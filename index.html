@@ -22,18 +22,15 @@
       </div>
       <span class="logo-text">MedGuide <strong>Pro</strong></span>
     </div>
-
     <nav class="sidebar-nav" id="sidebarNav">
       <div class="nav-section-label">Tableau de Bord</div>
       <button class="nav-item active" id="nav-dashboard" onclick="showDashboard()">
         <span class="nav-icon">⊞</span>
         <span>Accueil</span>
       </button>
-
       <div class="nav-section-label" style="margin-top:20px">Départements</div>
       <div id="departmentNavList"></div>
     </nav>
-
     <div class="sidebar-footer">
       <div class="user-badge">
         <div class="user-avatar">🎓</div>
@@ -44,12 +41,10 @@
       </div>
     </div>
   </aside>
-
   <!-- Mobile Menu Toggle -->
   <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleSidebar()">
     <span></span><span></span><span></span>
   </button>
-
   <!-- Main Content -->
   <main class="main-content" id="mainContent">
     <!-- Dashboard View -->
@@ -65,7 +60,6 @@
           <div class="search-results" id="searchResults"></div>
         </div>
       </header>
-
       <!-- Stats Banner -->
       <div class="stats-banner">
         <div class="stat-card" id="totalPathoStat">
@@ -97,14 +91,12 @@
           </div>
         </div>
       </div>
-
       <!-- Department Cards Grid -->
       <div class="section-header">
         <h2 class="section-title">Choisissez votre département</h2>
       </div>
       <div class="departments-grid" id="departmentsGrid"></div>
     </div>
-
     <!-- Department View -->
     <div id="departmentView" class="view">
       <header class="page-header">
@@ -121,18 +113,15 @@
           </div>
         </div>
       </header>
-
       <div class="filter-bar">
         <button class="filter-btn active" onclick="filterPathologies('all', this)">Toutes</button>
         <button class="filter-btn" onclick="filterPathologies('Urgent', this)">🚨 Urgences</button>
         <button class="filter-btn" onclick="filterPathologies('Fondamental', this)">📌 Fondamentaux</button>
         <button class="filter-btn" onclick="filterPathologies('Intermédiaire', this)">📈 Intermédiaire</button>
       </div>
-
       <div class="pathologies-list" id="pathologiesList"></div>
     </div>
   </main>
-
   <!-- Pathology Modal -->
   <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
     <div class="modal" id="pathologyModal" role="dialog" aria-modal="true">
@@ -145,14 +134,12 @@
         <nav class="modal-nav" id="modalNav"></nav>
         <div class="modal-progress" id="modalProgress"></div>
       </div>
-
       <div class="modal-body">
         <button class="modal-close" id="modalClose" onclick="closeModalDirect()" aria-label="Fermer">✕</button>
         <div class="modal-content" id="modalContent"></div>
       </div>
     </div>
   </div>
-
   <!-- Scripts -->
   <script src="data.js"></script>
   <script src="app.js"></script>
