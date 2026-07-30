@@ -1,147 +1,491 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="MedGuide Pro — Plateforme de révision médicale complète. Sémiologie, pathologies, pharmacologie pour les 5 départements médicaux.">
-  <title>MedGuide Pro — Révision Médicale</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ePILLY Trop 2022 — Interface Moderne & Fluide</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+<script>
+tailwind.config={
+  darkMode:'class',
+  theme:{
+    extend:{
+      fontFamily:{sans:['Plus Jakarta Sans','system-ui','sans-serif']},
+      colors:{
+        brand:{
+          50:'#fdf4f4',100:'#fbe8e8',200:'#f7d3d3',300:'#f0b1b1',400:'#e47e7e',
+          500:'#d44d4d',600:'#bc3535',700:'#9d2a2a',800:'#822626',900:'#6c2424',950:'#3a1010'
+        },
+        dark:{
+          950:'#07090e',900:'#0d111a',800:'#161d2c',700:'#212c42',600:'#324263'
+        }
+      }
+    }
+  }
+}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#07090e;color:#f1f5f9;overflow:hidden;height:100vh}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#212c42;border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#324263}
+
+/* Effets de Verre & Lueur Moderne */
+.glass-panel{background:rgba(22,29,44,0.7);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.06);box-shadow:0 8px 32px 0 rgba(0,0,0,0.37)}
+.glass-tab{background:rgba(13,17,26,0.6);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.04)}
+
+/* Tab Bar Améliorée */
+.tab-bar{display:flex;align-items:end;gap:4px;height:48px;padding:0 16px;background:#07090e;border-bottom:1px solid rgba(255,255,255,0.06);flex-shrink:0;overflow-x:auto}
+.tab-item{display:flex;align-items:center;gap:8px;padding:9px 16px;border-radius:10px 10px 0 0;font-size:12.5px;font-weight:600;color:#64748b;cursor:pointer;white-space:nowrap;transition:all .2s cubic-bezier(.4,0,.2,1);position:relative;border:1px solid transparent;border-bottom:none;max-width:220px;user-select:none}
+.tab-item:hover{color:#94a3b8;background:rgba(255,255,255,0.03)}
+.tab-item.active{color:#fff;background:#0d111a;border-color:rgba(255,255,255,0.08);box-shadow:0 -4px 20px rgba(0,0,0,0.2)}
+.tab-item.active::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:#d44d4d}
+.tab-item .tab-close{width:18px;height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#64748b;transition:all .15s ease;opacity:0}
+.tab-item:hover .tab-close{opacity:1}
+.tab-item .tab-close:hover{background:rgba(212,77,77,0.2);color:#fca5a5}
+.tab-item.active .tab-close{opacity:.7}
+
+/* Cartes Premium */
+.card-hover{transition:all .3s cubic-bezier(.25,.46,.45,.94);position:relative;overflow:hidden}
+.card-hover::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;opacity:0.8;transition:opacity .3s ease}
+.card-hover:hover{transform:translateY(-4px);border-color:rgba(212,77,77,0.3);box-shadow:0 12px 30px -10px rgba(212,77,77,0.15)}
+
+/* Modal Fluide */
+.modal-overlay{position:fixed;inset:0;background:rgba(7,9,14,0.85);backdrop-filter:blur(12px);z-index:100;display:none;align-items:center;justify-content:center;padding:20px;opacity:0;transition:all .3s ease}
+.modal-overlay.show{display:flex;opacity:1}
+.modal-box{width:100%;max-width:1000px;max-height:88vh;background:#0d111a;border:1px solid rgba(255,255,255,0.08);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;transform:scale(.95) translateY(20px);transition:all .3s cubic-bezier(.16,1,.3,1);box-shadow:0 25px 50px -12px rgba(0,0,0,0.7)}
+.modal-overlay.show .modal-box{transform:scale(1) translateY(0)}
+
+/* Tableaux & Listes */
+.custom-table{width:100%;border-collapse:collapse}
+.custom-table th{background:#161d2c;padding:12px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;text-align:left}
+.custom-table td{padding:12px 16px;font-size:13px;color:#cbd5e1;border-bottom:1px solid rgba(255,255,255,0.04)}
+.custom-table tr:hover td{background:rgba(255,255,255,0.02)}
+</style>
 </head>
 <body>
-  <!-- Sidebar -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo">
-      <div class="logo-icon">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-          <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-          <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <span class="logo-text">MedGuide <strong>Pro</strong></span>
-    </div>
-    <nav class="sidebar-nav" id="sidebarNav">
-      <div class="nav-section-label">Tableau de Bord</div>
-      <button class="nav-item active" id="nav-dashboard" onclick="showDashboard()">
-        <span class="nav-icon">⊞</span>
-        <span>Accueil</span>
-      </button>
-      <div class="nav-section-label" style="margin-top:20px">Départements</div>
-      <div id="departmentNavList"></div>
-    </nav>
-    <div class="sidebar-footer">
-      <div class="user-badge">
-        <div class="user-avatar">🎓</div>
-        <div class="user-info">
-          <span class="user-name">Étudiant Médecine</span>
-          <span class="user-level">Niveau Internat</span>
-        </div>
-      </div>
-    </div>
-  </aside>
-  <!-- Mobile Menu Toggle -->
-  <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleSidebar()">
-    <span></span><span></span><span></span>
-  </button>
-  <!-- Main Content -->
-  <main class="main-content" id="mainContent">
-    <!-- Dashboard View -->
-    <div id="dashboardView" class="view active">
-      <header class="page-header">
+<div class="flex flex-col h-screen">
+
+  <!-- ═══ BARRE D'ONGLETS SUPÉRIEURE ═══ -->
+  <div class="tab-bar" id="tabBar"></div>
+
+  <!-- ═══ ESPACE DE TRAVAIL PRINCIPAL ═══ -->
+  <div class="flex flex-1 overflow-hidden" id="workspace"></div>
+
+</div>
+
+<!-- ═══ MODAL DÉTAILS PATHOLOGIE ═══ -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div class="px-6 py-4 bg-dark-800/80 border-b border-white/5 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="w-10 h-10 rounded-xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400" id="mIcon"></div>
         <div>
-          <h1 class="page-title">Tableau de Bord</h1>
-          <p class="page-subtitle">Bienvenue sur votre guide diagnostique & thérapeutique</p>
-        </div>
-        <div class="search-bar">
-          <span class="search-icon">🔍</span>
-          <input type="text" id="globalSearch" placeholder="Rechercher une pathologie..." oninput="handleSearch(this.value)">
-          <div class="search-results" id="searchResults"></div>
-        </div>
-      </header>
-      <!-- Stats Banner -->
-      <div class="stats-banner">
-        <div class="stat-card" id="totalPathoStat">
-          <div class="stat-icon">📚</div>
-          <div class="stat-info">
-            <span class="stat-value" id="totalPathologies">0</span>
-            <span class="stat-label">Pathologies</span>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">🏥</div>
-          <div class="stat-info">
-            <span class="stat-value">5</span>
-            <span class="stat-label">Départements</span>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">💊</div>
-          <div class="stat-info">
-            <span class="stat-value" id="totalDrugs">0</span>
-            <span class="stat-label">Médicaments</span>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">⚡</div>
-          <div class="stat-info">
-            <span class="stat-value" id="totalUrgent">0</span>
-            <span class="stat-label">Urgences</span>
-          </div>
+          <h2 class="text-base font-bold text-white tracking-tight" id="mTitle">—</h2>
+          <p class="text-xs text-brand-400 font-medium" id="mSub">—</p>
         </div>
       </div>
-      <!-- Department Cards Grid -->
-      <div class="section-header">
-        <h2 class="section-title">Choisissez votre département</h2>
+      <div class="flex items-center gap-3">
+        <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider" id="mBadge"></span>
+        <button onclick="closeModal()" class="w-9 h-9 rounded-xl bg-dark-700/50 hover:bg-brand-500/20 hover:text-brand-400 border border-white/5 flex items-center justify-center transition-all text-slate-400">
+          <span class="iconify text-lg" data-icon="mdi:close"></span>
+        </button>
       </div>
-      <div class="departments-grid" id="departmentsGrid"></div>
     </div>
-    <!-- Department View -->
-    <div id="departmentView" class="view">
-      <header class="page-header">
-        <div class="breadcrumb">
-          <button onclick="showDashboard()" class="breadcrumb-link">Accueil</button>
-          <span class="breadcrumb-sep">›</span>
-          <span id="deptBreadcrumb">Département</span>
-        </div>
-        <div class="dept-header-content">
-          <div class="dept-header-icon" id="deptHeaderIcon"></div>
-          <div>
-            <h1 class="page-title" id="deptTitle"></h1>
-            <p class="page-subtitle" id="deptDesc"></p>
-          </div>
-        </div>
-      </header>
-      <div class="filter-bar">
-        <button class="filter-btn active" onclick="filterPathologies('all', this)">Toutes</button>
-        <button class="filter-btn" onclick="filterPathologies('Urgent', this)">🚨 Urgences</button>
-        <button class="filter-btn" onclick="filterPathologies('Fondamental', this)">📌 Fondamentaux</button>
-        <button class="filter-btn" onclick="filterPathologies('Intermédiaire', this)">📈 Intermédiaire</button>
-      </div>
-      <div class="pathologies-list" id="pathologiesList"></div>
-    </div>
-  </main>
-  <!-- Pathology Modal -->
-  <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
-    <div class="modal" id="pathologyModal" role="dialog" aria-modal="true">
-      <div class="modal-sidebar">
-        <div class="modal-dept-tag" id="modalDeptTag"></div>
-        <div class="modal-title-block">
-          <h2 id="modalTitle"></h2>
-          <span class="modal-difficulty-badge" id="modalDifficulty"></span>
-        </div>
-        <nav class="modal-nav" id="modalNav"></nav>
-        <div class="modal-progress" id="modalProgress"></div>
-      </div>
-      <div class="modal-body">
-        <button class="modal-close" id="modalClose" onclick="closeModalDirect()" aria-label="Fermer">✕</button>
-        <div class="modal-content" id="modalContent"></div>
-      </div>
+    <div class="flex flex-1 overflow-hidden">
+      <!-- Navigation Secondaire Modal -->
+      <nav class="w-64 min-w-[240px] bg-dark-900/90 border-r border-white/5 p-3 overflow-y-auto space-y-1" id="mNav"></nav>
+      <!-- Contenu Dynamique Modal -->
+      <div class="flex-1 p-8 overflow-y-auto bg-dark-950/40" id="mContent"></div>
     </div>
   </div>
-  <!-- Scripts -->
-  <script src="data.js"></script>
-  <script src="app.js"></script>
+</div>
+
+<!-- ═══ TOAST NOTIFICATION ═══ -->
+<div id="toast" class="fixed bottom-6 right-6 z-20 bg-dark-800 border border-white/10 text-slate-200 text-xs font-medium px-4 py-3 rounded-xl shadow-2xl transform translate-y-8 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2">
+  <span class="iconify text-brand-400 text-base" data-icon="mdi:information-outline"></span>
+  <span id="toastText">Action effectuée</span>
+</div>
+
+<script>
+// Base de données ePILLY Trop 2022 enrichie
+const EPILLY_DATA = {
+  id:'epilly-2022',
+  title:'ePILLY Trop 2022',
+  color:'#d44d4d',
+  subtitle:'Maladies infectieuses tropicales — 3e éd.',
+  stats:[
+    {label:'Pathologies',value:'87',unit:'chapitres',color:'#f87171',icon:'mdi:virus'},
+    {label:'Épidémiologie',value:'9',unit:'chapitres',color:'#34d399',icon:'mdi:earth'},
+    {label:'Outils & Diagnostic',value:'18',unit:'chapitres',color:'#fb923c',icon:'mdi:toolbox'},
+    {label:'Syndromes',value:'33',unit:'chapitres',color:'#60a5fa',icon:'mdi:stethoscope'}
+  ],
+  sidebar:[
+    {type:'item',label:'Tableau de bord',icon:'mdi:view-dashboard-outline',action:'dashboard'},
+    {type:'item',label:'Recherche globale',icon:'mdi:magnify',action:'search'},
+    {type:'divider',title:'Navigation par Sections'},
+    {type:'parent',label:'Épidémiologie & Santé',color:'#34d399',children:[
+      {label:'Épidémiologie des transmissibles',disease:'epidemio'},
+      {label:'Transmission & Prévention',disease:'transmission'},
+      {label:'Une seule santé (One Health)',disease:'onehealth'},
+      {label:'Vecteurs et lutte antivectorielle',disease:'vecteurs'},
+      {label:'Maladies tropicales négligées',disease:'mtn'}
+    ]},
+    {type:'parent',label:'Outils d’Infectiologie',color:'#fb923c',children:[
+      {label:'Prélèvements et examens',disease:'prelevements'},
+      {label:'Anti-infectieux essentiels',disease:'antiinfectieux'},
+      {label:'Antiparasitaires majeurs',disease:'antiparasitaires'}
+    ]},
+    {type:'parent',label:'Approche Syndromique',color:'#60a5fa',children:[
+      {label:'Fièvre aiguë au retour',disease:'fievreaigue'},
+      {label:'Fièvres hémorragiques',disease:'fhv'},
+      {label:'Diarrhées aigües',disease:'diarrhees'},
+      {label:'Ictères fébriles',disease:'icteres'},
+      {label:'Méningites et encéphalites',disease:'meningites'}
+    ]},
+    {type:'parent',label:'Pathologies Ciblées',color:'#d44d4d',highlight:true,children:[
+      {label:'Tuberculose',disease:'tuberculose'},
+      {label:'Paludisme grave',disease:'paludisme'},
+      {label:'Choléra',disease:'cholera'},
+      {label:'Fièvre typhoïde',disease:'typhoide'},
+      {label:'Tétanos',disease:'tetanos'},
+      {label:'Lèpre',disease:'lepre'},
+      {label:'Peste',disease:'peste'},
+      {label:'Leptospiroses',disease:'leptospiroses'}
+    ]}
+  ],
+  diseases:{
+    tuberculose:{
+      name:"Tuberculose",ch:"Chapitre 61",part:4,agent:"Mycobacterium tuberculosis",
+      def:"Infection bactérienne chronique à M. tuberculosis (bacille de Koch). Atteinte pulmonaire majeure avec risque de dissémination systémique.",
+      etio:"Bacille acido-alcoolo-résistant (BAAR) aérobie strict. Transmission aérienne interhumaine par micro-gouttelettes infectieuses.",
+      physio:"Phagocytose alvéolaire, formation du granulome caséeux. En cas d'immunodépression (VIH), dissémination active.",
+      clinique:[
+        {t:"Toux chronique",s:"Productive, persistante > 2 semaines, parfois hémoptoïque."},
+        {t:"Symptômes généraux",s:"Fièvre vespérale modérée, sueurs nocturnes abondantes, amaigrissement prononcé."}
+      ],
+      dd:[{t:"Cancer bronchique",s:"Tabagisme, altération rapide, absence de syndrome infectieux chronique."}],
+      examens:[
+        {e:"Examen direct (Ziehl-Neelsen)",o:"Mise en évidence de BAAR",n:"Négatif"},
+        {e:"PCR GeneXpert MTB/RIF",o:"Détection rapide et résistance rifampicine",n:"Non détecté"}
+      ],
+      evo:"Guérison > 95% sous traitement adapté. Risque de formes multirésistantes (MDR-TB) en cas d'inin observance.",
+      tx:[
+        {l:"Phase d'attaque (2 mois)",c:"Isoniazide + Rifampicine + Pyrazinamide + Éthambutol."},
+        {l:"Phase de continuation (4 mois)",c:"Isoniazide + Rifampicine."}
+      ]
+    },
+    cholera:{
+      name:"Choléra",ch:"Chapitre 75",part:4,agent:"Vibrio cholerae O1/O139",
+      def:"Toxi-infection entérique épidémique caractérisée par des diarrhées aqueuses massives menant à une déshydratation aiguë fulminante.",
+      etio:"Bacille Gram négatif incurvé, transmission féco-orale via l'eau ou les aliments souillés.",
+      physio:"Toxine cholérique stimulant l'AMP cyclique, entraînant une fuite massive d'eau et d'électrolytes dans la lumière intestinale.",
+      clinique:[
+        {t:"Diarrhée « eau de riz »",s:"Abondante, indolore, inépuisable, menant rapidement au collapsus."},
+        {t:"Vomissements incoercibles",s:"Sans nausées préalables."}
+      ],
+      dd:[{t:"Gastro-entérite aiguë virale",s:"Moins profuse, résolution spontanée rapide."}],
+      examens:[
+        {e:"Test rapide (RDT)",o:"Détection antigénique en 15 min",n:"Négatif"},
+        {e:"Ionogramme sanguin",o:"Évaluation de l'acidose métabolique et de l'insuffisance rénale",n:"Normal"}
+      ],
+      evo:"Mortalité < 1% avec réhydratation précoce, > 50% sans intervention.",
+      tx:[
+        {l:"Urgence absolue",c:"SRO abondants ou Ringer Lactate en IV rapide selon le degré de déshydratation."},
+        {l:"Antibiothérapie adjuvante",c:"Doxycycline ou Azithromycine en dose unique pour réduire l'excrétion."}
+      ]
+    }
+  },
+  syndromes:[
+    {id:'fievreaigue',name:'Fièvre aiguë',icon:'mdi:thermometer',desc:'Démarche diagnostique face à un voyageur fébrile.'},
+    {id:'fhv',name:'Fièvres hémorragiques',icon:'mdi:water-alert',desc:'Ebola, Marburg, Lassa — Précautions maximales.'},
+    {id:'diarrhees',name:'Diarrhées aigües',icon:'mdi:stomach',desc:'Du choléra aux amibiases invasives.'},
+    {id:'icteres',name:'Ictères fébriles',icon:'mdi:water',desc:'Paludisme grave, hépatites et leptospirose.'}
+  ]
+};
+
+// Logique de l'application
+let tabs = [];
+let activeTabId = null;
+let tabCounter = 0;
+
+function createTab(data) {
+  const id = data.id || 'tab-' + (++tabCounter);
+  tabs.push({ id, data, title: data.title, color: data.color });
+  renderTabs();
+  switchTab(id);
+}
+
+function closeTab(id) {
+  if(tabs.length <= 1) return;
+  const idx = tabs.findIndex(t => t.id === id);
+  tabs.splice(idx, 1);
+  if(activeTabId === id) switchTab(tabs[Math.max(0, idx - 1)].id);
+  renderTabs();
+}
+
+function switchTab(id) {
+  activeTabId = id;
+  renderTabs();
+  renderWorkspace();
+}
+
+function renderTabs() {
+  document.getElementById('tabBar').innerHTML = tabs.map(t => `
+    <div class="tab-item ${t.id===activeTabId?'active':''}" onclick="switchTab('${t.id}')">
+      <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${t.color}"></span>
+      <span class="truncate">${t.title}</span>
+      ${tabs.length > 1 ? `<span class="tab-close" onclick="event.stopPropagation();closeTab('${t.id}')">×</span>` : ''}
+    </div>`).join('') +
+    `<button onclick="addNewTab()" class="w-8 h-8 rounded-lg glass-tab flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/5 transition-all mb-1 ml-1" title="Nouvel onglet"><span class="iconify text-lg" data-icon="mdi:plus"></span></button>`;
+}
+
+function addNewTab() {
+  createTab({
+    id: 'tab-' + (++tabCounter),
+    title: 'Nouvelle Fiche',
+    color: '#3b82f6',
+    subtitle: 'Espace de travail personnalisable',
+    stats: [], sidebar: [], diseases: {}, syndromes: []
+  });
+  showToast('Nouvel onglet créé avec succès');
+}
+
+function renderWorkspace() {
+  const tab = tabs.find(t => t.id === activeTabId);
+  const d = tab.data;
+  document.getElementById('workspace').innerHTML = `
+    <!-- Sidebar -->
+    <aside class="w-72 min-w-[288px] bg-dark-900 border-r border-white/5 flex flex-col h-full select-none">
+      <div class="p-4 border-b border-white/5 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg" style="background:${d.color}20; border:1px solid ${d.color}40">
+          <span class="iconify text-xl" style="color:${d.color}" data-icon="mdi:virus"></span>
+        </div>
+        <div class="overflow-hidden">
+          <h1 class="text-sm font-bold text-white truncate">${d.title}</h1>
+          <p class="text-[10px] text-slate-400 truncate">${d.subtitle || ''}</p>
+        </div>
+      </div>
+      <div class="flex-1 overflow-y-auto p-3 space-y-1" id="sidebarContent"></div>
+      <div class="p-3 border-t border-white/5 text-[10px] text-slate-500 text-center">
+        ePILLY Trop 2022 — CMIT & Alinéa Plus
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden bg-dark-950">
+      <header class="h-16 px-8 glass-panel border-b border-white/5 flex items-center justify-between z-10">
+        <div class="flex items-center gap-3">
+          <h2 class="text-sm font-bold text-white" id="topTitle">Tableau de bord général</h2>
+          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold" style="background:${d.color}15;color:${d.color}">${d.title}</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="glass-tab px-3.5 py-2 rounded-xl flex items-center gap-2 w-64">
+            <span class="iconify text-slate-400 text-base" data-icon="mdi:magnify"></span>
+            <input type="text" placeholder="Rechercher une pathologie..." class="bg-transparent border-none outline-none text-xs text-slate-200 w-full placeholder-slate-500" onkeyup="handleSearch(event)">
+          </div>
+        </div>
+      </header>
+      <div class="flex-1 overflow-y-auto p-8" id="mainContent"></div>
+    </main>`;
+  renderSidebar(d);
+  renderDashboard(d);
+}
+
+function renderSidebar(d) {
+  const sc = document.getElementById('sidebarContent');
+  if(!d.sidebar || !d.sidebar.length) {
+    sc.innerHTML = `<div class="p-4 text-center text-xs text-slate-500">Aucune donnée de navigation</div>`;
+    return;
+  }
+  sc.innerHTML = d.sidebar.map(item => {
+    if(item.type === 'item') {
+      return `<div class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-white/5 hover:text-white cursor-pointer transition-all" onclick="sidebarAction('${item.action}')">
+        <span class="iconify text-base text-slate-400" data-icon="${item.icon}"></span><span>${item.label}</span></div>`;
+    } else if(item.type === 'divider') {
+      return `<div class="text-[9px] font-bold uppercase tracking-wider text-slate-500 px-3 pt-4 pb-1">${item.title}</div>`;
+    } else if(item.type === 'parent') {
+      return `<div>
+        <div class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold text-slate-200 hover:bg-white/5 cursor-pointer transition-all" onclick="toggleParent(this)">
+          <div class="flex items-center gap-2.5"><span class="w-2 h-2 rounded-full" style="background:${item.color}"></span><span>${item.label}</span></div>
+          <span class="iconify text-slate-500 transition-transform duration-200" data-icon="mdi:chevron-right"></span>
+        </div>
+        <div class="hidden pl-4 pr-1 py-1 space-y-0.5">
+          ${item.children.map(c => `<div class="px-3 py-2 rounded-lg text-xs text-slate-400 hover:text-white hover:bg-white/5 cursor-pointer transition-all" onclick="openDisease('${c.disease}')">${c.label}</div>`).join('')}
+        </div>
+      </div>`;
+    }
+  }).join('');
+}
+
+function toggleParent(el) {
+  const children = el.nextElementSibling;
+  const chevron = el.querySelector('.iconify');
+  children.classList.toggle('hidden');
+  chevron.style.transform = children.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(90deg)';
+}
+
+function renderDashboard(d) {
+  const mc = document.getElementById('mainContent');
+  if(!d.stats || !d.stats.length) {
+    mc.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-slate-500"><span class="iconify text-5xl mb-3 text-slate-600" data-icon="mdi:folder-open-outline"></span><p class="text-sm font-medium">Cet onglet est vide</p></div>`;
+    return;
+  }
+  
+  let html = `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    ${d.stats.map(s => `<div class="glass-panel p-5 rounded-2xl border-l-4" style="border-left-color:${s.color}">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">${s.label}</span>
+        <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:${s.color}15"><span class="iconify text-base" style="color:${s.color}" data-icon="${s.icon}"></span></div>
+      </div>
+      <div class="text-2xl font-extrabold text-white">${s.value}<span class="text-xs font-normal text-slate-400 ml-1.5">${s.unit}</span></div>
+    </div>`).join('')}
+  </div>`;
+
+  const diseases = Object.entries(d.diseases || {});
+  if(diseases.length) {
+    html += `<div class="mb-8">
+      <div class="flex items-center justify-between mb-4">
+        <div><h3 class="text-base font-bold text-white">Maladies Infectieuses Clés</h3><p class="text-xs text-slate-400">Pathologies majeures de référence</p></div>
+        <span class="px-3 py-1 rounded-full text-xs font-bold bg-brand-500/10 text-brand-400 border border-brand-500/20">${diseases.length} fiches disponibles</span>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        ${diseases.map(([id,dis]) => `<div class="glass-panel p-5 rounded-2xl card-hover cursor-pointer" style="border-top:3px solid #d44d4d" onclick="openDisease('${id}')">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-brand-500/20 text-brand-300">${dis.ch}</span>
+            <span class="iconify text-slate-500 text-lg" data-icon="mdi:arrow-top-right"></span>
+          </div>
+          <h4 class="text-sm font-bold text-white mb-1">${dis.name}</h4>
+          <p class="text-xs text-slate-400 line-clamp-2">${dis.def}</p>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  const syns = d.syndromes || [];
+  if(syns.length) {
+    html += `<div>
+      <div class="mb-4"><h3 class="text-base font-bold text-white">Approche Syndromique</h3><p class="text-xs text-slate-400">Orientation diagnostique rapide</p></div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        ${syns.map(s => `<div class="glass-panel p-4 rounded-2xl card-hover cursor-pointer border-t-3 border-blue-500" onclick="showToast('Sélectionné : ${s.name}')">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400"><span class="iconify text-lg" data-icon="${s.icon}"></span></div>
+            <h4 class="text-xs font-bold text-white">${s.name}</h4>
+          </div>
+          <p class="text-[11px] text-slate-400 leading-relaxed">${s.desc}</p>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  mc.innerHTML = html;
+}
+
+function openDisease(id) {
+  const tab = tabs.find(t => t.id === activeTabId);
+  const d = tab.data.diseases[id];
+  if(!d) { showToast('Fiche non disponible'); return; }
+
+  document.getElementById('topTitle').textContent = d.name;
+  document.getElementById('mTitle').textContent = d.name;
+  document.getElementById('mSub').textContent = `${d.ch} — ${d.agent}`;
+  document.getElementById('mBadge').textContent = 'Partie 4';
+  document.getElementById('mBadge').className = 'px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-brand-500/20 text-brand-400 border border-brand-500/30';
+  document.getElementById('mIcon').innerHTML = `<span class="iconify text-xl" data-icon="mdi:virus"></span>`;
+
+  const sections = [
+    {k:'def',l:'Définition',icon:'mdi:book-open-outline'},
+    {k:'etiologie',l:'Étiologie & Physio',icon:'mdi:dna'},
+    {k:'clinique',l:'Clinique & DD',icon:'mdi:stethoscope'},
+    {k:'examens',l:'Paraclinique',icon:'mdi:flask'},
+    {k:'traitement',l:'Traitement',icon:'mdi:pill'}
+  ];
+
+  document.getElementById('mNav').innerHTML = sections.map((s,i) => `
+    <div class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold ${i===0?'bg-brand-500/20 text-brand-300':'text-slate-400 hover:bg-white/5 hover:text-white'} cursor-pointer transition-all modal-nav-item" onclick="switchModalSec('${s.k}', this)">
+      <span class="iconify text-base" data-icon="${s.icon}"></span><span>${s.l}</span>
+    </div>`).join('');
+
+  document.getElementById('mContent').innerHTML = `
+    <div class="modal-sec space-y-4" id="sec-def">
+      <h3 class="text-sm font-bold text-white flex items-center gap-2"><span class="w-1.5 h-4 bg-brand-500 rounded-full"></span>Définition de la pathologie</h3>
+      <p class="text-xs text-slate-300 leading-relaxed p-4 rounded-xl bg-dark-900 border border-white/5">${d.def}</p>
+      <h4 class="text-xs font-bold text-brand-400 uppercase tracking-wider mt-4">Agent Pathogène</h4>
+      <p class="text-xs text-white font-medium p-3 rounded-xl bg-dark-900/50 border border-white/5">${d.agent}</p>
+    </div>
+    <div class="modal-sec space-y-4 hidden" id="sec-etiologie">
+      <h3 class="text-sm font-bold text-white flex items-center gap-2"><span class="w-1.5 h-4 bg-brand-500 rounded-full"></span>Étiologie & Physiopathologie</h3>
+      <p class="text-xs text-slate-300 leading-relaxed p-4 rounded-xl bg-dark-900 border border-white/5">${d.etio}</p>
+      <p class="text-xs text-slate-300 leading-relaxed p-4 rounded-xl bg-dark-900 border border-white/5">${d.physio}</p>
+    </div>
+    <div class="modal-sec space-y-4 hidden" id="sec-clinique">
+      <h3 class="text-sm font-bold text-white flex items-center gap-2"><span class="w-1.5 h-4 bg-brand-500 rounded-full"></span>Tableau Clinique</h3>
+      <div class="space-y-2">${d.clinique.map(c=>`<div class="p-3.5 rounded-xl bg-dark-900 border border-white/5"><div class="text-xs font-bold text-white mb-1">${c.t}</div><div class="text-xs text-slate-400">${c.s}</div></div>`).join('')}</div>
+      <h4 class="text-xs font-bold text-brand-400 uppercase tracking-wider mt-4">Diagnostics Différentiels</h4>
+      <div class="space-y-2">${d.dd.map(dd=>`<div class="p-3.5 rounded-xl bg-dark-900 border border-white/5 border-l-3 border-l-amber-500"><div class="text-xs font-bold text-white mb-1">${dd.t}</div><div class="text-xs text-slate-400">${dd.s}</div></div>`).join('')}</div>
+    </div>
+    <div class="modal-sec space-y-4 hidden" id="sec-examens">
+      <h3 class="text-sm font-bold text-white flex items-center gap-2"><span class="w-1.5 h-4 bg-brand-500 rounded-full"></span>Examens Paracliniques</h3>
+      <div class="rounded-xl overflow-hidden border border-white/5">
+        <table class="custom-table">
+          <thead><tr><th>Examen</th><th>Objectif</th><th>Valeur normale</th></tr></thead>
+          <tbody>${d.examens.map(ex=>`<tr><td class="font-bold text-white">${ex.e}</td><td>${ex.o}</td><td class="text-slate-400">${ex.n}</td></tr>`).join('')}</tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-sec space-y-4 hidden" id="sec-traitement">
+      <h3 class="text-sm font-bold text-white flex items-center gap-2"><span class="w-1.5 h-4 bg-brand-500 rounded-full"></span>Stratégie Thérapeutique</h3>
+      <div class="space-y-2">${d.tx.map(t=>`<div class="p-4 rounded-xl bg-dark-900 border border-white/5 border-l-3 border-l-emerald-500"><div class="text-xs font-bold text-emerald-400 mb-1 uppercase tracking-wider">${t.l}</div><div class="text-xs text-slate-200 leading-relaxed">${t.c}</div></div>`).join('')}</div>
+    </div>`;
+
+  const ov = document.getElementById('modalOverlay');
+  ov.style.display = 'flex';
+  requestAnimationFrame(() => ov.classList.add('show'));
+}
+
+function switchModalSec(k, el) {
+  document.querySelectorAll('.modal-sec').forEach(s => s.classList.add('hidden'));
+  document.querySelectorAll('.modal-nav-item').forEach(n => {
+    n.className = 'flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:bg-white/5 hover:text-white cursor-pointer transition-all modal-nav-item';
+  });
+  document.getElementById('sec-' + k).classList.remove('hidden');
+  el.className = 'flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold bg-brand-500/20 text-brand-300 cursor-pointer transition-all modal-nav-item';
+}
+
+function closeModal() {
+  const ov = document.getElementById('modalOverlay');
+  ov.classList.remove('show');
+  setTimeout(() => ov.style.display = 'none', 300);
+}
+
+function sidebarAction(action) {
+  if(action === 'dashboard') renderDashboard(tabs.find(t => t.id === activeTabId).data);
+  else if(action === 'search') showToast('Utilisez la barre de recherche en haut');
+}
+
+function handleSearch(e) {
+  if(e.key !== 'Enter') return;
+  const q = e.target.value.toLowerCase().trim();
+  if(!q) return;
+  const tab = tabs.find(t => t.id === activeTabId);
+  const found = Object.entries(tab.data.diseases).find(([id,d]) => d.name.toLowerCase().includes(q));
+  if(found) { openDisease(found[0]); e.target.value = ''; }
+  else showToast('Aucun résultat trouvé');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastText').textContent = msg;
+  t.style.transform = 'translateY(0)'; t.style.opacity = '1';
+  setTimeout(() => { t.style.transform = 'translateY(32px)'; t.style.opacity = '0'; }, 3000);
+}
+
+// Initialisation de l'application avec l'onglet ePILLY par défaut
+createTab(EPILLY_DATA);
+</script>
 </body>
 </html>
