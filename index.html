@@ -693,35 +693,111 @@ async function uploadSingleFile(item) {
     const text = await extractTextFromFile(item.file);
     if (!text || text.trim().length < 20) throw new Error('Texte vide ou trop court');
     const truncated = text.slice(0, 15000);
-    const { department, specialty } = await categorizeWithKeywords(truncated, uploadState.department, uploadState.specialty);
     
-    // Save to Firebase
-    const newDocRef = dbRef.ref('documents').push();
-    const docData = {
-      name: item.file.name.replace(/\.[^.]+$/, ''),
+    // Call Gemini to extract multiple pathologies with DRETEP
+    let pathologies = [];
+    let docName = item.file.name.replace(/\.[^.]+$/, '');
+    let department = uploadState.department || '';
+    let specialty = uploadState.specialty || '';
+    
+    try {
+      if (typeof ZAI !== 'undefined') {
+        const zai = await ZAI.create();
+        const completion = await zai.chat.completions.create({
+          messages: [
+            { role: 'system', content: 'Tu es un assistant médical expert qui répond UNIQUEMENT avec du JSON valide.' },
+            { role: 'user', content: `Analyse ce document médical et identifie TOUTES les pathologies qu'il contient. Pour chaque pathologie, crée une fiche DRETEP complète.
+
+Document:
+---
+${truncated}
+---
+
+Réponds avec un JSON de cette forme:
+{"name":"Titre document","department":"${department || 'Médecine Interne'}","specialty":"${specialty || 'Général'}","pathologies":[{"name":"Pathologie 1","department":"dept","specialty":"spec","concepts":"Concepts","urgences":"Urgences","dretrepe":{"definition":"Def","rappel":"Rappel","etiologie":"Étio","traitement":"Tx","evolution":"Évol","paraclinique":"Para"},"pharmacology":{"title":"Pharmaco","general":"Général","molecules":[{"name":"Molécule","posologie":"Dose","mecanisme":"Méca","marques":["Marque1 Orchidia","Marque2 Pharmakina","Marque3 Dekopharm"]}]}}]}
+
+Génère AU MOINS 3 molécules par pathologie. Réponds en français médical.` },
+          ],
+          temperature: 0.4,
+          maxTokens: 4000,
+        });
+        
+        const aiText = completion.choices?.[0]?.message?.content || '';
+        let jsonStr = aiText.trim();
+        const jm = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
+        if (jm) jsonStr = jm[1].trim();
+        const fb2 = jsonStr.indexOf('{');
+        const lb2 = jsonStr.lastIndexOf('}');
+        if (fb2 !== -1 && lb2 !== -1) jsonStr = jsonStr.slice(fb2, lb2 + 1);
+        const parsed = JSON.parse(jsonStr);
+        pathologies = parsed.pathologies || [];
+        docName = parsed.name || docName;
+        department = department || parsed.department || 'Médecine Interne';
+        specialty = specialty || parsed.specialty || 'Général';
+      }
+    } catch (aiErr) {
+      console.warn('IA Gemini non disponible, utilisation du mode mot-clé', aiErr);
+    }
+    
+    // Fallback: if no pathologies from AI, create one from text
+    if (pathologies.length === 0) {
+      const cat = await categorizeWithKeywords(truncated, department, specialty);
+      department = cat.department;
+      specialty = cat.specialty;
+      pathologies = [{
+        name: docName,
+        department,
+        specialty,
+        concepts: truncated.slice(0, 500),
+        urgences: '',
+        dretrepe: { definition: truncated.slice(0, 1000), rappel: '', etiologie: '', traitement: '', evolution: '', paraclinique: '' },
+        pharmacology: { title: 'Pharmacologie', general: 'À compléter', molecules: [] },
+      }];
+    }
+    
+    // Save each pathology as a separate Firebase document
+    const childIds = [];
+    for (const pathology of pathologies) {
+      const pathRef = dbRef.ref('documents').push();
+      await pathRef.set({
+        ...pathology,
+        department: pathology.department || department,
+        specialty: pathology.specialty || specialty,
+        fileName: item.file.name,
+        fileType: item.file.name.split('.').pop().toUpperCase(),
+        fileSize: item.file.size,
+        source: 'firebase',
+        createdAt: Date.now(),
+        rawText: '',
+      });
+      if (pathRef.key) childIds.push(pathRef.key);
+    }
+    
+    // Create parent document
+    const parentRef = dbRef.ref('documents').push();
+    await parentRef.set({
+      name: docName,
       department,
       specialty,
-      concepts: truncated.slice(0, 500),
+      concepts: `Document contenant ${childIds.length} pathologie(s)`,
       urgences: '',
-      dretrepe: {
-        definition: truncated.slice(0, 1000),
-        rappel: '',
-        etiologie: '',
-        traitement: '',
-        evolution: '',
-        paraclinique: '',
-      },
-      pharmacology: { title: 'Pharmacologie', general: 'À compléter', molecules: [] },
+      dretrepe: { definition: '', rappel: '', etiologie: '', traitement: '', evolution: '', paraclinique: '' },
       fileName: item.file.name,
       fileType: item.file.name.split('.').pop().toUpperCase(),
       fileSize: item.file.size,
       source: 'firebase',
       createdAt: Date.now(),
-      rawText: truncated,
-    };
-    await newDocRef.set(docData);
+      isMultiPathology: childIds.length > 1,
+      childPathologyIds: childIds,
+    });
+    
+    // Link children to parent
+    for (const childId of childIds) {
+      await dbRef.ref('documents/' + childId + '/parentDocId').set(parentRef.key);
+    }
+    
     item.stage = 'done';
-    item.result = { name: docData.name, department, specialty };
+    item.result = { name: docName, department, specialty, pathologiesCount: childIds.length };
   } catch (e) {
     item.stage = 'error';
     item.error = e.message;
@@ -816,22 +892,68 @@ async function handleGenerate() {
   renderGenerateModal();
   
   try {
-    // Call the backend API (if available) or show message
-    const response = await fetch('/api/generate-dretep', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ pathologyName: name, department: state.generateDept, specialty: state.generateSpec }),
-    });
+    // Use Z-AI SDK if available (client-side)
+    let generated = null;
     
-    if (!response.ok) throw new Error('API non disponible');
-    const json = await response.json();
-    if (!json.success) throw new Error(json.error);
+    if (typeof ZAI !== 'undefined') {
+      const zai = await ZAI.create();
+      const completion = await zai.chat.completions.create({
+        messages: [
+          { role: 'system', content: 'Tu es un assistant médical expert qui répond UNIQUEMENT avec du JSON valide.' },
+          { role: 'user', content: `Génère une fiche médicale complète pour la pathologie: "${name}". Département: ${state.generateDept || 'auto'}. Spécialité: ${state.generateSpec || 'auto'}.
+
+Réponds UNIQUEMENT avec un objet JSON de cette forme:
+{
+  "name": "${name}",
+  "department": "${state.generateDept || 'Médecine Interne'}",
+  "specialty": "${state.generateSpec || 'Général'}",
+  "concepts": "Concepts clés en 2-3 phrases détaillées",
+  "urgences": "Urgences médicales associées",
+  "dretrepe": {
+    "definition": "Définition complète (3-4 phrases)",
+    "rappel": "Rappel physiopathologique (3-4 phrases)",
+    "etiologie": "Étiologies principales (3-4 phrases)",
+    "traitement": "Traitement principal (3-4 phrases)",
+    "evolution": "Évolution et pronostic (3-4 phrases)",
+    "paraclinique": "Examens paracliniques (3-4 phrases)"
+  },
+  "pharmacology": {
+    "title": "Titre pharmacologique",
+    "general": "Pharmacologie générale (4-5 phrases)",
+    "molecules": [
+      {"name":"Molécule (classe)","posologie":"Posologie","mecanisme":"Mécanisme","marques":["Marque1 Orchidia","Marque2 Pharmakina","Marque3 Dekopharm"]}
+    ]
+  }
+}
+
+Génère AU MOINS 3 molécules. Réponds en français médical.` },
+        ],
+        temperature: 0.4,
+        maxTokens: 4000,
+      });
+      
+      const aiText = completion.choices?.[0]?.message?.content || '';
+      let jsonStr = aiText.trim();
+      const jsonMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (jsonMatch) jsonStr = jsonMatch[1].trim();
+      const fb = jsonStr.indexOf('{');
+      const lb = jsonStr.lastIndexOf('}');
+      if (fb !== -1 && lb !== -1) jsonStr = jsonStr.slice(fb, lb + 1);
+      
+      generated = JSON.parse(jsonStr);
+    }
     
-    state.generateData = json.document;
-    state.generateStage = 'preview';
-    renderGenerateModal();
+    if (generated) {
+      generated.dretrepe = generated.dretrepe || { definition:'', rappel:'', etiologie:'', traitement:'', evolution:'', paraclinique:'' };
+      generated.pharmacology = generated.pharmacology || { title:'Pharmacologie', general:'', molecules:[] };
+      state.generateData = generated;
+      state.generateStage = 'preview';
+      renderGenerateModal();
+    } else {
+      throw new Error('SDK Z-AI non disponible');
+    }
   } catch (e) {
-    // If no backend, create a basic template
+    // Fallback: create a basic template
     const dept = state.generateDept || 'Médecine Interne';
     const spec = state.generateSpec || 'Général';
     state.generateData = {
@@ -852,7 +974,7 @@ async function handleGenerate() {
     };
     state.generateStage = 'preview';
     renderGenerateModal();
-    showToast('Mode hors-ligne: fiche modèle créée (connectez le backend Gemini pour la génération IA complète)');
+    showToast('Mode hors-ligne: fiche modèle créée');
   }
 }
 
