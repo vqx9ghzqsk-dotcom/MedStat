@@ -331,7 +331,7 @@ function loadFirebaseDocs() {
   state.firebaseLoading = true;
   dbRef.ref('documents').on('value', (snapshot) => {
     const val = snapshot.val();
-    state.firebaseDocs = val ? Object.values(val).sort((a,b) => (b.createdAt||0) - (a.createdAt||0)) : [];
+    state.firebaseDocs = val ? Object.entries(val).map(([id, doc]) => ({...doc, id})).sort((a,b) => (b.createdAt||0) - (a.createdAt||0)) : [];
     state.firebaseLoading = false;
     renderAll();
   }, (error) => {
@@ -471,12 +471,14 @@ function closeMobileSidebar() {
 // ════════════════════════════════════════════════════════════════════════════
 // DASHBOARD
 // ════════════════════════════════════════════════════════════════════════════
-const STATS = [
-  {label:'Disciplines',value:'4',unit:'spécialités majeures',color:'#f87171',icon:'mdi:medical-bag'},
-  {label:'Spécialités',value:String(MEDICAL_DATA.reduce((a,p)=>a+p.specialties.length,0)),unit:'domaines cliniques',color:'#34d399',icon:'mdi:heart-pulse'},
-  {label:'Pathologies',value:String(ALL_DISEASES.length + state.firebaseDocs.length),unit:'fiches indexées',color:'#fb923c',icon:'mdi:clipboard-list-outline'},
-  {label:'Firebase',value:String(state.firebaseDocs.length),unit:'documents cloud',color:'#60a5fa',icon:'mdi:folder-open-outline'},
-];
+function getStats() {
+  return [
+    {label:'Disciplines',value:'4',unit:'spécialités majeures',color:'#f87171',icon:'mdi:medical-bag'},
+    {label:'Spécialités',value:String(MEDICAL_DATA.reduce((a,p)=>a+p.specialties.length,0)),unit:'domaines cliniques',color:'#34d399',icon:'mdi:heart-pulse'},
+    {label:'Pathologies',value:String(ALL_DISEASES.length + state.firebaseDocs.filter(d=>!d.parentDocId).length),unit:'fiches indexées',color:'#fb923c',icon:'mdi:clipboard-list-outline'},
+    {label:'Firebase',value:String(state.firebaseDocs.filter(d=>!d.parentDocId).length),unit:'documents cloud',color:'#60a5fa',icon:'mdi:folder-open-outline'},
+  ];
+}
 
 const SYNDROMIC_GROUPS = [
   {id:'cardio',name:'Urgences Cardiovasculaires',icon:'mdi:heart-pulse',desc:'OAP, choc cardiogénique, crise hypertensive.',color:'#f87171'},
@@ -488,7 +490,7 @@ const SYNDROMIC_GROUPS = [
 function renderDashboard() {
   const html = `
     <div class="stats-grid">
-      ${STATS.map(s => `<div class="stat-card" style="border-left-color:${s.color}"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem"><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8">${s.label}</span><div style="width:2rem;height:2rem;border-radius:.75rem;display:flex;align-items:center;justify-content:center;background:${s.color}15">${icon(s.icon,{size:'16px',color:s.color})}</div></div><div style="font-size:1.5rem;font-weight:800;color:#fff">${s.value}<span style="font-size:.75rem;font-weight:400;color:#94a3b8;margin-left:.375rem">${s.unit}</span></div></div>`).join('')}
+      ${getStats().map(s => `<div class="stat-card" style="border-left-color:${s.color}"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem"><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8">${s.label}</span><div style="width:2rem;height:2rem;border-radius:.75rem;display:flex;align-items:center;justify-content:center;background:${s.color}15">${icon(s.icon,{size:'16px',color:s.color})}</div></div><div style="font-size:1.5rem;font-weight:800;color:#fff">${s.value}<span style="font-size:.75rem;font-weight:400;color:#94a3b8;margin-left:.375rem">${s.unit}</span></div></div>`).join('')}
     </div>
     <div style="margin-bottom:2rem">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem"><div><h3 style="font-size:1rem;font-weight:700;color:#fff">Pathologies Clés</h3><p style="font-size:12px;color:#94a3b8">Fiches de référence structurées DRETEP</p></div></div>
@@ -543,6 +545,17 @@ const SECTIONS = [
 ];
 
 function openDisease(id, source) {
+  // Check if this is a multi-pathology document (parent)
+  const fbDoc = state.firebaseDocs.find(d => (d.id || d.name) === id);
+  if (fbDoc && fbDoc.isMultiPathology && fbDoc.childPathologyIds && fbDoc.childPathologyIds.length > 0) {
+    // Show the pathology list view
+    state.selectedDocumentId = id;
+    state.view = 'documentPathologies';
+    renderAll();
+    closeMobileSidebar();
+    return;
+  }
+  
   const { disease } = findDisease(id);
   if (!disease) { showToast('Fiche non disponible'); return; }
   state.selectedDisease = disease;
@@ -694,68 +707,84 @@ async function uploadSingleFile(item) {
     if (!text || text.trim().length < 20) throw new Error('Texte vide ou trop court');
     const truncated = text.slice(0, 15000);
     
-    // Call Gemini to extract multiple pathologies with DRETEP
     let pathologies = [];
     let docName = item.file.name.replace(/\.[^.]+$/, '');
     let department = uploadState.department || '';
     let specialty = uploadState.specialty || '';
+    let aiUsed = false;
     
+    // Try Z-AI SDK first
     try {
       if (typeof ZAI !== 'undefined') {
         const zai = await ZAI.create();
         const completion = await zai.chat.completions.create({
           messages: [
             { role: 'system', content: 'Tu es un assistant médical expert qui répond UNIQUEMENT avec du JSON valide.' },
-            { role: 'user', content: `Analyse ce document médical et identifie TOUTES les pathologies qu'il contient. Pour chaque pathologie, crée une fiche DRETEP complète.
+            { role: 'user', content: `Analyse ce document médical et identifie TOUTES les pathologies. Pour chaque pathologie, crée une fiche DRETEP.
 
 Document:
 ---
 ${truncated}
 ---
 
-Réponds avec un JSON de cette forme:
-{"name":"Titre document","department":"${department || 'Médecine Interne'}","specialty":"${specialty || 'Général'}","pathologies":[{"name":"Pathologie 1","department":"dept","specialty":"spec","concepts":"Concepts","urgences":"Urgences","dretrepe":{"definition":"Def","rappel":"Rappel","etiologie":"Étio","traitement":"Tx","evolution":"Évol","paraclinique":"Para"},"pharmacology":{"title":"Pharmaco","general":"Général","molecules":[{"name":"Molécule","posologie":"Dose","mecanisme":"Méca","marques":["Marque1 Orchidia","Marque2 Pharmakina","Marque3 Dekopharm"]}]}}]}
-
-Génère AU MOINS 3 molécules par pathologie. Réponds en français médical.` },
+Réponds avec: {"name":"Titre","department":"dept","specialty":"spec","pathologies":[{"name":"Patho","department":"dept","specialty":"spec","concepts":"Concepts","urgences":"Urg","dretrepe":{"definition":"Def","rappel":"Rappel","etiologie":"Étio","traitement":"Tx","evolution":"Évol","paraclinique":"Para"},"pharmacology":{"title":"Pharma","general":"Gén","molecules":[{"name":"Mol","posologie":"Dose","mecanisme":"Méca","marques":["M1 Orchidia","M2 Pharmakina","M3 Dekopharm"]}]}}]}` },
           ],
-          temperature: 0.4,
-          maxTokens: 4000,
+          temperature: 0.4, maxTokens: 4000,
         });
-        
         const aiText = completion.choices?.[0]?.message?.content || '';
         let jsonStr = aiText.trim();
         const jm = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
         if (jm) jsonStr = jm[1].trim();
-        const fb2 = jsonStr.indexOf('{');
-        const lb2 = jsonStr.lastIndexOf('}');
+        const fb2 = jsonStr.indexOf('{'); const lb2 = jsonStr.lastIndexOf('}');
         if (fb2 !== -1 && lb2 !== -1) jsonStr = jsonStr.slice(fb2, lb2 + 1);
         const parsed = JSON.parse(jsonStr);
         pathologies = parsed.pathologies || [];
         docName = parsed.name || docName;
         department = department || parsed.department || 'Médecine Interne';
         specialty = specialty || parsed.specialty || 'Général';
+        aiUsed = true;
       }
-    } catch (aiErr) {
-      console.warn('IA Gemini non disponible, utilisation du mode mot-clé', aiErr);
-    }
+    } catch (aiErr) { console.warn('Z-AI SDK non disponible', aiErr); }
     
-    // Fallback: if no pathologies from AI, create one from text
+    // If AI didn't work, split text into sections manually
     if (pathologies.length === 0) {
       const cat = await categorizeWithKeywords(truncated, department, specialty);
       department = cat.department;
       specialty = cat.specialty;
-      pathologies = [{
-        name: docName,
+      
+      // Try to split by section headers (numbered sections, ALL CAPS, etc.)
+      const sections = splitTextIntoSections(truncated);
+      pathologies = sections.map((section, i) => ({
+        name: section.title || `Section ${i + 1}`,
         department,
         specialty,
-        concepts: truncated.slice(0, 500),
+        concepts: section.content.slice(0, 200),
         urgences: '',
-        dretrepe: { definition: truncated.slice(0, 1000), rappel: '', etiologie: '', traitement: '', evolution: '', paraclinique: '' },
+        dretrepe: {
+          definition: section.content.slice(0, 500) || 'Contenu à compléter',
+          rappel: '',
+          etiologie: '',
+          traitement: '',
+          evolution: '',
+          paraclinique: '',
+        },
         pharmacology: { title: 'Pharmacologie', general: 'À compléter', molecules: [] },
-      }];
+      }));
+      
+      // If no sections found, create one pathology with the document name
+      if (pathologies.length === 0) {
+        pathologies = [{
+          name: docName,
+          department, specialty,
+          concepts: 'Document ajouté — contenu à analyser',
+          urgences: '',
+          dretrepe: { definition: 'Ce document contient du contenu médical. Cliquez sur les onglets pour naviguer.', rappel: '', etiologie: '', traitement: '', evolution: '', paraclinique: '' },
+          pharmacology: { title: 'Pharmacologie', general: 'À compléter', molecules: [] },
+        }];
+      }
     }
     
-    // Save each pathology as a separate Firebase document
+    // ALWAYS create PARENT + CHILDREN structure
     const childIds = [];
     for (const pathology of pathologies) {
       const pathRef = dbRef.ref('documents').push();
@@ -773,13 +802,12 @@ Génère AU MOINS 3 molécules par pathologie. Réponds en français médical.` 
       if (pathRef.key) childIds.push(pathRef.key);
     }
     
-    // Create parent document
+    // Create PARENT document (always isMultiPathology = true so clicking shows pathology list)
     const parentRef = dbRef.ref('documents').push();
     await parentRef.set({
       name: docName,
-      department,
-      specialty,
-      concepts: `Document contenant ${childIds.length} pathologie(s)`,
+      department, specialty,
+      concepts: `Document contenant ${childIds.length} pathologie(s)${aiUsed ? ' (analysé par IA)' : ' (à analyser)'}`,
       urgences: '',
       dretrepe: { definition: '', rappel: '', etiologie: '', traitement: '', evolution: '', paraclinique: '' },
       fileName: item.file.name,
@@ -787,7 +815,7 @@ Génère AU MOINS 3 molécules par pathologie. Réponds en français médical.` 
       fileSize: item.file.size,
       source: 'firebase',
       createdAt: Date.now(),
-      isMultiPathology: childIds.length > 1,
+      isMultiPathology: true,
       childPathologyIds: childIds,
     });
     
@@ -803,6 +831,44 @@ Génère AU MOINS 3 molécules par pathologie. Réponds en français médical.` 
     item.error = e.message;
   }
   renderUploadModal();
+}
+
+// Split text into sections by looking for chapter/section headers
+function splitTextIntoSections(text) {
+  const sections = [];
+  // Try to split by numbered sections: "1. Title", "Chapitre 1", "I. Title", etc.
+  const patterns = [
+    /^(?:\d+[\.\)]\s+|[IVX]+\.\s+|Chapitre\s+\d+[\.\s:])/gmi,
+  ];
+  
+  // Simple approach: split by lines that look like headers
+  const lines = text.split('\n');
+  let currentTitle = '';
+  let currentContent = '';
+  
+  for (const line of lines) {
+    const trimmed = line.trim();
+    // Check if this line looks like a section header
+    const isHeader = /^(?:\d+[\.\)]\s+|[IVX]+\.\s+|Chapitre\s+\d+|SECTION\s+\d+|PARTIE\s+\d+)/i.test(trimmed) ||
+                     (/^[A-ZÉÈÀÂÔÛÎÏÇ][A-ZÉÈÀÂÔÛÎÏÇ\s\-]{5,60}$/.test(trimmed) && trimmed.length < 80);
+    
+    if (isHeader && trimmed.length > 3) {
+      // Save previous section
+      if (currentTitle && currentContent.trim().length > 50) {
+        sections.push({ title: currentTitle, content: currentContent.trim() });
+      }
+      currentTitle = trimmed;
+      currentContent = '';
+    } else {
+      currentContent += line + '\n';
+    }
+  }
+  // Save last section
+  if (currentTitle && currentContent.trim().length > 50) {
+    sections.push({ title: currentTitle, content: currentContent.trim() });
+  }
+  
+  return sections;
 }
 
 async function uploadAll() {
@@ -1075,10 +1141,51 @@ function handleSearch(e) {
 function renderAll() {
   renderTabBar();
   renderSidebar();
-  document.getElementById('headerTitle').textContent = state.view==='specialty' && state.activeSpecialty ? state.activeSpecialty.specialtyName : 'Tableau de bord général';
-  if (state.view === 'dashboard') renderDashboard();
-  else if (state.view === 'specialty' && state.activeSpecialty) renderSpecialtyView();
-  else renderDashboard();
+  if (state.view === 'documentPathologies' && state.selectedDocumentId) {
+    document.getElementById('headerTitle').textContent = 'Pathologies du document';
+    renderDocumentPathologiesView();
+  } else if (state.view === 'specialty' && state.activeSpecialty) {
+    document.getElementById('headerTitle').textContent = state.activeSpecialty.specialtyName;
+    renderSpecialtyView();
+  } else {
+    document.getElementById('headerTitle').textContent = 'Tableau de bord général';
+    renderDashboard();
+  }
+}
+
+// Render the pathology list view for a multi-pathology document
+function renderDocumentPathologiesView() {
+  const parentDoc = state.firebaseDocs.find(d => (d.id || d.name) === state.selectedDocumentId);
+  if (!parentDoc) { renderDashboard(); return; }
+  
+  const childIds = parentDoc.childPathologyIds || [];
+  const pathologies = childIds.map(id => state.firebaseDocs.find(d => d.id === id)).filter(Boolean);
+  const deptName = (parentDoc.department || '').replace(/^\d+\.\s*/, '').trim();
+  const color = '#34d399';
+  
+  const html = `
+    <div style="space-y:1.5rem">
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem">
+        <button onclick="state.view='dashboard';state.selectedDocumentId=null;renderAll()" style="width:2.5rem;height:2.5rem;border-radius:.75rem;background:rgba(255,255,255,0.05);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#cbd5e1;flex-shrink:0">${icon('mdi:arrow-left',{size:'20px'})}</button>
+        <div style="min-width:0;flex:1">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8">${escapeHtml(deptName || parentDoc.department || 'Document')}</div>
+          <h3 style="font-size:1.125rem;font-weight:700;color:#fff;truncate">${escapeHtml(parentDoc.name || 'Document')}</h3>
+          <p style="font-size:12px;color:#94a3b8">${pathologies.length} pathologie${pathologies.length > 1 ? 's' : ''} dans ce document</p>
+        </div>
+        <span style="padding:.25rem .75rem;border-radius:9999px;font-size:10px;font-weight:700;background:${color}20;color:${color};flex-shrink:0">${escapeHtml(parentDoc.fileType || 'Document')}</span>
+      </div>
+      ${pathologies.length === 0 ? `<div class="glass-panel" style="padding:2rem;text-align:center;border-radius:1rem"><p style="color:#94a3b8">Aucune pathologie dans ce document</p></div>` : `
+        <div class="cards-grid-3" style="margin-bottom:1.5rem">
+          ${pathologies.map((p, i) => `<div class="featured-card" style="border-top:3px solid ${color}" onclick="openDisease('${p.id}','firebase')"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem"><span style="font-size:10px;font-weight:700;padding:.125rem .5rem;border-radius:.25rem;background:${color}20;color:${color}">Pathologie ${i+1}</span>${icon('mdi:arrow-top-right',{size:'18px'})}</div><h4 style="font-size:.875rem;font-weight:700;color:#fff;margin-bottom:.25rem">${escapeHtml(p.name || 'Pathologie ' + (i+1))}</h4><p class="line-clamp-2" style="font-size:12px;color:#94a3b8">${escapeHtml(p.dretrepe?.definition || p.concepts || 'Cliquez pour voir le schéma DRETEP')}</p><div style="margin-top:.75rem;display:flex;flex-wrap:wrap;gap:.25rem">${p.urgences ? `<span style="font-size:9px;padding:.125rem .5rem;border-radius:.25rem;background:rgba(239,68,68,0.1);color:#f87171;border:1px solid rgba(239,68,68,0.2)">Urgences</span>` : ''}${p.dretrepe?.definition ? `<span style="font-size:9px;padding:.125rem .5rem;border-radius:.25rem;background:rgba(255,255,255,0.05);color:#94a3b8">DRETEP</span>` : ''}${p.pharmacology?.molecules?.length > 0 ? `<span style="font-size:9px;padding:.125rem .5rem;border-radius:.25rem;background:rgba(59,130,246,0.1);color:#60a5fa;border:1px solid rgba(59,130,246,0.2)">Pharmaco</span>` : ''}</div></div>`).join('')}
+        </div>
+        <div class="glass-panel" style="border-radius:1rem;overflow:hidden">
+          <div style="padding:1rem;border-bottom:1px solid rgba(255,255,255,0.05)"><h4 style="font-size:.875rem;font-weight:700;color:#fff">Vue d'ensemble — ${escapeHtml(parentDoc.name || 'Document')}</h4><p style="font-size:12px;color:#94a3b8;margin-top:.125rem">Cliquez sur une pathologie pour voir son schéma DRETEP</p></div>
+          <div style="overflow-x:auto"><table class="custom-table"><thead><tr><th>Pathologie</th><th>Spécialité</th><th>Définition</th><th style="width:2.5rem"></th></tr></thead><tbody>${pathologies.map(p => `<tr style="cursor:pointer" onclick="openDisease('${p.id}','firebase')"><td style="font-weight:700;color:#fff;white-space:nowrap">${escapeHtml(p.name || '?')}</td><td style="color:#94a3b8">${escapeHtml(p.specialty || '—')}</td><td style="color:#94a3b8"><div class="line-clamp-2" style="max-width:24rem">${escapeHtml(p.dretrepe?.definition || '—')}</div></td><td>${icon('mdi:arrow-top-right',{size:'14px'})}</td></tr>`).join('')}</tbody></table></div>
+        </div>
+      `}
+    </div>
+  `;
+  document.getElementById('mainContent').innerHTML = html;
 }
 
 // ESC closes modals
