@@ -37,10 +37,10 @@ html,body{background:#07090e;color:#f1f5f9;font-family:'Plus Jakarta Sans',syste
 .card-hover{transition:all .3s;position:relative;overflow:hidden;cursor:pointer}
 .card-hover:hover{transform:translateY(-4px);border-color:rgba(212,77,77,0.3);box-shadow:0 12px 30px -10px rgba(212,77,77,0.15)}
 
-.modal-overlay{position:fixed;inset:0;background:rgba(7,9,14,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);z-index:100;display:none;align-items:center;justify-content:center;padding:10px;opacity:0;transition:all .3s}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:100;display:none;align-items:center;justify-content:center;padding:10px;opacity:0;transition:all .3s}
 @media(max-width:640px){.modal-overlay{padding:0}}
 .modal-overlay.show{display:flex;opacity:1}
-.modal-box{width:100%;max-width:1100px;max-height:90vh;background:#0d111a;border:1px solid rgba(255,255,255,0.08);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;transform:scale(.95) translateY(20px);transition:all .3s;box-shadow:0 25px 50px -12px rgba(0,0,0,0.7)}
+.modal-box{width:100%;max-width:900px;max-height:92vh;height:92vh;background:#ffffff;border:1px solid #e5e7eb;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;transform:scale(.95) translateY(20px);transition:all .3s;box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);margin:auto}
 @media(max-width:640px){.modal-box{max-width:100%;max-height:100vh;height:100vh;border-radius:0;border:none}}
 .modal-overlay.show .modal-box{transform:scale(1) translateY(0)}
 
@@ -534,18 +534,16 @@ function renderSpecialtyView() {
 // ════════════════════════════════════════════════════════════════════════════
 // DISEASE MODAL
 // ════════════════════════════════════════════════════════════════════════════
-const SECTIONS = [
-  {key:'definition',label:'Définition',icon:'mdi:book-open-outline'},
-  {key:'etiologie',label:'Étiologie',icon:'mdi:dna'},
-  {key:'concepts',label:'Concepts & Urgences',icon:'mdi:alert-circle-outline'},
-  {key:'clinique',label:'Tableau Clinique',icon:'mdi:stethoscope'},
-  {key:'paraclinique',label:'Paraclinique',icon:'mdi:flask'},
-  {key:'diagnostic',label:'Diagnostic',icon:'mdi:clipboard-list-outline'},
-  {key:'traitement',label:'Prise en charge',icon:'mdi:pill'},
-  {key:'pharmacologie',label:'Pharmacologie',icon:'mdi:flask-outline'},
-  {key:'evolution',label:'Évolution',icon:'mdi:lightning-bolt'},
+const DETPEP_SECTIONS = [
+  {key:'D1', letter:'D', label:'Définition & Physiopathologie', emoji:'📌', color:'#2563eb'},
+  {key:'D2', letter:'D', label:'Diagnostic Clinique et Paraclinique', emoji:'🔍', color:'#0891b2'},
+  {key:'E1', letter:'E', label:'Étiologies, Terrains & Déclencheurs', emoji:'🔍', color:'#7c3aed'},
+  {key:'T',  letter:'T', label:'Thérapeutiques & Règles d\'Administration', emoji:'💊', color:'#dc2626'},
+  {key:'E2', letter:'E', label:'Évolution & Raisonnement Clinique', emoji:'📈', color:'#059669'},
+  {key:'P',  letter:'P', label:'Planning, Parcours & Ville-Hôpital', emoji:'📅', color:'#d97706'},
 ];
-const ROMAN_NUMERALS = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI','XVII','XVIII','XIX','XX'];
+// Keep SECTIONS for backward compatibility but unused
+const SECTIONS = DETPEP_SECTIONS;
 
 
 function openDisease(id, source) {
@@ -564,7 +562,7 @@ function openDisease(id, source) {
   if (!disease) { showToast('Fiche non disponible'); return; }
   state.selectedDisease = disease;
   state.selectedDiseaseSource = source || 'static';
-  state.activeSection = (disease.customSections && disease.customSections.length > 0) ? 'custom_0' : 'definition';
+  state.activeSection = 'D1';
   closeMobileSidebar();
   renderDiseaseModal();
   document.getElementById('diseaseModalOverlay').classList.add('show');
@@ -587,84 +585,136 @@ function renderDiseaseModal() {
   const ph = d.pharmacology;
 
   document.getElementById('diseaseModalBox').innerHTML = `
-    <div style="padding:.75rem 1rem;background:rgba(22,29,44,0.8);border-bottom:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:.75rem">
+    <div style="padding:12px 20px;background:#f9fafb;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:12px">
       <div style="display:flex;align-items:center;gap:.75rem;min-width:0;flex:1"><div style="width:2.25rem;height:2.25rem;border-radius:.75rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:${color}15;border:1px solid ${color}30">${icon('mdi:medical-bag',{size:'18px',color:color})}</div><div style="min-width:0;flex:1"><h2 style="font-size:.875rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(d.name)}</h2><p style="font-size:11px;font-weight:500;color:${color};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(d.specialty)} — ${escapeHtml(d.partName.replace(/^\d+\.\s*/,''))}</p></div></div>
       <button onclick="closeDiseaseModal()" style="width:2rem;height:2rem;border-radius:.75rem;background:rgba(33,44,66,0.5);border:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;color:#94a3b8;cursor:pointer;flex-shrink:0">${icon('mdi:close',{size:'16px'})}</button>
     </div>
-    <div class="modal-tabs-bar"><div class="modal-tabs-scroll"><div class="modal-tabs-inner">${(() => {
-  const hasCustom = d.customSections && d.customSections.length > 0;
-  const tabs = hasCustom
-    ? d.customSections.map((label, i) => ({
-        key: 'custom_' + i,
-        label: (ROMAN_NUMERALS[i] || (i+1)) + '. ' + label,
-        icon: 'mdi:bookmark-outline'
-      }))
-    : SECTIONS;
-  return tabs.map(s => `<button class="modal-tab-btn ${state.activeSection===s.key?'active':''}" onclick="setModalSection('${s.key}')">${icon(s.icon,{size:'14px'})}<span>${s.label}</span></button>`).join('');
-})()}</div></div></div>
-    <div style="flex:1;padding:1rem;overflow-y:auto;background:rgba(7,9,14,0.4);min-height:0">${renderModalSection(d, color, ph)}</div>
+    <div class="modal-tabs-bar" style="background:#fff;border-bottom:1px solid #e5e7eb"><div class="modal-tabs-scroll"><div class="modal-tabs-inner" style="display:flex;gap:4px;padding:8px 12px">${DETPEP_SECTIONS.map(s => `<button class="modal-tab-btn ${state.activeSection===s.key?'active':''}" onclick="setModalSection('${s.key}')" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid ${state.activeSection===s.key?s.color+'40':'transparent'};background:${state.activeSection===s.key?s.color+'15':'transparent'};color:${state.activeSection===s.key?s.color:'#6b7280'};white-space:nowrap"><span style="font-size:14px">${s.emoji}</span><span style="font-weight:800">${s.letter}</span><span>${s.label}</span></button>`).join('')}</div></div></div>
+    <div style="flex:1;padding:20px 32px;overflow-y:auto;background:#ffffff;min-height:0">${renderModalSection(d, color, ph)}</div>
   `;
 }
 
 function renderModalSection(d, color, ph) {
-  const secTitle = (iconName, title) => `<h3 class="section-title">${escapeHtml(title)}</h3>`;
+  const parsed = (function(){ try { return JSON.parse(d.concepts || '{}'); } catch(e){ return {}; } })();
+  const sections = parsed.__sections__ || {};
+  const dret = d.dretrepe || {};
+  const firstSentence = (text) => { if(!text) return ''; const m = text.match(/^.{10,300}?[.!?]/); return m ? m[0].trim() : (text||'').slice(0,250).trim(); };
+  const fillLine = (n) => '<span style="display:inline-block;border-bottom:1px solid #9ca3af;margin:0 4px;width:'+(n*4)+'px;height:1.1em;vertical-align:bottom"></span>';
+  const placeholder = (txt) => '<span style="font-style:italic;color:#6b7280;font-size:11px">['+txt+']</span>';
+  const bullet = (content) => '<div style="display:flex;gap:8px;margin-bottom:10px"><span style="color:#1f2937;font-weight:bold;flex-shrink:0">•</span><div style="flex:1;font-size:13px;color:#1f2937;line-height:1.6">'+content+'</div></div>';
+  const subBullet = (content) => '<div style="display:flex;gap:8px;margin-bottom:8px;margin-left:24px"><span style="color:#4b5563;flex-shrink:0">○</span><div style="flex:1;font-size:12px;color:#374151;line-height:1.5;font-style:italic">'+content+'</div></div>';
+  const secHeader = (emoji, letter, label, color) => '<h2 style="font-size:18px;font-weight:bold;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid '+color+';color:'+color+';display:flex;align-items:center;gap:8px"><span style="font-size:20px">'+emoji+'</span><span style="font-weight:800">'+letter+'</span><span style="color:#1f2937">— '+label+'</span></h2>';
 
-  // Handle custom Roman numeral sections (for cardiologie pathologies)
-  if (state.activeSection && state.activeSection.startsWith('custom_')) {
-    const sectionIdx = parseInt(state.activeSection.replace('custom_', ''), 10);
-    const sectionLabel = d.customSections && d.customSections[sectionIdx] ? d.customSections[sectionIdx] : '';
-    const roman = ROMAN_NUMERALS[sectionIdx] || (sectionIdx + 1);
-
-    // Parse stored data from concepts (JSON with __sections__)
-    let parsed = {};
-    try { parsed = JSON.parse(d.concepts || '{}'); } catch (e) {}
-    const sections = parsed.__sections__ || {};
-    const sectionContent = sections[sectionLabel] || '';
-
-    // Parse subsections if any (stored as array under the section label)
-    const subsections = parsed[sectionLabel] || [];
-
-    let html_out = `<div style="display:flex;flex-direction:column;gap:1rem">`;
-    html_out += secTitle('mdi:bookmark-outline', roman + '. ' + escapeHtml(sectionLabel));
-
-    // Main section content
-    if (sectionContent && sectionContent.length > 0) {
-      html_out += `<div style="padding:1rem;border-radius:.75rem;background:#0d111a;border:1px solid rgba(255,255,255,0.05)"><div style="font-size:12px;color:#cbd5e1;line-height:1.7;white-space:pre-wrap">${escapeHtml(sectionContent)}</div></div>`;
+  // Get cardiologie textbook sections matching a tab
+  const tabKeywords = {
+    D1: ['définition','physiopath','mécanism','généralit','introduction','rappel','épidémiolog'],
+    D2: ['diagnostic','clinique','paraclinique','examens','exploration','signes','symptôme','aspect'],
+    E1: ['étiolog','cause','facteur','terrain','déclench'],
+    T: ['traitement','thérapeut','prescription','pharmacolog','antithrombot','diurét','prise en charge'],
+    E2: ['évolution','complication','surveillance','pronostic'],
+    P: ['planning','suivi','parcours','réseau','continuit','prévention']
+  };
+  const getCardioSections = (tabKey) => {
+    if (!sections || Object.keys(sections).length === 0) return [];
+    const result = [];
+    const keywords = tabKeywords[tabKey] || [];
+    for (const [title, content] of Object.entries(sections)) {
+      if (!content || content.length < 30) continue;
+      const lowerTitle = title.toLowerCase();
+      if (keywords.some(kw => lowerTitle.includes(kw))) {
+        result.push({title, content});
+      }
     }
+    return result;
+  };
+  const renderCardioSections = (tabKey, color) => {
+    const cardio = getCardioSections(tabKey);
+    if (cardio.length === 0) return '';
+    return '<div style="margin-top:24px;padding-top:16px;border-top:1px solid #e5e7eb"><h3 style="font-size:14px;font-weight:bold;color:#374151;margin-bottom:12px;font-style:italic">📖 Contenu détaillé du manuel :</h3>'+cardio.map(s => '<div style="margin-bottom:16px;padding:12px;background:#f9fafb;border-radius:4px;border-left:4px solid '+color+'"><h4 style="font-size:13px;font-weight:bold;color:'+color+';margin-bottom:8px">'+escapeHtml(s.title)+'</h4><div style="font-size:12px;color:#1f2937;line-height:1.6;white-space:pre-wrap">'+escapeHtml(s.content)+'</div></div>').join('')+'</div>';
+  };
 
-    // Subsections (A, B, C...)
-    if (subsections.length > 0) {
-      html_out += `<div style="display:flex;flex-direction:column;gap:.5rem">`;
-      subsections.forEach((sub, j) => {
-        const letter = String.fromCharCode(65 + j);
-        html_out += `<div style="padding:.75rem;border-radius:.75rem;background:#0d111a;border:1px solid rgba(255,255,255,0.05);border-left:3px solid #3b82f6"><div style="font-size:12px;font-weight:700;color:#60a5fa;margin-bottom:.25rem">${letter}. ${escapeHtml(sub)}</div><p style="font-size:11px;color:#94a3b8;line-height:1.5">Voir le contenu détaillé dans le manuel de référence.</p></div>`;
-      });
-      html_out += `</div>`;
-    }
-
-    // Fallback if no content
-    if (!sectionContent && subsections.length === 0) {
-      html_out += `<p style="font-size:12px;color:#cbd5e1;line-height:1.625;padding:1rem;border-radius:.75rem;background:#0d111a;border:1px solid rgba(255,255,255,0.05)">Contenu de la section « ${escapeHtml(sectionLabel)} » — à compléter.</p>`;
-    }
-
-    // Source footer
-    html_out += `<div style="padding:.75rem;border-radius:.75rem;background:#0d111a;border:1px solid rgba(255,255,255,0.05);border-left:3px solid #10b981"><h5 style="font-size:12px;font-weight:700;color:#34d399;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.25rem">Source</h5><p style="font-size:11px;color:#94a3b8;line-height:1.5">Contenu extrait du manuel de Cardiologie ECN (2ᵉ édition, Elsevier-Masson).</p></div>`;
-    html_out += `</div>`;
-    return html_out;
-  }
-
+  let out = '';
   switch (state.activeSection) {
-    case 'definition': return `<div style="display:flex;flex-direction:column;gap:1rem">${secTitle('mdi:book-open-outline','Définition')}<p style="font-size:12px;color:#cbd5e1;line-height:1.625;padding:1rem;border-radius:.75rem;background:#0d111a;border:1px solid rgba(255,255,255,0.05)">${escapeHtml(d.dretrepe.definition||'Non disponible.')}</p><h4 style="font-size:12px;font-weight:700;color:#e47e7e;text-transform:uppercase;letter-spacing:.05em;margin-top:1rem">Classification</h4><p style="font-size:12px;color:#cbd5e1;line-height:1.625;padding:1rem;border-radius:.75rem;background:#0d111a;border:1px solid rgba(255,255,255,0.05)">${escapeHtml(d.concepts||'Non spécifiée.')}</p><h4 style="font-size:12px;font-weight:700;color:#e47e7e;text-transform:uppercase;letter-spacing:.05em;margin-top:1rem">Spécialité</h4><p style="font-size:12px;color:#fff;font-weight:500;padding:.75rem;border-radius:.75rem;background:rgba(13,17,26,0.5);border:1px solid rgba(255,255,255,0.05)">${escapeHtml(d.specialty)} — ${escapeHtml(d.partName.replace(/^\d+\.\s*/,''))}</p></div>`;
-    case 'etiologie': return `<div style="display:flex;flex-direction:column;gap:1rem">${secTitle('mdi:dna','Étiologie & Physiopathologie')}<div style="padding:1rem;border-radius:.75rem;background:#0d111a;border:1px solid rgba(255,255,255,0.05);border-left:3px solid #a855f7"><h5 style="font-size:12px;font-weight:700;color:#a855f7;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem">Rappel physiopathologique</h5><p style="font-size:12px;color:#cbd5e1;line-height:1.625">${escapeHtml(d.dretrepe.rappel||'Non disponible.')}</p></div><div style="padding:1rem;border-radius:.75rem;background:#0d111a;border:1px solid rgba(255,255,255,0.05);border-left:3px solid #fb923c"><h5 style="font-size:12px;font-weight:700;color:#fb923c;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem">Étiologies principales</h5><p style="font-size:12px;color:#cbd5e1;line-height:1.625">${escapeHtml(d.dretrepe.etiologie||'Non spécifiées.')}</p></div><div style="padding:1rem;border-radius:.75rem;background:#0d111a;border:1px solid rgba(255,255,255,0.05);border-left:3px solid #fbbf24"><h5 style="font-size:12px;font-weight:700;color:#fbbf24;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem">Facteurs de risque</h5><p style="font-size:12px;color:#cbd5e1;line-height:1.625">${escapeHtml(d.concepts||'Non spécifiés.')}</p></div></div>`;
-    case 'concepts': return `<div style="display:flex;flex-direction:column;gap:1rem">${secTitle('mdi:alert-circle-outline','Concepts & Urgences')}<div style="padding:1rem;border-radius:.75rem;background:#0d111a;border:1px solid rgba(255,255,255,0.05);border-left:3px solid #3b82f6"><h5 style="font-size:12px;font-weight:700;color:#60a5fa;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem">Concepts clés</h5><p style="font-size:12px;color:#cbd5e1;line-height:1.625">${escapeHtml(d.concepts||'—')}</p></div><div style="padding:1rem;border-radius:.75rem;background:#0d111a;border:1px solid rgba(255,255,255,0.05);border-left:3px solid #ef4444"><h5 style="font-size:12px;font-weight:700;color:#f87171;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem">Urgences</h5><p style="font-size:12px;color:#cbd5e1;line-height:1.625">${escapeHtml(d.urgences||'—')}</p></div></div>`;
-    case 'clinique': return `<div style="display:flex;flex-direction:column;gap:1rem">${secTitle('mdi:stethoscope','Tableau Clinique')}<div style="padding:1rem;border-radius:.75rem;background:#0d111a;border:1px solid rgba(255,255,255,0.05);border-left:3px solid #3b82f6"><h5 style="font-size:12px;font-weight:700;color:#3b82f6;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem">Signes fonctionnels</h5><p style="font-size:12px;color:#cbd5e1;line-height:1.625">Signes fonctionnels à rechercher à l'interrogatoire.</p></div><div style="padding:1rem;border-radius:.75rem;background:#0d111a;border:1px solid rgba(255,255,255,0.05);border-left:3px solid #14b8a6"><h5 style="font-size:12px;font-weight:700;color:#14b8a6;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem">Signes physiques</h5><p style="font-size:12px;color:#cbd5e1;line-height:1.625">Examen physique complet essentiel pour orienter le diagnostic.</p></div><div style="padding:1rem;border-radius:.75rem;background:#0d111a;border:1px solid rgba(255,255,255,0.05);border-left:3px solid #6366f1"><h5 style="font-size:12px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem">Examens complémentaires</h5><p style="font-size:12px;color:#cbd5e1;line-height:1.625">${escapeHtml(d.dretrepe.paraclinique||'Non spécifié.')}</p></div></div>`;
-    case 'paraclinique': return `<div style="display:flex;flex-direction:column;gap:1rem">${secTitle('mdi:flask','Examens Paracliniques')}<div style="border-radius:.75rem;overflow:hidden;border:1px solid rgba(255,255,255,0.05)"><table class="custom-table"><thead><tr><th>Domaine</th><th>Examens</th></tr></thead><tbody><tr><td style="font-weight:700;color:#fff">Bilan paraclinique</td><td>${escapeHtml(d.dretrepe.paraclinique||'—')}</td></tr><tr><td style="font-weight:700;color:#fff">Examens biologiques</td><td style="color:#94a3b8">Prélèvements orientés par la clinique.</td></tr><tr><td style="font-weight:700;color:#fff">Imagerie</td><td style="color:#94a3b8">Adapter selon la pathologie.</td></tr></tbody></table></div></div>`;
-    case 'diagnostic': return `<div style="display:flex;flex-direction:column;gap:1rem">${secTitle('mdi:clipboard-list-outline','Diagnostic')}<div style="padding:1rem;border-radius:.75rem;background:#0d111a;border:1px solid rgba(255,255,255,0.05);border-left:3px solid #10b981"><h5 style="font-size:12px;font-weight:700;color:#10b981;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem">Critères diagnostiques</h5><p style="font-size:12px;color:#cbd5e1;line-height:1.625">Le diagnostic repose sur les données cliniques et paracliniques.</p></div><div style="padding:1rem;border-radius:.75rem;background:#0d111a;border:1px solid rgba(255,255,255,0.05);border-left:3px solid #fbbf24"><h5 style="font-size:12px;font-weight:700;color:#fbbf24;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem">Diagnostics différentiels</h5><p style="font-size:12px;color:#cbd5e1;line-height:1.625">Diagnostics différentiels à évoquer et éliminer.</p></div></div>`;
-    case 'traitement': return `<div style="display:flex;flex-direction:column;gap:1rem">${secTitle('mdi:pill','Prise en charge')}${d.urgences?`<div style="padding:1rem;border-radius:.75rem;background:#0d111a;border:1px solid rgba(255,255,255,0.05);border-left:3px solid #ef4444"><div style="font-size:12px;font-weight:700;color:#f87171;margin-bottom:.25rem;text-transform:uppercase;letter-spacing:.05em">⚠️ Urgences</div><div style="font-size:12px;color:#e2e8f0;line-height:1.625">${escapeHtml(d.urgences)}</div></div>`:''}<div style="padding:1rem;border-radius:.75rem;background:#0d111a;border:1px solid rgba(255,255,255,0.05);border-left:3px solid #10b981"><div style="font-size:12px;font-weight:700;color:#34d399;margin-bottom:.25rem;text-transform:uppercase;letter-spacing:.05em">Traitement curatif</div><div style="font-size:12px;color:#e2e8f0;line-height:1.625">${escapeHtml(d.dretrepe.traitement||'Non spécifié.')}</div></div><div style="padding:1rem;border-radius:.75rem;background:#0d111a;border:1px solid rgba(255,255,255,0.05);border-left:3px solid #3b82f6"><div style="font-size:12px;font-weight:700;color:#60a5fa;margin-bottom:.25rem;text-transform:uppercase;letter-spacing:.05em">Traitement préventif</div><div style="font-size:12px;color:#e2e8f0;line-height:1.625">Mesures préventives, éducation thérapeutique, vaccination et suivi.</div></div>${ph && ph.molecules && ph.molecules.length > 0 ? renderPharmacology(ph) : ''}</div>`;
-    case 'pharmacologie': return renderPharmacology(ph);
-    case 'evolution': return `<div style="display:flex;flex-direction:column;gap:1rem">${secTitle('mdi:lightning-bolt','Évolution & Complications')}<div style="padding:1rem;border-radius:.75rem;background:#0d111a;border:1px solid rgba(255,255,255,0.05);border-left:3px solid #a855f7"><h5 style="font-size:12px;font-weight:700;color:#a855f7;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem">Évolution naturelle</h5><p style="font-size:12px;color:#cbd5e1;line-height:1.625">${escapeHtml(d.dretrepe.evolution||'Non documentée.')}</p></div><div style="padding:1rem;border-radius:.75rem;background:#0d111a;border:1px solid rgba(255,255,255,0.05);border-left:3px solid #ef4444"><h5 style="font-size:12px;font-weight:700;color:#f87171;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem">Complications</h5><p style="font-size:12px;color:#cbd5e1;line-height:1.625">Surveillance régulière et adaptation thérapeutique.</p></div><div style="padding:1rem;border-radius:.75rem;background:#0d111a;border:1px solid rgba(255,255,255,0.05);border-left:3px solid #14b8a6"><h5 style="font-size:12px;font-weight:700;color:#14b8a6;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem">Pronostic</h5><p style="font-size:12px;color:#cbd5e1;line-height:1.625">Le pronostic dépend de la précocité du diagnostic et de la qualité de la prise en charge.</p></div></div>`;
-    default: return '';
+    case 'D1': {
+      const cardio = renderCardioSections('D1', '#3b82f6');
+      out = '<div>' + secHeader('📌','D','Définition & Physiopathologie','#2563eb') +
+        bullet('<span style="font-weight:600">Le mécanisme en 1 phrase :</span> ' + (dret.rappel || firstSentence(dret.definition) ? escapeHtml(firstSentence(dret.rappel) || firstSentence(dret.definition)) : placeholder("Qu'est-ce qui dysfonctionne dans l'organisme, où et comment ?"))) +
+        bullet('<span style="font-weight:600">Formes & Stades cliniques :</span> ' + (dret.definition && dret.definition.length > 50 ? escapeHtml(dret.definition) : placeholder('Aigu / Chronique / Classifications médicales de référence'))) +
+        bullet('<span style="font-weight:600">🚨 Les "Drapeaux Rouges" (Urgences vitales) :</span> ' + (d.urgences ? '<span style="color:#b91c1c;font-weight:500">'+escapeHtml(d.urgences)+'</span>' : placeholder('Signes de décompensation immédiate / Appel du 15'))) +
+        cardio + '</div>';
+      break;
+    }
+    case 'D2': {
+      const cardio = renderCardioSections('D2', '#06b6d4');
+      const para = dret.paraclinique || '';
+      out = '<div>' + secHeader('🔍','D','Diagnostic Clinique et Paraclinique','#0891b2') +
+        bullet('<span style="font-weight:600">Symptômes cliniques pivots (La triade ou le tableau d\'appel) :</span> ' + (d.concepts && !parsed.__sections__ ? escapeHtml(d.concepts) : fillLine(50))) +
+        bullet('<span style="font-weight:600">Examens Biologiques :</span>' +
+          subBullet('<span style="font-weight:600;font-style:normal">Norme / Résultat attendu (Patient sain) :</span> ' + (para ? '<span style="font-style:normal;color:#1f2937">'+escapeHtml(para.slice(0,200))+'</span>' : fillLine(30))) +
+          subBullet('<span style="font-weight:600;font-style:normal">Valeur pathologique (Alerte / Diagnostic de la maladie) :</span> ' + fillLine(30))) +
+        bullet('<span style="font-weight:600">Examens d\'Imagerie et Explorations fonctionnelles (ECG, Radio, Écho, Scanner, Épreuves...) :</span>' +
+          subBullet('<span style="font-weight:600;font-style:normal">Aspect / Tracé / Résultat Normal :</span> ' + fillLine(30)) +
+          subBullet('<span style="font-weight:600;font-style:normal">Signes Anormaux (Images ou critères pathologiques clés) :</span> ' + (para ? '<span style="font-style:normal;color:#1f2937">'+escapeHtml(para.slice(200,500))+'</span>' : fillLine(30)))) +
+        cardio + '</div>';
+      break;
+    }
+    case 'E1': {
+      const cardio = renderCardioSections('E1', '#a855f7');
+      out = '<div>' + secHeader('🔍','E','Étiologies, Terrains & Déclencheurs','#7c3aed') +
+        bullet('<span style="font-weight:600">Causes primaires :</span> ' + (dret.etiologie ? escapeHtml(dret.etiologie) : placeholder('Origine : génétique, infectieuse, toxique, auto-immune, dégénérative'))) +
+        bullet('<span style="font-weight:600">Facteurs de risque (FdR) modifiables :</span> ' + (!parsed.__sections__ && d.concepts ? escapeHtml(d.concepts) : placeholder('Tabac, alimentation, sédentarité, stress, environnement'))) +
+        bullet('<span style="font-weight:600">Facteurs déclenchants de crise :</span> ' + placeholder("Qu'est-ce qui rompt l'équilibre ? (ex: infection intercurrente, écart de traitement)")) +
+        cardio + '</div>';
+      break;
+    }
+    case 'T': {
+      const cardio = renderCardioSections('T', '#ef4444');
+      const molecules = (ph && ph.molecules) ? ph.molecules : [];
+      const highRiskKw = ['insuline','héparine','heparin','potassium','kcl','adrénaline','adrenaline','catécholamine','catecholamine','dopamine','noradrénaline'];
+      const highRisk = molecules.filter(m => highRiskKw.some(kw => m.name.toLowerCase().includes(kw)));
+      const antidoteKw = ['antidote','flumazénil','flumazenil','naloxone','protamine','vitamine k','vit k','gluconate de calcium'];
+      const antidotes = molecules.filter(m => antidoteKw.some(kw => m.name.toLowerCase().includes(kw) || (m.mecanisme||'').toLowerCase().includes(kw)));
+      let molHtml = '';
+      if (molecules.length > 0) {
+        molHtml = '<div style="margin-top:8px;display:flex;flex-direction:column;gap:8px">'+molecules.slice(0,5).map(mol => '<div style="margin-left:16px;padding:8px;background:#fef2f2;border-left:4px solid #fca5a5;border-radius:4px"><div style="font-size:12px"><span style="font-weight:bold;color:#991b1b">○ Classe / Molécule :</span> <span style="color:#1f2937">'+escapeHtml(mol.name)+'</span><span style="color:#4b5563;font-style:italic"> ('+escapeHtml(mol.posologie)+')</span></div><div style="font-size:11px;color:#374151;font-style:italic;margin-top:4px">➡️ Objectif attendu : '+escapeHtml((mol.mecanisme||'').slice(0,150))+'</div>'+(mol.marques && mol.marques.length > 0 ? '<div style="font-size:11px;color:#4b5563;margin-top:4px">Spécialités : '+escapeHtml(mol.marques.slice(0,4).join(', '))+(mol.marques.length > 4 ? ' (+'+(mol.marques.length-4)+')' : '')+'</div>' : '')+'</div>').join('')+'</div>';
+      } else if (dret.traitement) {
+        molHtml = '<div style="margin-left:16px;padding:8px;background:#fef2f2;border-left:4px solid #fca5a5;border-radius:4px;font-size:12px;color:#1f2937">'+escapeHtml(dret.traitement)+'</div>';
+      } else {
+        molHtml = fillLine(50);
+      }
+      out = '<div>' + secHeader('💊','T','Thérapeutiques, Éducation & Règles d\'Administration','#dc2626') +
+        bullet('<span style="font-weight:600">Traitements médicamenteux pivots :</span>' + molHtml) +
+        bullet('<span style="font-weight:600">👑 Les "Règles d\'or" de l\'Administration (Au lit du patient) :</span>' +
+          subBullet('<span style="font-weight:600;font-style:normal">Galénique & Modalités :</span> ' + placeholder('À jeun ? Pendant le repas ? Écrasable ou non ? Interactions (ex: pamplemousse)')) +
+          subBullet('<span style="font-weight:600;font-style:normal">Antidotes & Conduites à tenir :</span> ' + (antidotes.length > 0 ? '<span style="font-style:normal;color:#1f2937">'+escapeHtml(antidotes.map(m=>m.name).join(', '))+'</span>' : placeholder("Quel est l'antidote d'urgence en cas de surdosage ? (ex: Vitamine K, Protamine, Flumazénil)")))) +
+        bullet('<span style="font-weight:600">⚙️ Les "Triggers" de Calculs de Doses associés (Médicaments à haut risque) :</span>' +
+          subBullet('<span style="font-weight:600;font-style:normal">Alertes de calculs :</span> ' + (highRisk.length > 0 ? '<span style="font-style:normal;color:#1f2937">'+escapeHtml(highRisk.map(m=>m.name+' ('+m.posologie+')').join(' ; '))+'</span>' : placeholder('Débits PSE d\'insuline, d\'héparine, de catécholamines, d\'électrolytes concentrés (KCl)...')))) +
+        bullet('<span style="font-weight:600">🎓 Objectifs d\'Éducation Thérapeutique (ETP) :</span> ' + placeholder('Savoir-faire du patient : auto-surveillance, gestes techniques')) +
+        cardio + '</div>';
+      break;
+    }
+    case 'E2': {
+      const cardio = renderCardioSections('E2', '#10b981');
+      out = '<div>' + secHeader('📈','E','Évolution & Raisonnement Clinique Infirmier','#059669') +
+        bullet('<span style="font-weight:600">🛡️ Surveillance des complications :</span> ' + (dret.evolution ? escapeHtml(dret.evolution) : placeholder("Quels éléments cliniques/paracliniques montrent activement que la maladie s'aggrave ou décompense ?"))) +
+        bullet('<span style="font-weight:600">Surveillance de l\'efficacité thérapeutique :</span> ' + (dret.traitement ? escapeHtml(firstSentence(dret.traitement)) : placeholder('Quels signes cliniques ou biologiques prouvent que le traitement fonctionne ?'))) +
+        bullet('<span style="font-weight:600">Surveillance de la tolérance (Iatrogénie) :</span> ' + (ph && ph.molecules && ph.molecules[0] ? 'Surveiller les effets indésirables des molécules prescrites (cf. pharmacologie).' : placeholder('Quels effets indésirables biologiques ou cliniques faut-il traquer ?'))) +
+        cardio + '</div>';
+      break;
+    }
+    case 'P': {
+      const cardio = renderCardioSections('P', '#f59e0b');
+      out = '<div>' + secHeader('📅','P','Planning, Parcours & Liens Ville-Hôpital','#d97706') +
+        bullet('<span style="font-weight:600">Calendrier de suivi typique :</span> ' + (dret.evolution ? escapeHtml(firstSentence(dret.evolution)) : placeholder('Fréquence des consultations spécialistes, généralistes et bilans'))) +
+        bullet('<span style="font-weight:600">Réseau pluriprofessionnel (Qui fait quoi ?) :</span> ' + placeholder('Kiné, diététicien, IDE libérale, orthophoniste, assistante sociale...')) +
+        bullet('<span style="font-weight:600">Sortie & Continuité des soins :</span> ' + placeholder('Dispositifs (HAD, SSIAD), aménagement du domicile, rôle des aidants')) +
+        cardio + '</div>';
+      break;
+    }
+    default: out = '';
   }
+  out += '<div style="margin-top:32px;padding-top:16px;border-top:1px solid #e5e7eb"><p style="font-size:10px;color:#9ca3af;font-style:italic;text-align:center">📄 Fiche structurée selon le schéma DETPEP — MedStat</p></div>';
+  return out;
 }
 
 function renderPharmacology(ph) {
@@ -943,7 +993,7 @@ function renderUploadModal() {
   const hasFiles = uploadState.files.length > 0;
   
   document.getElementById('uploadModalBox').innerHTML = `
-    <div style="padding:.75rem 1rem;background:rgba(22,29,44,0.8);border-bottom:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:.75rem">
+    <div style="padding:12px 20px;background:#f9fafb;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:12px">
       <div style="display:flex;align-items:center;gap:.75rem;min-width:0"><div style="width:2.25rem;height:2.25rem;border-radius:.75rem;display:flex;align-items:center;justify-content:center;background:rgba(16,185,129,0.13);border:1px solid rgba(16,185,129,0.25)">${icon('mdi:upload',{size:'18px',color:'#10b981'})}</div><div><h2 style="font-size:.875rem;font-weight:700;color:#fff">Ajouter des documents</h2><p style="font-size:11px;color:#94a3b8">PDF, Word, ou texte</p></div></div>
       <button onclick="closeUploadModal()" style="width:2rem;height:2rem;border-radius:.75rem;background:rgba(33,44,66,0.5);border:1px solid rgba(255,255,255,0.05);color:#94a3b8;cursor:pointer">${icon('mdi:close',{size:'16px'})}</button>
     </div>
@@ -1169,7 +1219,7 @@ function renderGenerateModal() {
   }
   
   document.getElementById('generateModalBox').innerHTML = `
-    <div style="padding:.75rem 1rem;background:rgba(22,29,44,0.8);border-bottom:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:.75rem">
+    <div style="padding:12px 20px;background:#f9fafb;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:12px">
       <div style="display:flex;align-items:center;gap:.75rem"><div style="width:2.25rem;height:2.25rem;border-radius:.75rem;display:flex;align-items:center;justify-content:center;background:rgba(168,85,247,0.13);border:1px solid rgba(168,85,247,0.25)">${icon('mdi:auto-fix',{size:'18px',color:'#a855f7'})}</div><div><h2 style="font-size:.875rem;font-weight:700;color:#fff">Générer une fiche DRETEP</h2><p style="font-size:11px;color:#94a3b8">IA Gemini</p></div></div>
       <button onclick="closeGenerateModal()" style="width:2rem;height:2rem;border-radius:.75rem;background:rgba(33,44,66,0.5);border:1px solid rgba(255,255,255,0.05);color:#94a3b8;cursor:pointer">${icon('mdi:close',{size:'16px'})}</button>
     </div>
