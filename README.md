@@ -2,2213 +2,940 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#1A5276">
-<meta name="description" content="MedStat - Application d'accompagnement des memoires de fin d'etudes en medecine. Creee par Dr Mingalu.">
-<title>MedStat - Memoires de Medecine</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"><\/script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"><\/script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"><\/script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"><\/script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"><\/script>
-<script>
-tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:"#1A5276",light:"#2980B9",dark:"#0E2F44"},accent:{DEFAULT:"#2E86C1",light:"#5DADE2",dark:"#1F6FA3"},success:"#27AE60",warning:"#F39C12",error:"#E74C3C",bg:"#F4F6F9",card:"#FFFFFF",txt:{DEFAULT:"#333333",secondary:"#5B6B7D",muted:"#95A5A6"}},fontFamily:{sans:["Inter","sans-serif"],mono:["Roboto Mono","monospace"]}}}};
-<\/script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<meta name="theme-color" content="#059669">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="MedRef RDC - Bibliothèque médicale de référence pour la République Démocratique du Congo">
+<title>MedRef RDC</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;font-family:'Inter',sans-serif;background:#F4F6F9;color:#333;overflow-x:hidden}
-.screen{display:none;min-height:100vh;flex-direction:column}
-.screen.active{display:flex}
-.fade-in{animation:fadeIn .3s ease}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
-.pulse-anim{animation:pulse 1.5s infinite}
-.card{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:16px}
-.card-elevated{background:#fff;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.1);padding:20px}
-.btn-primary{background:#2E86C1;color:#fff;padding:12px 24px;border-radius:12px;font-weight:600;font-size:16px;border:none;cursor:pointer;transition:all .2s;font-family:Inter}
-.btn-primary:hover{background:#1F6FA3}
-.btn-danger{background:#E74C3C;color:#fff;padding:10px 20px;border-radius:12px;font-weight:600;border:none;cursor:pointer;font-family:Inter}
-.btn-success{background:#27AE60;color:#fff;padding:10px 20px;border-radius:12px;font-weight:600;border:none;cursor:pointer;font-family:Inter}
-.btn-outline{background:transparent;color:#2E86C1;border:2px solid #2E86C1;padding:10px 20px;border-radius:12px;font-weight:600;cursor:pointer;font-family:Inter}
-.btn-sm{padding:8px 16px;font-size:13px;border-radius:8px}
-.input-field{width:100%;padding:12px 16px;border:1.5px solid #E0E6ED;border-radius:12px;font-size:14px;font-family:Inter;transition:border .2s;background:#fff}
-.input-field:focus{outline:none;border-color:#2E86C1;box-shadow:0 0 0 3px rgba(46,134,193,.15)}
-.badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:20px;font-size:12px;font-weight:600}
-.badge-blue{background:#EBF5FB;color:#2E86C1}
-.badge-green{background:#EAFAF1;color:#27AE60}
-.badge-orange{background:#FEF5E7;color:#F39C12}
-.badge-red{background:#FDEDEC;color:#E74C3C}
-.badge-gray{background:#F2F3F4;color:#5B6B7D}
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #E8ECF0;display:flex;z-index:50;padding:6px 0 env(safe-area-inset-bottom,6px)}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:4px 0;cursor:pointer;color:#95A5A6;transition:color .2s;font-size:11px;gap:2px;border:none;background:none;font-family:Inter}
-.nav-item.active{color:#2E86C1}
-.nav-item svg{width:24px;height:24px}
-.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;display:none}
-.drawer-overlay.open{display:block}
-.drawer{position:fixed;top:0;left:-280px;width:280px;height:100%;background:#fff;z-index:101;transition:left .3s;overflow-y:auto;padding:20px}
-.drawer.open{left:0}
-.toast{position:fixed;top:20px;right:20px;padding:14px 20px;border-radius:12px;color:#fff;font-weight:500;z-index:200;animation:fadeIn .3s ease;max-width:340px;font-family:Inter}
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:150;display:flex;align-items:center;justify-content:center;padding:16px}
-.tab-bar{display:flex;gap:0;border-bottom:2px solid #E8ECF0;overflow-x:auto;scrollbar-width:none}
-.tab-bar::-webkit-scrollbar{display:none}
-.tab-item{padding:12px 20px;white-space:nowrap;cursor:pointer;font-weight:500;color:#5B6B7D;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;background:none;border-top:none;border-left:none;border-right:none;font-family:Inter;font-size:14px}
-.tab-item.active{color:#2E86C1;border-bottom-color:#2E86C1}
-.msg-bubble{max-width:80%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5;word-wrap:break-word}
-.msg-sent{background:#2E86C1;color:#fff;border-bottom-right-radius:4px;margin-left:auto}
-.msg-received{background:#F0F2F5;color:#333;border-bottom-left-radius:4px}
-textarea.input-field{resize:vertical;min-height:100px}
-.accordion-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;border-radius:10px;background:#F8F9FA;transition:background .2s}
-.accordion-header:hover{background:#F0F2F5}
-.accordion-content{max-height:0;overflow:hidden;transition:max-height .3s ease}
-.accordion-content.open{max-height:3000px}
-.pb-safe{padding-bottom:80px}
-.appbar{background:#fff;padding:12px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #F0F2F5;position:sticky;top:0;z-index:40}
-.progress-ring{transform:rotate(-90deg)}
-select.input-field{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235B6B7D' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
-</style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --emerald-50:#ecfdf5;--emerald-100:#d1fae5;--emerald-200:#a7f3d0;--emerald-300:#6ee7b7;
+  --emerald-500:#10b981;--emerald-600:#059669;--emerald-700:#047857;--emerald-800:#065f46;--emerald-900:#064e3b;
+  --sky-50:#f0f9ff;--sky-100:#e0f2fe;--sky-600:#0284c7;--sky-800:#075985;
+  --rose-50:#fff1f2;--rose-100:#ffe4e6;--rose-600:#e11d48;--rose-800:#9f1239;
+  --amber-50:#fffbeb;--amber-100:#fef3c7;--amber-600:#d97706;--amber-800:#92400e;
+  --violet-50:#f5f3ff;--violet-100:#ede9fe;--violet-600:#7c3aed;--violet-800:#5b21b6;
+  --gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e5e7eb;--gray-300:#d1d5db;
+  --gray-400:#9ca3af;--gray-500:#6b7280;--gray-600:#4b5563;--gray-700:#374151;
+  --gray-800:#1f2937;--gray-900:#111827;
+  --red-50:#fef2f2;--red-100:#fee2e2;--red-200:#fecaca;--red-500:#ef4444;--red-600:#dc2626;--red-700:#b91c1c;--red-800:#991b1b;
+  --blue-50:#eff6ff;--blue-100:#dbeafe;--blue-600:#2563eb;--blue-800:#1e40af;
+  --teal-50:#f0fdfa;--teal-100:#ccfbf1;--teal-600:#0d9488;--teal-800:#115e59;
+  --radius: 0.75rem;
+  --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+}
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: var(--gray-50); color: var(--gray-800); line-height: 1.6;
+  -webkit-font-smoothing: antialiased; min-height: 100vh;
+}
+a { color: var(--emerald-600); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button { cursor: pointer; font-family: inherit; }
+
+/* ===== LAYOUT ===== */
+.app { max-width: 900px; margin: 0 auto; padding: 12px; }
+.header-bar {
+  display: flex; align-items: center; gap: 12px; padding: 12px 0;
+  border-bottom: 1px solid var(--gray-200); margin-bottom: 16px;
+}
+.header-bar .logo { display: flex; align-items: center; gap: 8px; }
+.header-bar .logo svg { width: 28px; height: 28px; color: var(--emerald-600); }
+.header-bar .logo span { font-weight: 700; font-size: 1.15rem; color: var(--gray-900); }
+.back-btn {
+  display: inline-flex; align-items: center; gap: 4px; background: none; border: none;
+  color: var(--gray-500); font-size: 0.85rem; padding: 4px 0;
+}
+.back-btn:hover { color: var(--gray-800); }
+.breadcrumb {
+  display: flex; align-items: center; gap: 6px; font-size: 0.82rem;
+  color: var(--gray-500); margin-bottom: 12px; flex-wrap: wrap;
+}
+.breadcrumb button { background: none; border: none; color: var(--gray-500); font-size: inherit; padding: 0; }
+.breadcrumb button:hover { color: var(--gray-800); text-decoration: underline; }
+.breadcrumb .sep { color: var(--gray-400); }
+
+/* ===== CARDS ===== */
+.card {
+  background: white; border-radius: var(--radius); border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow); overflow: hidden; transition: box-shadow 0.2s;
+}
+.card:hover { box-shadow: var(--shadow-md); }
+.card.clickable { cursor: pointer; }
+.card-header { padding: 14px 16px 8px; }
+.card-title { font-size: 0.9rem; font-weight: 600; color: var(--gray-800); }
+.card-body { padding: 8px 16px 16px; }
+
+/* ===== GRID ===== */
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.grid-6 { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+@media (max-width: 640px) {
+  .grid-2, .grid-3, .grid-6 { grid-template-columns: 1fr; }
+  .grid-6 { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ===== HERO ===== */
+.hero {
+  background: linear-gradient(135deg, var(--emerald-700), var(--emerald-800), #0f766e);
+  border-radius: var(--radius); padding: 28px 24px; color: white; position: relative; overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute; inset: 0; opacity: 0.08;
+  background-image: radial-gradient(circle, white 1px, transparent 1px); background-size: 24px 24px;
+}
+.hero * { position: relative; z-index: 1; }
+.hero h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 4px; }
+.hero p { color: var(--emerald-200); font-size: 0.88rem; max-width: 500px; margin-bottom: 16px; }
+.search-box {
+  position: relative; max-width: 420px;
+}
+.search-box input {
+  width: 100%; padding: 10px 12px 10px 38px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.15); color: white; font-size: 0.88rem; outline: none;
+}
+.search-box input::placeholder { color: var(--emerald-200); }
+.search-box input:focus { background: rgba(255,255,255,0.25); border-color: rgba(255,255,255,0.5); }
+.search-box .icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--emerald-200); }
+
+/* ===== QUICK ACCESS ===== */
+.quick-card {
+  display: flex; align-items: center; gap: 8px; padding: 12px;
+  border-radius: 10px; border: 1px solid var(--gray-200); background: white;
+  font-size: 0.85rem; font-weight: 500; transition: background 0.15s;
+}
+.quick-card:hover { background: var(--gray-50); }
+.quick-card svg { width: 18px; height: 18px; flex-shrink: 0; }
+.quick-card.red { color: var(--red-700); border-color: var(--red-200); background: var(--red-50); }
+.quick-card.amber { color: var(--amber-800); border-color: #fde68a; background: var(--amber-50); }
+.quick-card.blue { color: var(--blue-800); border-color: #93c5fd; background: var(--blue-50); }
+.quick-card.purple { color: var(--violet-800); border-color: #c4b5fd; background: var(--violet-50); }
+.quick-card.teal { color: var(--teal-800); border-color: #5eead4; background: var(--teal-50); }
+.quick-card.gray { color: var(--gray-700); border-color: var(--gray-300); }
+
+/* ===== DEPT CARDS ===== */
+.dept-card {
+  display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+  border-radius: var(--radius); border: 1px solid var(--gray-200); background: white;
+  cursor: pointer; transition: box-shadow 0.2s; border-left: 4px solid;
+}
+.dept-card:hover { box-shadow: var(--shadow-md); }
+.dept-card .icon-box {
+  width: 40px; height: 40px; border-radius: 8px; display: flex;
+  align-items: center; justify-content: center; flex-shrink: 0;
+}
+.dept-card .icon-box svg { width: 20px; height: 20px; }
+.dept-card .info { flex: 1; min-width: 0; }
+.dept-card .info h3 { font-size: 0.92rem; font-weight: 600; }
+.dept-card .badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.dept-card .badge-sm {
+  font-size: 0.7rem; padding: 2px 7px; border-radius: 9999px; border: 1px solid var(--gray-200);
+  color: var(--gray-600); background: var(--gray-50);
+}
+.dept-card .count {
+  font-size: 0.75rem; padding: 2px 8px; border-radius: 9999px;
+  background: var(--gray-100); color: var(--gray-600); font-weight: 500; white-space: nowrap;
+}
+
+/* ===== BADGES ===== */
+.badge {
+  display: inline-flex; align-items: center; font-size: 0.72rem; padding: 2px 8px;
+  border-radius: 9999px; font-weight: 500; gap: 3px;
+}
+.badge-emerald { background: var(--emerald-100); color: var(--emerald-800); }
+.badge-sky { background: var(--sky-100); color: var(--sky-800); }
+.badge-rose { background: var(--rose-100); color: var(--rose-800); }
+.badge-amber { background: var(--amber-100); color: var(--amber-800); }
+.badge-violet { background: var(--violet-100); color: var(--violet-800); }
+.badge-red { background: var(--red-100); color: var(--red-700); }
+.badge-outline { background: var(--gray-50); color: var(--gray-600); border: 1px solid var(--gray-200); }
+.badge-default { background: var(--emerald-600); color: white; }
+.badge-secondary { background: var(--gray-100); color: var(--gray-700); }
+
+/* ===== TABS ===== */
+.tabs { border-bottom: 2px solid var(--gray-200); display: flex; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab-btn {
+  padding: 10px 16px; border: none; background: none; font-size: 0.82rem;
+  font-weight: 500; color: var(--gray-500); white-space: nowrap; border-bottom: 2px solid transparent;
+  margin-bottom: -2px; transition: all 0.15s;
+}
+.tab-btn:hover { color: var(--gray-700); }
+.tab-btn.active { color: var(--emerald-700); border-bottom-color: var(--emerald-600); font-weight: 600; }
+.tab-content { display: none; padding: 16px 0; }
+.tab-content.active { display: block; }
+
+/* ===== SECTION ===== */
+.section { margin-bottom: 20px; }
+.section-title {
+  font-size: 0.88rem; font-weight: 600; color: var(--gray-800); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+.section-title svg { width: 16px; height: 16px; color: var(--gray-400); }
+.section-text { font-size: 0.85rem; color: var(--gray-700); line-height: 1.7; }
+.item-list { list-style: none; }
+.item-list li {
+  font-size: 0.84rem; color: var(--gray-700); padding: 4px 0;
+  padding-left: 18px; position: relative; line-height: 1.6;
+}
+.item-list li::before {
+  content: ''; position: absolute; left: 4px; top: 12px;
+  width: 6px; height: 6px; border-radius: 50%; background: var(--emerald-400);
+}
+.item-list.danger li::before { background: var(--red-500); }
+.item-list.warn li::before { background: var(--amber-600); }
+
+/* ===== URGENCY BANNER ===== */
+.urgency-banner {
+  background: var(--red-50); border: 1px solid var(--red-200); border-radius: var(--radius);
+  padding: 14px 16px; margin-bottom: 16px;
+}
+.urgency-banner h3 { font-size: 0.88rem; font-weight: 700; color: var(--red-800); display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+.urgency-banner h3 svg { width: 18px; height: 18px; }
+.urgency-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 6px; }
+.urgency-item { font-size: 0.82rem; display: flex; align-items: flex-start; gap: 6px; color: var(--red-700); }
+.urgency-item svg { width: 14px; height: 14px; margin-top: 2px; flex-shrink: 0; }
+
+/* ===== ABCDE ===== */
+.abcde-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.abcde-card {
+  background: white; border-radius: 8px; padding: 12px; border: 1px solid var(--red-100);
+}
+.abcde-card h4 { font-size: 0.8rem; font-weight: 700; color: var(--red-700); margin-bottom: 4px; }
+.abcde-card p { font-size: 0.78rem; color: var(--gray-600); line-height: 1.5; }
+
+/* ===== MEDICATION ===== */
+.med-card {
+  border: 1px solid var(--gray-200); border-radius: 8px; padding: 12px; margin-bottom: 8px;
+}
+.med-card .med-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; flex-wrap: wrap; }
+.med-card h4 { font-size: 0.85rem; font-weight: 600; }
+.med-card .med-info { font-size: 0.82rem; color: var(--gray-600); }
+.med-card .med-note {
+  font-size: 0.78rem; color: var(--blue-800); background: var(--blue-50);
+  padding: 6px 8px; border-radius: 6px; margin-top: 6px;
+}
+
+/* ===== PARACLINIQUE ===== */
+.exam-card {
+  border: 1px solid var(--gray-200); border-radius: 8px; padding: 12px; margin-bottom: 8px;
+}
+.exam-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+.exam-header h4 { font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+.exam-header .exam-badges { display: flex; gap: 4px; }
+.exam-info { font-size: 0.8rem; color: var(--gray-500); }
+
+/* ===== NUMBERED LIST ===== */
+.num-list { list-style: none; counter-reset: nlist; }
+.num-list li {
+  font-size: 0.84rem; color: var(--gray-700); padding: 4px 0 4px 36px;
+  position: relative; line-height: 1.6; counter-increment: nlist;
+}
+.num-list li::before {
+  content: counter(nlist); position: absolute; left: 0; top: 4px;
+  width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; font-size: 0.7rem; font-weight: 700;
+}
+.num-list.red li::before { background: var(--red-100); color: var(--red-700); }
+.num-list.amber li::before { background: var(--amber-100); color: var(--amber-800); }
+
+/* ===== ETIOLOGY GRID ===== */
+.etio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+.etio-card { border: 1px solid var(--gray-200); border-radius: 8px; padding: 12px; }
+.etio-card h4 { font-size: 0.82rem; font-weight: 600; margin-bottom: 6px; text-transform: capitalize; }
+
+/* ===== SCHEMAS ===== */
+.schema-box { background: var(--gray-100); padding: 10px 14px; border-radius: 8px; font-size: 0.82rem; color: var(--gray-700); margin-bottom: 6px; font-family: monospace; }
+
+/* ===== LOADING ===== */
+.loading { display: flex; align-items: center; gap: 8px; padding: 32px; color: var(--gray-500); font-size: 0.88rem; justify-content: center; }
+.spinner { width: 18px; height: 18px; border: 2px solid var(--gray-200); border-top-color: var(--emerald-600); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== EMPTY STATE ===== */
+.empty { text-align: center; padding: 40px 20px; color: var(--gray-400); font-size: 0.9rem; }
+
+/* ===== SURGEONS ===== */
+.surg-card { border: 1px solid var(--red-200); background: var(--red-50); border-radius: 8px; padding: 12px; margin-bottom: 8px; }
+.surg-card h4 { font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+
+/* ===== SOURCES ===== */
+.source-item { font-size: 0.8rem; color: var(--gray-600); display: flex; align-items: center; gap: 6px; padding: 3px 0; }
+.source-item .level { font-weight: 700; font-size: 0.7rem; }
+
+/* ===== HAMBURGER ===== */
+.menu-btn { display: none; background: none; border: none; padding: 8px; color: var(--gray-600); }
+.menu-btn svg { width: 24px; height: 24px; }
+@media (max-width: 640px) { .menu-btn { display: block; } }
+.mobile-menu {
+  display: none; position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.5);
+}
+.mobile-menu.open { display: block; }
+.mobile-menu-panel {
+  position: absolute; right: 0; top: 0; bottom: 0; width: 280px; background: white;
+  box-shadow: var(--shadow-md); padding: 20px; overflow-y: auto;
+}
+.mobile-menu-panel h3 { font-size: 1rem; font-weight: 700; margin-bottom: 16px; }
+.mobile-menu-panel a { display: block; padding: 10px 0; border-bottom: 1px solid var(--gray-100); font-size: 0.88rem; color: var(--gray-700); }
+.mobile-menu-panel a:hover { color: var(--emerald-600); }
+}</style>
 </head>
 <body>
-<!-- SPLASH -->
-<div id="screen-splash" class="screen active" style="background:linear-gradient(135deg,#1A5276,#2E86C1);justify-content:center;align-items:center;text-align:center">
-<div class="fade-in" style="text-align:center">
-  <div style="width:100px;height:100px;border-radius:24px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;backdrop-filter:blur(10px)">
-    <svg width="56" height="56" fill="#fff" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
-  </div>
-  <h1 style="color:#fff;font-size:32px;font-weight:800;letter-spacing:-0.5px">MedStat</h1>
-  <p style="color:rgba(255,255,255,.8);font-size:14px;margin-top:8px;max-width:280px;line-height:1.5">Accompagnement complet des memoires de fin d'etudes en medecine</p>
-  <div style="margin-top:48px;display:flex;flex-direction:column;gap:12px;width:280px;margin-left:auto;margin-right:auto">
-    <button class="btn-primary" style="width:100%;padding:14px" onclick="nav('login')">Se connecter</button>
-    <button class="btn-outline" style="width:100%;padding:14px;color:#fff;border-color:rgba(255,255,255,.4)" onclick="nav('signup')">Creer un compte</button>
-  </div>
-  <button style="background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;margin-top:24px;font-size:13px;text-decoration:underline;font-family:Inter" onclick="nav('about')">A propos de MedStat</button>
-</div>
-</div>
-<!-- LOGIN -->
-<div id="screen-login" class="screen" style="background:#fff;justify-content:center;align-items:center;padding:20px">
-<div style="width:100%;max-width:400px" class="fade-in">
-  <div style="text-align:center;margin-bottom:32px">
-    <div style="width:72px;height:72px;border-radius:18px;background:linear-gradient(135deg,#1A5276,#2E86C1);display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
-      <svg width="40" height="40" fill="#fff" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
-    </div>
-    <h2 style="font-size:24px;font-weight:700;color:#1A5276">Bienvenue</h2>
-    <p style="color:#5B6B7D;font-size:14px;margin-top:4px">Connectez-vous a votre compte MedStat</p>
-  </div>
-  <div style="display:flex;flex-direction:column;gap:16px">
-    <div><label style="font-size:13px;font-weight:600;color:#5B6B7D;display:block;margin-bottom:6px">Adresse e-mail</label><input id="login-email" type="email" class="input-field" placeholder="votre@email.com"></div>
-    <div><label style="font-size:13px;font-weight:600;color:#5B6B7D;display:block;margin-bottom:6px">Mot de passe</label><input id="login-password" type="password" class="input-field" placeholder="Min. 6 caracteres"></div>
-    <button class="btn-primary" style="width:100%;margin-top:4px" onclick="doLogin()">Se connecter</button>
-    <p id="login-error" style="color:#E74C3C;font-size:13px;text-align:center;display:none"></p>
-    <div style="display:flex;align-items:center;gap:12px"><div style="flex:1;height:1px;background:#E0E6ED"></div><span style="color:#95A5A6;font-size:13px">ou</span><div style="flex:1;height:1px;background:#E0E6ED"></div></div>
-    <button onclick="doGoogleLogin()" style="width:100%;padding:12px;border-radius:12px;border:1.5px solid #E0E6ED;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-weight:500;font-size:14px;font-family:Inter">
-      <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-      Se connecter avec Google
+<div class="app" id="app">
+  <!-- Header -->
+  <div class="header-bar">
+    <button class="menu-btn" id="menuBtn" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
     </button>
-    <p style="text-align:center;font-size:14px;color:#5B6B7D">Pas encore de compte ? <a href="#" onclick="nav('signup');return false" style="color:#2E86C1;font-weight:600;text-decoration:none">S'inscrire</a></p>
-    <p style="text-align:center"><a href="#" onclick="nav('about');return false" style="color:#95A5A6;font-size:13px;text-decoration:underline">A propos de MedStat</a></p>
-  </div>
-</div>
-</div>
-<!-- SIGNUP -->
-<div id="screen-signup" class="screen" style="background:#fff;padding:0">
-<div style="background:#fff;padding:16px 20px;display:flex;align-items:center;gap:16px;border-bottom:1px solid #F0F2F5">
-  <button onclick="nav('splash')" style="background:none;border:none;cursor:pointer;color:#1A5276"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
-  <h2 style="font-size:18px;font-weight:700;color:#1A5276;flex:1;text-align:center;margin-right:40px">Inscription</h2>
-</div>
-<div style="display:flex;justify-content:center;gap:8px;padding:20px 20px 0" id="signup-steps">
-  <div style="width:40px;height:4px;border-radius:2px;background:#2E86C1" id="step-bar-1"></div>
-  <div style="width:40px;height:4px;border-radius:2px;background:#E0E6ED" id="step-bar-2"></div>
-  <div style="width:40px;height:4px;border-radius:2px;background:#E0E6ED" id="step-bar-3"></div>
-</div>
-<!-- Step 1 -->
-<div id="signup-s1" style="padding:24px 20px;display:flex;flex-direction:column;gap:16px">
-  <h3 style="font-size:16px;font-weight:700;color:#1A5276">Informations personnelles</h3>
-  <div><label style="font-size:13px;font-weight:600;color:#5B6B7D;display:block;margin-bottom:6px">Nom complet</label><input id="su-name" class="input-field" placeholder="Dr Jean Mukendi"></div>
-  <div><label style="font-size:13px;font-weight:600;color:#5B6B7D;display:block;margin-bottom:6px">Adresse e-mail</label><input id="su-email" type="email" class="input-field" placeholder="votre@email.com"></div>
-  <div><label style="font-size:13px;font-weight:600;color:#5B6B7D;display:block;margin-bottom:6px">Mot de passe</label><input id="su-pwd" type="password" class="input-field" placeholder="Min. 6 caracteres"></div>
-  <button class="btn-primary" style="width:100%;margin-top:8px" onclick="suStep(2)">Suivant</button>
-</div>
-<!-- Step 2 -->
-<div id="signup-s2" style="padding:24px 20px;display:none;flex-direction:column;gap:16px">
-  <h3 style="font-size:16px;font-weight:700;color:#1A5276">Choix du role</h3>
-  <div style="display:flex;flex-direction:column;gap:12px">
-    <div id="rc-student" onclick="pickRole('student')" style="border:2px solid #E0E6ED;border-radius:12px;padding:16px;cursor:pointer;transition:all .2s">
-      <div style="display:flex;align-items:center;gap:12px">
-        <div style="width:44px;height:44px;border-radius:12px;background:#EBF5FB;display:flex;align-items:center;justify-content:center;color:#2E86C1"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/></svg></div>
-        <div><p style="font-weight:600;font-size:15px">Etudiant</p><p style="font-size:12px;color:#5B6B7D">Finaliste en medecine (D3/D4)</p></div>
-      </div>
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <span>MedRef RDC</span>
     </div>
-    <div id="rc-director" onclick="pickRole('director')" style="border:2px solid #E0E6ED;border-radius:12px;padding:16px;cursor:pointer;transition:all .2s">
-      <div style="display:flex;align-items:center;gap:12px">
-        <div style="width:44px;height:44px;border-radius:12px;background:#EAFAF1;display:flex;align-items:center;justify-content:center;color:#27AE60"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
-        <div><p style="font-weight:600;font-size:15px">Directeur de memoire</p><p style="font-size:12px;color:#5B6B7D">Encadrant academique</p></div>
-      </div>
-    </div>
+    <div style="flex:1"></div>
+    <button class="back-btn" id="backBtn" style="display:none" aria-label="Retour">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Retour
+    </button>
   </div>
-  <div id="sf-student" style="display:none;flex-direction:column;gap:12px">
-    <div><label style="font-size:13px;font-weight:600;color:#5B6B7D;display:block;margin-bottom:6px">Universite</label><select id="su-uni" class="input-field"><option value="">Selectionnez...</option><option value="UNIKIN">Universite de Kinshasa</option><option value="UCBC">Universite Catholique du Bukavu</option><option value="UCB">Universite Catholique de Bukavu</option><option value="ULPGL">Universite Libre de Pays des Grands Lacs</option><option value="UNILU">Universite de Lubumbashi</option><option value="UPC">Universite Protestante au Congo</option><option value="USK">Universite Simon Kimbangu</option><option value="UK">Universite Kongo</option></select></div>
-    <div><label style="font-size:13px;font-weight:600;color:#5B6B7D;display:block;margin-bottom:6px">Promotion</label><select id="su-promo" class="input-field"><option value="">Selectionnez...</option><option value="D3">D3</option><option value="D4">D4</option></select></div>
-    <div><label style="font-size:13px;font-weight:600;color:#5B6B7D;display:block;margin-bottom:6px">Specialite</label><input id="su-spec" class="input-field" placeholder="ex: Medecine interne"></div>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-panel" id="mobileMenuPanel"></div>
   </div>
-  <div id="sf-director" style="display:none;flex-direction:column;gap:12px">
-    <div><label style="font-size:13px;font-weight:600;color:#5B6B7D;display:block;margin-bottom:6px">Universite</label><select id="su-unid" class="input-field"><option value="">Selectionnez...</option><option value="UNIKIN">Universite de Kinshasa</option><option value="UCBC">Universite Catholique du Bukavu</option><option value="UCB">Universite Catholique de Bukavu</option><option value="ULPGL">Universite Libre de Pays des Grands Lacs</option><option value="UNILU">Universite de Lubumbashi</option><option value="UPC">Universite Protestante au Congo</option><option value="USK">Universite Simon Kimbangu</option><option value="UK">Universite Kongo</option></select></div>
-    <div><label style="font-size:13px;font-weight:600;color:#5B6B7D;display:block;margin-bottom:6px">Titre academique</label><select id="su-title" class="input-field"><option value="">Selectionnez...</option><option value="Dr">Dr</option><option value="Prof">Prof</option><option value="CT">Chef de Travaux</option><option value="Assist">Assistant</option></select></div>
-    <div><label style="font-size:13px;font-weight:600;color:#5B6B7D;display:block;margin-bottom:6px">Specialite</label><input id="su-specd" class="input-field" placeholder="ex: Chirurgie generale"></div>
-  </div>
-  <div style="display:flex;gap:12px;margin-top:8px">
-    <button class="btn-outline" style="flex:1" onclick="suStep(1)">Retour</button>
-    <button class="btn-primary" style="flex:1" onclick="suStep(3)">Suivant</button>
-  </div>
-</div>
-<!-- Step 3 -->
-<div id="signup-s3" style="padding:24px 20px;display:none;flex-direction:column;gap:16px">
-  <h3 style="font-size:16px;font-weight:700;color:#1A5276">Confirmation</h3>
-  <div id="su-summary" class="card" style="background:#F4F6F9"></div>
-  <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
-    <input type="checkbox" id="su-terms" style="margin-top:4px;accent-color:#2E86C1;width:18px;height:18px">
-    <span style="font-size:13px;color:#5B6B7D;line-height:1.5">J'accepte les conditions d'utilisation et la politique de confidentialite</span>
-  </label>
-  <p id="su-error" style="color:#E74C3C;font-size:13px;display:none"></p>
-  <div style="display:flex;gap:12px;margin-top:8px">
-    <button class="btn-outline" style="flex:1" onclick="suStep(2)">Retour</button>
-    <button class="btn-primary" style="flex:1" onclick="doSignup()">Creer mon compte</button>
-  </div>
-</div>
-</div>
-<!-- ABOUT -->
-<div id="screen-about" class="screen" style="background:#fff">
-<div style="background:linear-gradient(135deg,#1A5276,#2E86C1);padding:60px 20px 40px;text-align:center">
-  <div style="width:80px;height:80px;border-radius:20px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;backdrop-filter:blur(10px)">
-    <svg width="44" height="44" fill="#fff" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
-  </div>
-  <h1 style="color:#fff;font-size:28px;font-weight:800">MedStat</h1>
-  <p style="color:rgba(255,255,255,.85);font-size:14px;margin-top:4px">Accompagnement des memoires de fin d'etudes en medecine</p>
-</div>
-<div style="padding:24px 20px;display:flex;flex-direction:column;gap:20px">
-  <div class="card"><h3 style="font-size:16px;font-weight:700;color:#1A5276;margin-bottom:8px">Createur</h3><p style="font-size:14px;color:#5B6B7D;line-height:1.6">MedStat a ete creee par <strong style="color:#333">Dr Mingalu</strong>, medecin et informaticien, dont la vision est de democratise l'accompagnement a la recherche scientifique medicale en Republique Democratique du Congo.</p></div>
-  <div class="card"><h3 style="font-size:16px;font-weight:700;color:#1A5276;margin-bottom:8px">Mission</h3><p style="font-size:14px;color:#5B6B7D;line-height:1.6">Centraliser tous les outils necessaires a la recherche medicale dans une seule plateforme, depuis la mise en relation etudiant-directeur jusqu'a la generation automatique de la discussion et des references bibliographiques.</p></div>
-  <div class="card"><h3 style="font-size:16px;font-weight:700;color:#1A5276;margin-bottom:8px">Fonctionnalites cles</h3>
-    <ul style="font-size:14px;color:#5B6B7D;line-height:1.8;padding-left:20px">
-      <li>Gestion complete du processus de memoire (9 jalons)</li>
-      <li>Generation IA de fiches d'enquete et discussions</li>
-      <li>Analyses statistiques avancees (17+ tests)</li>
-      <li>Messagerie integree etudiant-directeur</li>
-      <li>Mode hors ligne pour la collecte</li>
-      <li>Anti-plagiat et export multi-format</li>
-      <li>Calendrier academique et notifications push</li>
-      <li>Multi-directeurs et co-supervision</li>
-    </ul>
-  </div>
-  <div class="card"><h3 style="font-size:16px;font-weight:700;color:#1A5276;margin-bottom:8px">Universites partenaires</h3><div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"><span class="badge badge-blue">UNIKIN</span><span class="badge badge-blue">UCBC</span><span class="badge badge-blue">UCB</span><span class="badge badge-blue">ULPGL</span><span class="badge badge-blue">UNILU</span><span class="badge badge-blue">UPC</span><span class="badge badge-blue">USK</span><span class="badge badge-blue">UK</span></div></div>
-  <div class="card"><h3 style="font-size:16px;font-weight:700;color:#1A5276;margin-bottom:8px">Version</h3><p style="font-size:14px;color:#5B6B7D">MedStat v1.0 - Juillet 2026</p><p style="font-size:13px;color:#95A5A6;margin-top:4px">(c) 2026 MedStat - Dr Mingalu. Tous droits reserves.</p></div>
-  <button onclick="nav('splash')" class="btn-primary" style="width:100%">Retour a l'accueil</button>
-</div>
-</div>
-<!-- ═══ APP SHELL: DRAWER ═══ -->
-<div id="drawer-overlay" class="drawer-overlay" onclick="toggleDrawer()"></div>
-<div id="drawer" class="drawer">
-  <div style="display:flex;align-items:center;gap:12px;padding:8px 0 20px;border-bottom:1px solid #F0F2F5">
-    <div id="drawer-avatar" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#1A5276,#2E86C1);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px">?</div>
-    <div><p id="drawer-name" style="font-weight:600;font-size:15px">Utilisateur</p><p id="drawer-role" style="font-size:12px;color:#5B6B7D">Role</p></div>
-  </div>
-  <nav style="padding:16px 0;display:flex;flex-direction:column;gap:4px">
-    <button onclick="nav('profile');toggleDrawer()" style="display:flex;align-items:center;gap:12px;padding:12px;border:none;background:none;cursor:pointer;font-family:Inter;font-size:14px;color:#333;border-radius:10px;width:100%;text-align:left"><svg class="w-5 h-5" style="color:#5B6B7D" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>Mon profil</button>
-    <button onclick="nav('calendar');toggleDrawer()" style="display:flex;align-items:center;gap:12px;padding:12px;border:none;background:none;cursor:pointer;font-family:Inter;font-size:14px;color:#333;border-radius:10px;width:100%;text-align:left"><svg class="w-5 h-5" style="color:#5B6B7D" fill="currentColor" viewBox="0 0 24 24"><path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/></svg>Calendrier academique</button>
-    <button onclick="nav('references');toggleDrawer()" style="display:flex;align-items:center;gap:12px;padding:12px;border:none;background:none;cursor:pointer;font-family:Inter;font-size:14px;color:#333;border-radius:10px;width:100%;text-align:left"><svg class="w-5 h-5" style="color:#5B6B7D" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>References bibliographiques</button>
-    <div id="drawer-admin-btn" style="display:none">
-      <div style="height:1px;background:#F0F2F5;margin:8px 0"></div>
-      <p style="font-size:11px;font-weight:600;color:#95A5A6;padding:4px 12px;text-transform:uppercase;letter-spacing:.5px">Administration</p>
-      <button onclick="nav('admin-users');toggleDrawer()" style="display:flex;align-items:center;gap:12px;padding:12px;border:none;background:none;cursor:pointer;font-family:Inter;font-size:14px;color:#333;border-radius:10px;width:100%;text-align:left"><svg class="w-5 h-5" style="color:#5B6B7D" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>Gestion utilisateurs</button>
-      <button onclick="nav('admin-unis');toggleDrawer()" style="display:flex;align-items:center;gap:12px;padding:12px;border:none;background:none;cursor:pointer;font-family:Inter;font-size:14px;color:#333;border-radius:10px;width:100%;text-align:left"><svg class="w-5 h-5" style="color:#5B6B7D" fill="currentColor" viewBox="0 0 24 24"><path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/></svg>Universites</button>
-      <button onclick="nav('admin-years');toggleDrawer()" style="display:flex;align-items:center;gap:12px;padding:12px;border:none;background:none;cursor:pointer;font-family:Inter;font-size:14px;color:#333;border-radius:10px;width:100%;text-align:left"><svg class="w-5 h-5" style="color:#5B6B7D" fill="currentColor" viewBox="0 0 24 24"><path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/></svg>Annees academiques</button>
-    </div>
-    <div style="height:1px;background:#F0F2F5;margin:8px 0"></div>
-    <button onclick="nav('settings');toggleDrawer()" style="display:flex;align-items:center;gap:12px;padding:12px;border:none;background:none;cursor:pointer;font-family:Inter;font-size:14px;color:#333;border-radius:10px;width:100%;text-align:left"><svg class="w-5 h-5" style="color:#5B6B7D" fill="currentColor" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>Parametres</button>
-    <button onclick="nav('about');toggleDrawer()" style="display:flex;align-items:center;gap:12px;padding:12px;border:none;background:none;cursor:pointer;font-family:Inter;font-size:14px;color:#333;border-radius:10px;width:100%;text-align:left"><svg class="w-5 h-5" style="color:#5B6B7D" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>A propos de MedStat</button>
-    <div style="height:1px;background:#F0F2F5;margin:8px 0"></div>
-    <button onclick="doLogout()" style="display:flex;align-items:center;gap:12px;padding:12px;border:none;background:none;cursor:pointer;font-family:Inter;font-size:14px;color:#E74C3C;border-radius:10px;width:100%;text-align:left"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>Deconnexion</button>
-  </nav>
+
+  <!-- Main Content -->
+  <div id="mainContent"></div>
+
 </div>
 
-<!-- ═══ APP SHELL: TOP BAR ═══ -->
-<div id="appbar" class="appbar" style="display:none">
-  <button onclick="toggleDrawer()" style="background:none;border:none;cursor:pointer;color:#1A5276;padding:4px"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg></button>
-  <span id="appbar-title" style="font-size:18px;font-weight:700;color:#1A5276;flex:1">MedStat</span>
-  <button onclick="nav('notifications')" style="background:none;border:none;cursor:pointer;color:#5B6B7D;position:relative;padding:4px">
-    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
-    <span id="notif-badge" class="badge badge-red" style="position:absolute;top:-2px;right:-2px;font-size:10px;min-width:18px;height:18px;display:none;align-items:center;justify-content:center;border-radius:9px;padding:0">0</span>
-  </button>
-  <button onclick="nav('profile')" style="background:none;border:none;cursor:pointer;padding:4px">
-    <div id="appbar-avatar" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#1A5276,#2E86C1);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px">?</div>
-  </button>
-</div>
+<!-- PATHOLOGY DATA -->
+<script id="pathology-data" type="application/json">
+[{"id": "cardiologie-insuffisance-cardiaque", "name": "Insuffisance cardiaque", "departmentId": "medecine-interne", "courseId": "cardiologie", "definition": {"definition": "Syndrome clinique resultant d'un trouble structural ou fonctionnel du coeur qui entraine l'incapacite du coeur a remplir ou ejecter le sang de maniere adequate pour repondre aux besoins metaboliques de l'organisme, ou ne le faire qu'au prix d'une elevation des pressions de remplissage. En RDC, c'est une cause majeure d'hospitalisation en medecine interne avec une mortalite elevee en raison du diagnostic tardif et des comorbidites frequentes (HTA, VIH, cardiopathie rhumatismale).", "anatomieConcernee": "Coeur (ventricules gauche et droit, oreillettes), valvules mitrale et tricuspide, myocarde, pericarde, systeme de conduction. Les ventricules sont les chambres principales dont la dysfonction (systolique ou diastolique) est au centre du syndrome d'insuffisance cardiaque.", "physiologieGenerale": "Le coeur est une pompe musculaire a quatre chambres dont le debit cardiaque (DC = FC x VES) assure la perfusion tissulaire. Le systeme nerveux autonome (sympathique/parasympathique) et le systeme renine-angiotensine-aldosterone (SRAA) regulent le debit cardiaque. La loi de Starling determine la relation entre precharge et volume d'ejection.", "physiopathologie": "L'insuffisance cardiaque resulte d'une alteration de la fonction ventriculaire. Dans la FEVG reduite (IC-FEr), la contractilite myocardique diminue (baisse du VES) avec dilatation ventriculaire compensatoire. Dans la FEVG preservee (IC-FEp), la relaxation ventriculaire est alteree (dysfonction diastolique) avec rigidite myocardique augmentee. L'activation neurohormonale (SRAA, noradrenaline, vasopressine, endotheline) entraine une vasoconstriction et une retention hydrosodique qui aggravent la surcharge.", "mecanismeMaladie": "Le mecanisme central est la baisse du debit cardiaque qui active les systemes sympathique et renine-angiotensine. La vasoconstriction arterielle augmente la postcharge, la retention hydrosodique augmente la precharge. Le remodelage ventriculaire (hypertrophie, dilatation, fibrose) aggrave progressivement la dysfonction. Le tableau clinique depend du cote predominant : gauche (oedeme pulmonaire) ou droit (congestion systemique).", "schemasExplicatifs": ["Baisse du DC -> Activation SRAA + SNS -> Vasoconstriction + Retention Na+/H2O -> Surcharge volumique -> Aggravation de l'IC", "IC gauche -> Stase pulmonaire -> HTAP -> IC droite -> IC globale", "Remodelage ventriculaire : lesion initiale -> hypertrophie compensatoire -> dilatation -> IC terminale"]}, "diagnostic": {"clinique": {"motifConsultation": ["Dyspnee d'effort puis de repos", "Orthopnee", "Oedemes des membres inferieurs", "Fatigue importante", "Prise de poids rapide"], "signesFonctionnels": ["Dyspnee progressive (stades I a IV NYHA)", "Orthopnee (necessite de dormir avec 2-3 oreillers)", "Tachypnee", "Toux nocturne seche", "Asthme cardiaque", "Nycturie", "Fatigabilite musculaire", "Anorexie, nausees"], "signesGeneraux": ["Amaigrissement dans les formes avancees (cachexie cardiaque)", "Alteration de l'etat general", "Fievre moderee si cause infectieuse associee"], "signesPhysiques": ["Tachycardie reguliere ou irreguliere (FA associee)", "Hypertension arterielle ou hypotension", "Souffle cardiaque (valvulopathie causale)", "Galop gauche (B3) ou droit (B4)", "Crepitants bilateraux aux bases pulmonaires", "Oedemes mous bilateraux prenant le godet", "Hepatomegalie douloureuse", "Reflux hepato-jugulaire", "Ascite", "Epanchement pleural"], "signesGravite": ["Dyspnee de repos persistante (NYHA IV)", "Hypotension arterielle (PAS < 90 mmHg)", "Oligurie (< 0,5 mL/kg/h)", "Confusion, obnubilation (hypoperfusion cerebrale)", "Signes de choc cardiogenique", "Epuisement respiratoire"]}, "paraclinique": [{"nom": "Echocardiographie-Doppler", "type": "imagerie", "intention": 1, "urgence": true, "resultatsAttendus": "FEVG, diametres ventriculaires, epaisseur des parois, fonction diastolique, pressions pulmonaires", "interpretation": "FEVG < 40% = IC-FEr ; 40-52% = IC-FEmr ; > 52% = IC-FEp. Dilatation VG, hypertrophie concentrique."}, {"nom": "BNP / NT-proBNP", "type": "biologique", "intention": 1, "urgence": true, "resultatsAttendus": "NT-proBNP > 450 pg/mL (<50 ans), > 900 (50-75 ans), > 1800 (>75 ans)", "interpretation": "Valeur elevee confirme l'IC. Normal exclut l'IC."}, {"nom": "Radiographie thoracique (FACE)", "type": "imagerie", "intention": 1, "urgence": false, "resultatsAttendus": "Cardiomegalie, lignes de Kerley, epanchement pleural, redistribution vasculaire", "interpretation": "Cardiomegalie et signes de stase pulmonaire."}, {"nom": "NFS, uree, creatinine, ionogramme", "type": "biologique", "intention": 2, "urgence": false, "resultatsAttendus": "Anemie, insuffisance renale, hyponatremie, hypokaliemie", "interpretation": "Anemie aggrave l'IC. Insuffisance renale = mauvais pronostic. Hyponatremie = activation SRAA majeure."}, {"nom": "ECG", "type": "test_specifique", "intention": 1, "urgence": false, "resultatsAttendus": "Rythme sinusal ou FA, hypertrophie ventriculaire, troubles de repolarisation", "interpretation": "ECG normal rend l'IC improbable mais ne l'exclut pas."}]}, "etiologie": {"etiologies": {"infectieuses": ["Rhumatisme articulaire aigu (cardiopathie rhumatismale)", "Myocardite virale (Coxsackie B, adenovirus, VIH)", "Endocardite infectieuse", "Tuberculose (pericardite constrictive)", "Dengue, COVID-19 (myocardite)"], "metaboliques": ["Hypertension arterielle (premiere cause en RDC)", "Diabete sucree (cardiomyopathie diabetique)", "Obesite", "Dyslipidemies", "Carences nutritionnelles (beriberi)"], "inflammatoires": ["Lupus erythemateux systemique", "Sarcoidose", "Amylose"], "iatrogenes": ["Toxicite des anthracyclines (doxorubicine)", "Ablation de medicaments de l'IC", "Exces de betabloquants"], "autres": ["Cardiomyopathie dilatee idiopathique", "Alcoolisme chronique", "Stress cardiomyopathique (Takotsubo)", "Fistules arterio-veineuses (frequentes en RDC)"], "genetiques": ["Cardiomyopathie hypertrophique familiale", "Cardiomyopathie dilatee familiale"]}, "terrain": {"age": "Surtout > 65 ans, mais toute tranche d'age en RDC (cardiopathies rhumatismales jeunes)", "sexe": "Legere preponderance masculine avant 75 ans, feminine apres", "comorbidites": ["HTA", "Diabete", "Obesite", "BPCO", "VIH/SIDA", "Insuffisance renale chronique"], "antecedents": ["Infarctus du myocarde", "Valvulopathie", "Cardiopathie congenitale", "Alcoolisme chronique"]}, "facteursDeclencheurs": {"infections": ["Infection respiratoire basse", "Paludisme", "Infection urinaire"], "medicaments": ["AINS (retention hydrosodique)", "Corticoides", "Antiarythmiques de classe I"], "alimentation": ["Exces de sel (> 6g/jour)", "Hyperhydratation"], "stress": ["Stress psychologique aigu", "Infarctus cerebral (insulte neurogenique)"], "dehydration": true, "autres": ["Anemie aigue", "Embolie pulmonaire", "Arythmie rapide (FA, TV)", "Non-observance therapeutique"]}}, "therapeutique": {"mesuresGenerales": {"repos": "Repos au lit en position demi-assise (30-45 deg) en phase de decompensation aigue, activite physique adaptee en phase stable", "alimentation": "Regime hyposode (< 5g/jour = < 2g de sodium), limitation des boissons a 1,5L/jour si hyponatremie", "hydratation": "Restriction hydrique a 1,5L/jour en cas d'hyponatremie ou d'IC severe", "oxygenotherapie": "O2 si SpO2 < 90% ou dyspnee severe (objectif SpO2 94-98%)", "surveillance": ["Poids quotidien (variation > 2kg en 3 jours = alerter)", "Frequence cardiaque et PA biquotidienne", "Diurese quotidienne", "Signes de surcharge (oedemes, orthopnee, prise de poids)", "Ionogramme sanguin hebdomadaire (K+, Na+, creatinine)"]}, "traitementMedicamenteux": [{"medicament": "Furosemide (Lasilix)", "dci": "Furosemide", "posologie": "20-80 mg PO/IV par jour, adapter selon diurese et oedemes. Augmenter jusqu'a 200-500 mg/jour si necessaire.", "duree": "Au long cours, dose d'entretien minimale efficace", "voie": "PO / IV", "particularites": "Diuretique de l'anse, puissant. Surveiller K+ et creatinine. Disponible : Lasilix (PHARCI, SOCPHAR, DNDi)."}, {"medicament": "Enalapril", "dci": "Enalapril", "posologie": "Debut 2,5 mg PO 2x/jour -> adapter jusqu'a 10-20 mg 2x/jour", "duree": "Au long cours (traitement de fond)", "voie": "PO", "particularites": "IEC, reduit la mortalite et le remodelage. Contre-indique si K+ > 5,5 ou creatinine > 3 mg/dL. Disponible : Renitec (PNLP), generiques PHARCI/SOCPHAR."}, {"medicament": "Bisoprolol", "dci": "Bisoprolol", "posologie": "Debut 1,25 mg PO/jour -> augmenter par paliers de 2 semaines jusqu'a 10 mg/jour max", "duree": "Au long cours", "voie": "PO", "particularites": "Betabloquant selectif. Reduit mortalite. Initier a faible dose, IC stabilisee. Surveillance FC (objectif 60-70 bpm). Disponible : Cardensiel (SOCPHAR)."}, {"medicament": "Spironolactone", "dci": "Spironolactone", "posologie": "12,5-25 mg PO/jour (jusqu'a 50 mg/jour)", "duree": "Au long cours si FEVG <= 35% et symptomes persistants", "voie": "PO", "particularites": "Anti-aldosterone, reduit mortalite. Risque d'hyperkaliemie. Disponible : Aldactone (SOCPHAR, PHARCI)."}, {"medicament": "Amlodipine", "dci": "Amlodipine", "posologie": "5-10 mg PO/jour si HTA associee et IC-FEp", "duree": "Au long cours", "voie": "PO", "particularites": "Inhibiteur calcique. Utilise surtout dans l'IC-FEp avec HTA. Eviter dans l'IC-FEr decompensee. Disponible : generiques (PNLP, SOCPHAR, SOMEDICO)."}], "traitementChirurgical": [{"indication": "Resynchronisation cardiaque (CRT)", "type": "Implantation d'un defibrillateur biventriculaire", "urgence": false, "details": "Indiquee si FEVG <= 35%, QRS >= 150 ms, bloc de branche gauche, sous traitement optimal. Non disponible en routine en RDC."}, {"indication": "Defibrillateur implantable (DAI)", "type": "Prevention primaire ou secondaire de la mort subite", "urgence": false, "details": "Indique si FEVG <= 35% malgre traitement optimal et survie > 1 an. Non disponible en RDC."}, {"indication": "Transplantation cardiaque", "details": "Dernier recours en IC terminale refractaire. Non realisable en RDC actuellement."}], "mesuresNonMedicamenteuses": ["Rehabilitation cardiaque (exercice physique supervise)", "Education therapeutique du patient (observance, signes d'alerte)", "Vaccination anti-grippale annuelle", "Restriction de l'apport sode", "Perte de poids si surpoids", "Arret complet du tabac et de l'alcool", "Surveillance telephonique si possible"]}, "urgences": {"motifsConsultation": ["Dyspnee aigue severe au repos", "Orthopnee majeure", "Oedeme aigu du poumon", "Choc cardiogenique", "Arythmie grave associee (TV, FV)"], "signesGravite": ["Detresse respiratoire aigue", "SpO2 < 85% malgre O2", "PAS < 90 mmHg", "Diurese < 0,5 mL/kg/h", "Confusion, obnubilation", "Acidose lactique"], "conduiteImmediate": {"airway": "Liberer les voies aeriennes, position demi-assise a 45 deg, aspirer les secretions si besoin. Intubation si Glasgow <= 8.", "breathing": "O2 a fort debit (6-10 L/min) au masque, SpO2 cible 94-98%. CPAP/BI-PAP si disponible. VNI en premiere intention si oedeme pulmonaire.", "circulation": "1 a 2 voies d'abord veineuses, furosemide IV 40-80 mg (reprendre en 30 min si necessaire), monitorage ECG continu. Vasopresseurs (noradrenaline) si choc.", "disability": "Evaluer conscience (GCS), pupils, glycemie capillaire. Sedation si agitation respiratoire.", "exposure": "Examen complet, recherche d'une cause declenchante (infection, IAM, arythmie). Prelever sang (NFS, iono, BNP, troponine, gaz du sang)."}, "cinqPremieresMinutes": ["Position demi-assise immediate a 45 deg", "O2 a fort debit par masque (6-10 L/min)", "Mise en place d'une VNI (CPAP) si disponible", "Furosemide 40-80 mg IV en bolus", "Monitorage ECG, SpO2, PA"], "trentePremieresMinutes": ["Reevaluer cliniquement a 15 min (dyspnee, SpO2, diurese)", "Repeter furosemide IV si reponse insuffisante", "Prelever NFS, ionogramme, creatinine, BNP, troponine, ECG, radio thorax", "Rechercher cause declenchante (infection, IAM, arythmie, arret traitement)", "Traitement etiologique (antibiotiques si infection, anticoagulation si FA)", "Envisager transfert en reanimation si stabilite non obtenue"], "quandAppelerSpecialiste": "Appeler le cardiologue ou l'interniste en urgence si : choc cardiogenique (PAS < 90 mmHg, oligurie, confusion), oedeme pulmonaire refractaire au furosemide IV, arythmie ventriculaire maligne, IC suite a un IDM complique, necessite de support ventilatoire invasif.", "quandTransferer": "Transférer en reanimation ou unite de soins intensifs cardiologiques si : choc cardiogenique, necessite de ventilation mecanique, insuffisance renale aigue anurique, arythmie grave resistante au traitement medical, necessite de traitement specialise non disponible (VNI, drogues inotropes, assistance circulatoire).", "ouTransferer": "Service de reanimation ou de cardiologie de reference (Cliniques universitaires de Kinshasa, Hopital de la Campine, Hopital du Cinquantenaire, Centre Medical de Kinshasa, ou tout centre ayant un service de reanimation fonctionnel)."}, "evolution": {"evolutionNaturelle": {"favorable": "Sous traitement optimal (IEC + betabloquant + antagoniste aldosterone + diuretique), l'IC peut se stabiliser avec amelioration fonctionnelle (classe NYHA). La reduction de la mortalite est de 30-40% avec le traitement de fond. En RDC, les taux de reponse sont moindres en raison du diagnostic tardif.", "recidive": "Les decompensations aigues sont frequentes (1-2 episodes/an en moyenne). Les facteurs de recidive sont : non-observance therapeutique, infections repetees, alimentation riche en sel, arret des diuretiques.", "chronique": "L'IC est une maladie chronique evolutive. Malgre le traitement, la fonction ventriculaire tend a se degrader progressivement. Les formes a FEVG reduite ont une evolution plus rapide. La rehospitalisation est frequente (50% a 6 mois en Afrique sub-saharienne).", "aggravation": "L'aggravation se manifeste par des episodes de decompensation aigue de plus en plus frequents et severes, une IC refractaire (classe NYHA IV malgre traitement optimal), une cachexie cardiaque, une insuffisance renale associee (syndrome cardio-renal), et finalement un choc cardiogenique terminal."}, "complications": {"precoces": ["Oedeme aigu du poumon", "Choc cardiogenique", "Arythmies supraventriculaires et ventriculaires", "Thrombose intra-cardiaque", "Insuffisance renale aigue fonctionnelle", "Troubles hydro-electrolytiques (hyponatremie, hypokaliemie)"], "tardives": ["Cardiomyopathie dilatee terminale", "Fibrillation auriculaire permanente", "Embolie systemique (AVC, ischemie de membre)", "Cachexie cardiaque", "HTAP secondaire", "Syndrome cardio-renal", "Mort subite cardiaque"]}, "pronostic": "La mortalite a 5 ans est de 50% dans les formes a FEVG reduite, et de 30-40% dans les formes a FEVG preservee. En RDC, le pronostic est plus sombre en raison du diagnostic tardif, des difficultes d'acces aux medicaments et des comorbidites frequentes (HTA, VIH). La mortalite hospitaliere d'un episode de decompensation est de 10-20%."}, "sources": [{"id": "ikb-cardiologie", "name": "Manuel IKB - Cardiologie", "level": 4, "category": "Manuel IKB"}, {"id": "esc-cardio", "name": "European Society of Cardiology (ESC)", "level": 2, "category": "Societes savantes"}, {"id": "oms-cvd", "name": "OMS - Maladies cardiovasculaires", "level": 1, "category": "OMS"}, {"id": "has-ic", "name": "HAS - Insuffisance cardiaque", "level": 2, "category": "Societes savantes"}]}, {"id": "cardiologie-hypertension-arterielle", "name": "Hypertension arterielle (HTA)", "departmentId": "medecine-interne", "courseId": "cardiologie", "definition": {"definition": "Elevation persistante de la pression arterielle au-dela des valeurs normales, definie par une PAS >= 140 mmHg et/ou une PAD >= 90 mmHg mesuree au cabinet medical lors de 3 consultations successives. C'est le premier facteur de risque cardiovasculaire en RDC et la premiere cause d'insuffisance cardiaque et d'AVC. Sa prevalence en milieu urbain congolais est estimee entre 20-30% chez les adultes de plus de 25 ans.", "anatomieConcernee": "Coeur (ventricule gauche, oreillette gauche), arteres (aorte, arteres coronaires, arteres cerebrales, arteres renales), reins. L'atteinte de l'organe cible depend de la duree et de la severite de l'HTA.", "physiologieGenerale": "La pression arterielle est determinee par le produit du debit cardiaque et des resistances vasculaires peripheriques (PA = DC x RVP). La regulation fait intervenir le systeme nerveux autonome, le SRAA, le systeme nerveux central et les prostaglandines renales. La regulation a court terme est nerveuse (barorecepteurs), a long terme est renale (balance sodium/eau).", "physiopathologie": "L'HTA resulte d'une augmentation du debit cardiaque et/ou des resistances vasculaires peripheriques. L'hyperactivation du SRAA et du systeme sympathique entraine une vasoconstriction arteriolaire et une retention hydrosodique. Le remodelage vasculaire (hypertrophie mediale, fibrose) aggrave les resistances peripheriques. L'hypertrophie ventriculaire gauche est la reponse cardiaque adaptee a l'augmentation de la postcharge.", "mecanismeMaladie": "Augmentation des RVP -> elevation PA -> hypertrophie VG adaptee -> dysfonction diastolique puis systolique -> IC. Au niveau arteriel : lesion endotheliale -> atherosclerose acceleree -> stenose coronarienne, stenose carotidienne, arteriopathie des membres inferieurs. Au niveau renal : nephroangiosclerose -> IRC.", "schemasExplicatifs": ["Hyperactivation SRAA -> Angiotensine II -> Vasoconstriction + Aldosterone -> Retention Na+/H2O -> Elvation PA", "HTA chronique -> Hypertrophie VG -> Dysfonction diastolique -> IC-FEp -> IC-FEr", "HTA -> Atherosclerose acceleree -> Stenose coronaire -> Angor/IDM -> IC"]}, "diagnostic": {"clinique": {"motifConsultation": ["Cepalees (surtout matinales)", "Vertiges", "Troubles visuels (mouches volantes)", "Palpitations", "Dyspnee d'effort", "Epistaxis"], "signesFonctionnels": ["Cepalees occipitales matinales", "Vertiges", "Bourdonnements d'oreilles (acouphenes)", "Troubles visuels (phosphenes)", "Palpitations", "Dyspnee d'effort progressive", "Epistaxis recurrents"], "signesGeneraux": ["Pas de signes generaux specifiques dans l'HTA essentielle non compliquee", "Asthénie dans les formes avancees"], "signesPhysiques": ["PAS >= 140 mmHg et/ou PAD >= 90 mmHg (3 mesures a 3 consultations differentes)", "Hypertrophie ventriculaire gauche (souffle systolique d'ejection, 4e BCG)", "Souffle aortique ou carotidien (atherosclerose associee)", "Oedemes des membres inferieurs (si IC associee)"], "signesGravite": ["PA >= 180/110 mmHg (HTA severe)", "Signes d'encephalopathie hypertensive (confusion, convulsions, coma)", "Insuffisance cardiaque aigue (oedeme aigu du poumon)", "Dissection aortique (douleur thoracique dechirante)", "Eclampsie chez la femme enceinte", "Insuffisance renale aigue (oligurie, creatinine elevee)"]}, "paraclinique": [{"nom": "Mesure de la PA (cabinet et ambulatorie si possible)", "type": "test_specifique", "intention": 1, "urgence": true, "resultatsAttendus": "PAS >= 140 et/ou PAD >= 90 mmHg. Classer en grade 1 (140-159/90-99), grade 2 (160-179/100-109), grade 3 (>= 180/110)", "interpretation": "Le diagnostic requiert 3 consultations a 1 mois d'intervalle sauf urgence."}, {"nom": "Creatininemie, ionogramme, uree", "type": "biologique", "intention": 1, "urgence": false, "resultatsAttendus": "Creatinine, K+, Na+, glycemie a jeun, cholesterol total, triglycerides", "interpretation": "Evaluation de la fonction renale, recherche d'un diabete ou dyslipidemie associee, depistage d'une hypokaliemie (SRAA)."}, {"nom": "ECG", "type": "test_specifique", "intention": 1, "urgence": false, "resultatsAttendus": "Hypertrophie ventriculaire gauche (SV1 + RV5 > 35 mm), troubles du rythme, hypertrophie auriculaire gauche", "interpretation": "HVG = atteinte d'organe cible = traitement indispensable."}, {"nom": "Echocardiographie-Doppler", "type": "imagerie", "intention": 2, "urgence": false, "resultatsAttendus": "Masse VG, epaisseur parois, fonction diastolique, FEVG, epaisseur intima-media carotidienne", "interpretation": "Depistage de l'HVG et evaluation de la fonction cardiaque. Guide le traitement."}, {"nom": "Fond d'oeil", "type": "test_specifique", "intention": 2, "urgence": false, "resultatsAttendus": "Retinopathie hypertensive stade I a IV", "interpretation": "Stade III-IV = HTA maligne, urgence de traiter."}]}, "etiologie": {"etiologies": {"infectieuses": ["Glomerulonephrite aigue post-streptococcique"], "metaboliques": ["Obesite", "Diabete sucree", "Dyslipidemies", "Syndrome metabolique"], "genetiques": ["HTA essentielle (polygenique, 90% des cas)", "Hypertension arterielle familiale"], "autres": ["Stress chronique", "Sedentarite", "Exces de sel (> 5g/jour)", "Consommation d'alcool > 3 verres/jour", "Tabagisme", "Age (> 55 ans)", "Apnee du sommeil", "Maladie renale chronique"], "iatrogenes": ["Contraceptifs oraux oestroprogestatifs", "AINS", "Corticoides", "Ciclosporine", "Vasoconstricteurs nasaux"], "inflammatoires": ["Artérite a cellules geantes (maladie de Horton)", "Polyarterite noueuse"]}, "terrain": {"age": "Prevalence augmente avec l'age : < 1% a 20 ans, > 50% apres 65 ans", "sexe": "Homme < 55 ans, puis egalite. Femme > 55 ans avec risque accru.", "comorbidites": ["Diabete", "Obesite", "Dyslipidemie", "BPCO", "Maladie renale"], "antecedents": ["ATCD familiaux d'HTA", "Pre-eclampsie"], "grossesse": "Risque de pre-eclampsie/eclampsie si HTA preexistante ou gestationnelle"}, "facteursDeclencheurs": {"medicaments": ["AINS", "Corticoides", "Contraceptifs oraux", "Ciclosporine"], "alimentation": ["Exces de sel", "Prise de poids rapide"], "stress": ["Stress aigu ou chronique", "Intervention chirurgicale"], "autres": ["Sedentarite", "Arret du traitement antihypertenseur", "Pregnancy"]}}, "therapeutique": {"mesuresGenerales": {"repos": "Repos en cas d'HTA severe, activite physique reguliere adaptee (30 min de marche rapide, 5x/semaine)", "alimentation": "Regime DASH (fruits, legumes, cereales completes, laitages maigres), reduction du sel a < 5g/jour, limitation de l'alcool a 2 verres/jour max", "surveillance": ["Automesure de la PA a domicile (matin et soir pendant 7 jours)", "Poids hebdomadaire", "Consultation de suivi tous les 3 a 6 mois", "Creatinine et K+ 2 semaines apres introduction d'un IEC ou ARA2", "Examen du fond d'oeil annuel"]}, "traitementMedicamenteux": [{"medicament": "Amlodipine", "dci": "Amlodipine", "posologie": "5 mg PO/jour, augmenter a 10 mg/jour si necessaire", "duree": "Au long cours", "voie": "PO", "particularites": "Inhibiteur calcique dihydropyridinique, premier choix en monotherapie en RDC. Disponible : PNLP, PHARCI, SOCPHAR, SOMEDICO."}, {"medicament": "Enalapril", "dci": "Enalapril", "posologie": "5-20 mg PO/jour en 1 ou 2 prises", "duree": "Au long cours", "voie": "PO", "particularites": "IEC, indique si IC, diabete, nephropathie associee. Contre-indique si K+ > 5,5 ou creatinine > 3. Disponible : Renitec (PNLP), generiques."}, {"medicament": "Hydrochlorothiazide", "dci": "Hydrochlorothiazide", "posologie": "12,5-25 mg PO/jour", "duree": "Au long cours", "voie": "PO", "particularites": "Diuretique thiazidique, synergique avec IEC et ICa. Surveiller K+ et uricemie. Disponible : PNLP, PHARCI, SOCPHAR."}, {"medicament": "Losartan", "dci": "Losartan", "posologie": "50-100 mg PO/jour", "duree": "Au long cours", "voie": "PO", "particularites": "ARA2, alternative si intolerance aux IEC (toux). Meme profil d'efficacite. Disponible : PHARCI, SOCPHAR."}, {"medicament": "Bisoprolol", "dci": "Bisoprolol", "posologie": "5-10 mg PO/jour", "duree": "Au long cours", "voie": "PO", "particularites": "Betabloquant, indique si IC ou coronaropathie associee. Disponible : Cardensiel (SOCPHAR)."}], "traitementChirurgical": [], "mesuresNonMedicamenteuses": ["Activite physique reguliere (30 min, 5x/sem)", "Arret du tabac", "Reduction de l'alcool", "Reduction du sel alimentaire", "Perte de poids si surpoids", "Gestion du stress", "Reeducation a la mesure de la PA a domicile"]}, "urgences": {"motifsConsultation": ["Cepalees intolérables", "Troubles visuels aigus", "Confusion, obnubilation", "Dyspnee aigue", "Douleur thoracique dechirante"], "signesGravite": ["PA >= 180/120 mmHg", "Signes neurologiques (confusion, convulsions, coma)", "OAP", "Insuffisance renale aigue", "Dissection aortique"], "conduiteImmediate": {"airway": "Voies aeriennes libres, position demi-assise. Intubation si GCS <= 8.", "breathing": "O2 si SpO2 < 94%. Monitorer la respiration.", "circulation": "PA controlee, objectif reduction progressive (pas > 25% en 1ere heure). Nicardipine IV ou labetalol IV si disponible. En RDC : nifedipine sublinguale 10 mg en urgence si pas d'IV.", "disability": "Evaluer GCS, pupils, signes neurologiques focaux. Glycemie capillaire. Interroger l'entourage.", "exposure": "ECG urgent, prelevements sanguins, echocardiographie si possible. Recherche de cause (grossesse, medicaments, douleur thoracique)."}, "cinqPremieresMinutes": ["Mesure immédiate de la PA aux 2 bras", "Position demi-assise, calmer le patient", "Nifedipine 10 mg sublinguale si PA >= 180/120 mmHg (en l'absence de traitement IV)", "O2 si dyspnee", "ECG et glycémie capillaire"], "trentePremieresMinutes": ["Recontroler PA a 15 min", "Nouvelle dose si PA non controlee", "Prelever : creatinine, iono, NFS, uricemie, troponine", "ECG 12 derivations", "Rechercher signes d'atteinte d'organe cible (neuro, cardiaque, renal)", "Classification : urgences hypertensives (avec atteinte d'organe) vs. poussees hypertensives (sans atteinte)"], "quandAppelerSpecialiste": "Appeler le cardiologue ou interniste si : PA >= 180/120 mmHg malgre traitement, signes d'atteinte d'organe cible (neurologiques, cardiaques, renaux), HTA resistante (3 antihypertenseurs a dose optimale dont 1 diuretique), femme enceinte (eclampsie).", "quandTransferer": "Transférer en reanimation si : encéphalopathie hypertensive, OAP, dissection aortique, éclampsie, insuffisance rénale aiguë oligurique, IAM associé, nécessité de traitement par voie intraveineuse.", "ouTransferer": "Service de réanimation ou de cardiologie de référence (CUK, Hôpital de la Campine, Centre Medical de Kinshasa). Pour la femme enceinte : maternité de référence avec chirurgien et réanimateur."}, "evolution": {"evolutionNaturelle": {"favorable": "Sous traitement antihypertenseur bien suivi, la PA peut etre normalisee chez 60-70% des patients. La reduction du risque d'AVC est de 35-40%, de l'IC de 25%, de la mortalite CV de 20% pour une baisse de 10 mmHg de la PAS. En RDC, le controle est souvent insuffisant (< 30% des patients traites atteignent la cible).", "recidive": "Les poussees hypertensives sont frequentes en cas d'arret du traitement ou de non-observance. La rechute est la regle si les mesures hygieno-dietetiques ne sont pas maintenues. L'HTA est une maladie chronique necessitant un traitement a vie.", "chronique": "L'HTA non controlee evolue vers l'atteinte progressive des organes cibles : HVG, IC, nephroangiosclerose, retinopathie, arteriopathie des membres inferieurs, demence vasculaire. Le risque cardiovasculaire double pour chaque augmentation de 20/10 mmHg.", "aggravation": "L'aggravation se fait vers l'urgence hypertensive avec atteinte d'organe cible : encéphalopathie hypertensive (convulsions, coma), OAP, dissection aortique, insuffisance rénale terminale, AVC hemorragique ou ischémique."}, "complications": {"precoces": ["Oedeme aigu du poumon", "Encéphalopathie hypertensive", "Dissection aortique aigue", "Insuffisance rénale aigue", "AVC ischémique ou hemorragique"], "tardives": ["Hypertrophie ventriculaire gauche", "Insuffisance cardiaque chronique", "Nephroangiosclérose et IRC", "Retinopathie hypertensive", "Artériosclérose acceleree", "Maladie coronarienne", "Démence vasculaire"]}, "pronostic": "L'HTA non traitee reduit l'esperance de vie de 10-15 ans. Sous traitement, le pronostic depend du controle tensionnel et de la presence d'atteinte d'organe cible. En RDC, la mortalite liee a l'HTA est elevee en raison du diagnostic tardif, de la non-observance therapeutique et des difficultes d'acces aux medicaments."}, "sources": [{"id": "ikb-cardiologie", "name": "Manuel IKB - Cardiologie", "level": 4, "category": "Manuel IKB"}, {"id": "who-hta", "name": "OMS - Hypertension arterielle", "level": 1, "category": "OMS"}, {"id": "esc-cardio", "name": "European Society of Cardiology (ESC)", "level": 2, "category": "Societes savantes"}, {"id": "oms-cvd", "name": "OMS - Maladies cardiovasculaires", "level": 1, "category": "OMS"}]}, {"id": "cardiologie-angor-stable", "name": "Angor stable", "departmentId": "medecine-interne", "courseId": "cardiologie", "definition": {"definition": "Douleur thoracique retrosternale survenant a l'effort, liee a un ischemie myocardique transitoire par desequilibre entre les besoins en oxygene du myocarde et les apports coronaires. C'est la manifestation clinique de la maladie coronarienne, frequente en RDC en raison de l'augmentation des facteurs de risque cardiovasculaire (HTA, diabete, tabac).", "anatomieConcernee": "Myocarde ventriculaire gauche, arteres coronaires (interventriculaire anterieure, circonflexe, coronaire droite), circulation coronaire (arteres, capillaires, veines coronaires, sinus coronaire).", "physiologieGenerale": "La circulation coronaire perfuse le myocarde en diastole. Le debit coronaire depend de la pression de perfusion (PAS - pression tele-diastolique VG) et des resistances coronaires. L'extraction d'O2 est maximale au repos (70-80%), donc l'augmentation des besoins ne peut etre satisfaite que par l'augmentation du debit coronaire (vasodilatation).", "physiopathologie": "La stenose coronariene atheromateuse reduit le debit coronaire maximal. A l'effort, les besoins en O2 augmentent (taux, contractilite, pression). Le debit coronaire ne peut pas augmenter suffisamment -> ischemie -> douleur angineuse. L'ischemie est transitoire et reversible a l'arret de l'effort.", "mecanismeMaladie": "Stenose coronaire > 70% -> reserve coronaire diminuee -> a l'effort : besoins O2 augmentent -> debit coronaire insuffisant -> ischemie sous-endocardique -> liberation d'adénosine et de substances algogènes -> douleur rétrosternale.", "schemasExplicatifs": ["Stenose coronaire atheromateuse -> Reduction du debit coronaire maximal -> Ischemie a l'effort -> Angor"]}, "diagnostic": {"clinique": {"motifConsultation": ["Douleur thoracique a l'effort", "Oppression retrosternale", "Douleur irradiant au bras gauche, machoire, cou"], "signesFonctionnels": ["Douleur retrosternale en barre, serree, survenant a l'effort", "Cedant au repos ou a la trinitrine en < 5 min", "Irradiation : bras gauche, epigastre, machoire, cou", "Dyspnee d'effort associee", "Sensation de lourdeur thoracique"], "signesGeneraux": ["Examen clinique normal en dehors des crises", "Facteurs de risque CV souvent presents"], "signesPhysiques": ["Souffle passtenotique en cas de dysfonction VG", "3e ou 4e BCG si dysfonction VG", "Signes d'HTA ou d'hypercholesterolemie"], "signesGravite": ["Douleur de repos prolongee (> 20 min)", "Douleur resistant a la trinitrine", "Apparition de signes d'insuffisance cardiaque", "Troubles du rythme ventriculaire"]}, "paraclinique": [{"nom": "ECG de repos et d'effort", "type": "test_specifique", "intention": 1, "urgence": false, "resultatsAttendus": "Normal au repos. A l'effort : sous-decalage de ST >= 1 mm, ondes T negatives, troubles du rythme", "interpretation": "Sous-decalage ST a l'effort = ischemie myocardique. ECG normal n'exclut pas l'angor."}, {"nom": "Echocardiographie de stress ou ECG d'effort", "type": "test_specifique", "intention": 1, "urgence": false, "resultatsAttendus": "Troubles de la cinetique segmentaire a l'effort, FEVG de repos et a l'effort", "interpretation": "Anomalies cinetiques a l'effort = ischemie dans le territoire coronaire correspondant."}, {"nom": "Coronarographie", "type": "imagerie", "intention": 2, "urgence": false, "resultatsAttendus": "Stenose coronaire (> 50% = significative, > 70% = hemodynamiquement significative)", "interpretation": "Gold standard pour le diagnostic etiologique. Indiquee si angor invalidant ou ischemie documentee."}, {"nom": "Troponine I ou T, CK-MB", "type": "biologique", "intention": 1, "urgence": true, "resultatsAttendus": "Normale (troponine < 14 ng/L, CK-MB normal)", "interpretation": "Troponine normale = pas de necrose. Si elevee = SCA (angor instable ou IDM)."}, {"nom": "Bilan lipidique, glycemie, creatinine", "type": "biologique", "intention": 2, "urgence": false, "resultatsAttendus": "LDL cholesterol, HDL, triglycerides, HbA1c, creatinine", "interpretation": "Evaluation des facteurs de risque CV associes."}]}, "etiologie": {"etiologies": {"metaboliques": ["Dyslipidemie (LDL eleve, HDL bas)", "Diabete", "HTA", "Obesite", "Syndrome metabolique"], "autres": ["Tabagisme", "Sedentarite", "Age > 55 ans (homme), > 65 ans (femme)", "ATCD familiaux de coronaropathie", "Stress chronique"], "inflammatoires": ["Artérite a cellules geantes", "Lupus", "Maladie de Kawasaki (sequelles)"], "iatrogenes": []}, "terrain": {"age": "Homme > 45 ans, femme > 55 ans (ou post-menopausique)", "sexe": "Preponderance masculine avant 60 ans", "comorbidites": ["HTA", "Diabete", "Dyslipidemie", "BPCO", "Obesite"], "antecedents": ["ATCD familiaux de coronaropathie precoce (< 55 ans pere/frere)", "ATCD d'IDM", "Tabagisme actif ou sevré"], "grossesse": "Risque augmente de coronaropathie post-partum"}, "facteursDeclencheurs": {"stress": ["Effort physique", "Stress emotionnel", "Exposition au froid", "Repas copieux"], "alimentation": ["Repas copieux et riches en graisses"], "autres": ["Exposition au froid", "Anemie aigue aggravant l'ischemie"]}}, "therapeutique": {"mesuresGenerales": {"alimentation": "Regime mediterraneen (fruits, legumes, poisson, huile d'olive, peu de viande rouge)", "surveillance": ["Controle trimestriel en ambulatoire", "ECG annuel ou a chaque modification des symptomes", "Bilan lipidique annuel"], "repos": "Eviter les efforts intenses non prevus, repartir l'activite physique"}, "traitementMedicamenteux": [{"medicament": "Trinitrine sublinguale", "dci": "Nitroglycerine", "posologie": "0,25-0,5 mg sublingual en crise, renouveler a 5 min si necessaire (max 3 doses)", "duree": "A la demande", "voie": "Sublingual", "particularites": "Vasodilatateur coronaire et veineux. Cede la crise en < 5 min. Si pas de soulagement : suspecter un SCA. Disponible en RDC."}, {"medicament": "Aspirine", "dci": "Acide acetylsalicylique", "posologie": "75-100 mg PO/jour", "duree": "Au long cours", "voie": "PO", "particularites": "Antiagrégant plaquettaire, reduit le risque d'IDM et d'AVC. Contre-indique si ulcere gastrique non traite. Disponible : Aspirine (PNLP, PHARCI, SOCPHAR, SOMEDICO)."}, {"medicament": "Amlodipine", "dci": "Amlodipine", "posologie": "5-10 mg PO/jour", "duree": "Au long cours", "voie": "PO", "particularites": "Anti-angoreux et antihypertenseur. Reduit la frequence et la severite des crises. Disponible : PNLP, PHARCI, SOCPHAR."}, {"medicament": "Bisoprolol", "dci": "Bisoprolol", "posologie": "2,5-10 mg PO/jour", "duree": "Au long cours", "voie": "PO", "particularites": "Reduit la consommation d'O2 myocardique en baissant la FC et la PA. Antiangoreux de fond. Disponible : Cardensiel (SOCPHAR)."}, {"medicament": "Atorvastatine", "dci": "Atorvastatine", "posologie": "20-80 mg PO/jour au coucher", "duree": "Au long cours", "voie": "PO", "particularites": "Statin, objectif LDL < 1,0 g/L ou reduction > 50%. Stabilise la plaque d'atherome. Surveiller transaminases. Disponible : PHARCI, SOCPHAR, SOMEDICO."}], "traitementChirurgical": [{"indication": "Angioplastie coronaire avec stent", "type": "Stent nu ou actif (drug-eluting stent)", "urgence": false, "details": "Indiquee si stenose > 70% sur une artere proximale, angor invalidant malgre traitement medical optimal. Necessite un plateau de cardiologie interventionnelle."}, {"indication": "Pontage aorto-coronarien", "type": "Chirurgie a coeur ouvert", "urgence": false, "details": "Indiquee si atteinte tritronculaire, stenose du tronc commun gauche, insuffisance mitrale associee. Non disponible en RDC."}], "mesuresNonMedicamenteuses": ["Arret du tabac", "Activite physique reguliere adaptee (30 min, 5x/sem)", "Controle du poids", "Regime mediterraneen", "Gestion du stress", "Education du patient a l'utilisation de la trinitrine"]}, "urgences": {"motifsConsultation": ["Douleur thoracique prolongee > 20 min", "Douleur au repos resistant a la trinitrine", "Apparition de dyspnee severe", "Troubles du rythme"], "signesGravite": ["Douleur prolongee > 20 min resistant a 3 doses de trinitrine", "Apparition de signes d'IC", "Troubles du rythme ventriculaire", "Sous-decalage de ST > 2 mm a l'ECG"], "conduiteImmediate": {"airway": "Voies aeriennes libres, position demi-assise.", "breathing": "O2 4-6 L/min, monitorer SpO2.", "circulation": "ECG immediat, voie veineuse, trinitrine sublinguale si douleur. Aspirine 300 mg PO. Heparine si SCA suspecte.", "disability": "Evaluer conscience, douleur, signes d'IC.", "exposure": "Prelever troponine, NFS, iono, CK-MB. ECG serie a 15 min si douleur persiste."}, "cinqPremieresMinutes": ["Arret immediat de l'effort", "Trinitrine 0,5 mg sublingual", "O2 4-6 L/min", "ECG 12 derivations", "Aspirine 300 mg PO si suspicion de SCA"], "trentePremieresMinutes": ["Reevaluer a 15 min (douleur, ECG)", "2e dose de trinitrine si douleur persiste", "Prelever troponine, CK-MB, NFS, iono", "ECG comparatif si modification", "Si douleur persiste > 20 min ou ECG modifie : traiter comme SCA", "Envisager transfert pour coronarographie"], "quandAppelerSpecialiste": "Appeler le cardiologue si : douleur resistant a 3 doses de trinitrine, ECG modifie (sous-decalage ST, onde T negative), troponine elevee, douleur reccurente au repos, angor de novo ou rapidement progressif.", "quandTransferer": "Transférer en unite de soins intensifs cardiologiques si : angor instable, SCA, troponine elevee, ECG avec modifications ST, douleur resistant au traitement medical.", "ouTransferer": "Service de cardiologie avec unite de soins intensifs (CUK, Hopital de la Campine)."}, "evolution": {"evolutionNaturelle": {"favorable": "L'angor stable a un bon pronostic sous traitement medical optimal. La survie a 5 ans est > 90% pour les formes stables traitées. Le risque d'IDM est de 1-2% par an sous traitement optimal.", "recidive": "Les crises d'angor sont recidivantes, declenchees par l'effort, le stress ou le froid. La frequence des crises depend de la severite de la stenose coronarienne et de l'observance therapeutique.", "chronique": "L'angor stable peut evoluer vers un angor instable (douleur de repos, crescendo) ou un IDM si la plaque d'atherome se complique (rupture, thrombose). La progression de la maladie atheromateuse est acceleree par les facteurs de risque non controles.", "aggravation": "L'aggravation se fait vers le SCA (angor instable, IDM NSTEMI ou STEMI), l'IC ischemique, les troubles du rythme ventriculaire (TV, FV), et la mort subite cardiaque."}, "complications": {"precoces": ["SCA par rupture de plaque", "Troubles du rythme ventriculaire", "IDM"], "tardives": ["IC chronique ischemique", "Troubles du rythme permanents (FA)", "Mort subite cardiaque"]}, "pronostic": "Le pronostic depend du nombre et de la severite des stenoses coronaires, de la fonction VG et de la presence de comorbidites. La mortalite annuelle est de 1-2% sous traitement optimal. En RDC, le pronostic est moins bon du fait de l'acces limite a la cardiologie interventionnelle."}, "sources": [{"id": "ikb-cardiologie", "name": "Manuel IKB - Cardiologie", "level": 4, "category": "Manuel IKB"}, {"id": "esc-sca", "name": "ESC - Syndromes coronariens aigus", "level": 2, "category": "Societes savantes"}, {"id": "oms-cvd", "name": "OMS - Maladies cardiovasculaires", "level": 1, "category": "OMS"}]}]
+</script>
 
-<!-- ═══ BOTTOM NAV - STUDENT ═══ -->
-<div id="bnav-student" class="bottom-nav" style="display:none">
-  <button class="nav-item active" onclick="navTab('dashboard','student')" data-tab="dashboard"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg><span>Tableau de bord</span></button>
-  <button class="nav-item" onclick="navTab('thesis','student')" data-tab="thesis"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg><span>Mon memoire</span></button>
-  <button class="nav-item" onclick="navTab('collection','student')" data-tab="collection"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1z"/></svg><span>Collecte</span></button>
-  <button class="nav-item" onclick="navTab('stats','student')" data-tab="stats"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/></svg><span>Statistiques</span></button>
-  <button class="nav-item" onclick="navTab('chat','student')" data-tab="chat"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg><span>Messages</span></button>
-</div>
+</script>
 
-<!-- ═══ BOTTOM NAV - DIRECTOR ═══ -->
-<div id="bnav-director" class="bottom-nav" style="display:none">
-  <button class="nav-item active" onclick="navTab('dashboard','director')" data-tab="dashboard"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg><span>Tableau de bord</span></button>
-  <button class="nav-item" onclick="navTab('students','director')" data-tab="students"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg><span>Etudiants</span></button>
-  <button class="nav-item" onclick="navTab('projects','director')" data-tab="projects"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg><span>Projets</span></button>
-  <button class="nav-item" onclick="navTab('chat','director')" data-tab="chat"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg><span>Messages</span></button>
-  <button class="nav-item" onclick="navTab('archives','director')" data-tab="archives"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27z"/></svg><span>Archives</span></button>
-</div>
-
-<!-- ═══ BOTTOM NAV - ADMIN ═══ -->
-<div id="bnav-admin" class="bottom-nav" style="display:none">
-  <button class="nav-item active" onclick="navTab('admin-users','admin')" data-tab="admin-users"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg><span>Admin</span></button>
-  <button class="nav-item" onclick="navTab('admin-unis','admin')" data-tab="admin-unis"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/></svg><span>Universites</span></button>
-  <button class="nav-item" onclick="navTab('archives','admin')" data-tab="archives"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27z"/></svg><span>Archives</span></button>
-</div>
-
-<!-- ═══ STUDENT DASHBOARD ═══ -->
-<div id="screen-dashboard" class="screen" style="background:#F4F6F9">
-<div class="pb-safe" style="padding:16px;display:flex;flex-direction:column;gap:16px">
-  <div class="card-elevated fade-in" style="display:flex;align-items:center;gap:16px">
-    <div style="position:relative;width:72px;height:72px;flex-shrink:0">
-      <svg width="72" height="72" class="progress-ring"><circle cx="36" cy="36" r="30" stroke="#E8ECF0" stroke-width="6" fill="none"/><circle id="prog-circle" cx="36" cy="36" r="30" stroke="#2E86C1" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="113.1"/></svg>
-      <span id="prog-pct" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:Roboto Mono;font-weight:700;font-size:16px;color:#1A5276">40%</span>
-    </div>
-    <div><p id="dash-greeting" style="font-size:18px;font-weight:700;color:#1A5276">Bonjour, Etudiant</p><p id="dash-milestone" style="font-size:13px;color:#5B6B7D;margin-top:2px">Jalon actuel : Collecte de donnees</p><p id="dash-uni" style="font-size:12px;color:#95A5A6;margin-top:2px">UNIKIN - D4</p></div>
-  </div>
-  <!-- Timeline -->
-  <div class="card fade-in">
-    <h4 style="font-size:14px;font-weight:700;color:#1A5276;margin-bottom:12px">Progression du memoire</h4>
-    <div style="display:flex;align-items:center;gap:0;overflow-x:auto;padding:8px 0">
-      <div class="flex items-center w-full"><div class="timeline-dot" style="border-color:#27AE60;background:#27AE60" title="Sujet assigne"></div><div style="height:3px;flex:1;min-width:12px;background:#27AE60"></div><div class="timeline-dot" style="border-color:#27AE60;background:#27AE60" title="Revue de litterature"></div><div style="height:3px;flex:1;min-width:12px;background:#2E86C1"></div><div class="timeline-dot" style="border-color:#27AE60;background:#27AE60" title="Protocole de recherche"></div><div style="height:3px;flex:1;min-width:12px;background:#E0E6ED"></div><div class="timeline-dot pulse-anim" style="border-color:#2E86C1;background:#2E86C1" title="Fiche d'enquete"></div><div style="height:3px;flex:1;min-width:12px;background:#E0E6ED"></div><div class="timeline-dot" style="border-color:#E0E6ED;background:#E0E6ED" title="Collecte de donnees"></div><div style="height:3px;flex:1;min-width:12px;background:#E0E6ED"></div><div class="timeline-dot" style="border-color:#E0E6ED;background:#E0E6ED" title="Analyse statistique"></div><div style="height:3px;flex:1;min-width:12px;background:#E0E6ED"></div><div class="timeline-dot" style="border-color:#E0E6ED;background:#E0E6ED" title="Discussion"></div><div style="height:3px;flex:1;min-width:12px;background:#E0E6ED"></div><div class="timeline-dot" style="border-color:#E0E6ED;background:#E0E6ED" title="References"></div><div style="height:3px;flex:1;min-width:12px;background:#E0E6ED"></div><div class="timeline-dot" style="border-color:#E0E6ED;background:#E0E6ED" title="Memoire finalise"></div></div>
-    </div>
-    <div id="milestone-labels" style="display:flex;gap:0;margin-top:6px;overflow-x:auto;font-size:10px;color:#95A5A6">
-      <span style="min-width:14px"></span>
-    </div>
-  </div>
-  <!-- KPIs -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" class="fade-in">
-    <div class="card" style="text-align:center">
-      <p style="font-size:11px;color:#5B6B7D;font-weight:500">References</p>
-      <p id="kpi-refs" style="font-family:Roboto Mono;font-size:28px;font-weight:700;color:#1A5276">0</p>
-    </div>
-    <div class="card" style="text-align:center">
-      <p style="font-size:11px;color:#5B6B7D;font-weight:500">Donnees collectees</p>
-      <p id="kpi-data" style="font-family:Roboto Mono;font-size:28px;font-weight:700;color:#1A5276">0</p>
-    </div>
-  </div>
-  <!-- Recent notifications -->
-  <div class="card fade-in">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <h4 style="font-size:14px;font-weight:700;color:#1A5276">Notifications recentes</h4>
-      <a href="#" onclick="nav('notifications');return false" style="font-size:12px;color:#2E86C1;text-decoration:none">Voir tout</a>
-    </div>
-    <div id="dash-notifs" style="display:flex;flex-direction:column;gap:8px">
-      <p style="color:#95A5A6;font-size:13px;text-align:center;padding:12px">Aucune notification</p>
-    </div>
-  </div>
-  <!-- Recent messages -->
-  <div class="card fade-in">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <h4 style="font-size:14px;font-weight:700;color:#1A5276">Derniers messages</h4>
-      <a href="#" onclick="nav('chat');return false" style="font-size:12px;color:#2E86C1;text-decoration:none">Voir tout</a>
-    </div>
-    <div id="dash-msgs" style="display:flex;flex-direction:column;gap:8px">
-      <p style="color:#95A5A6;font-size:13px;text-align:center;padding:12px">Aucun message</p>
-    </div>
-  </div>
-</div>
-</div>
-<!-- ═══ DIRECTOR DASHBOARD ═══ -->
-<div id="screen-dir-dashboard" class="screen" style="background:#F4F6F9">
-<div class="pb-safe" style="padding:16px;display:flex;flex-direction:column;gap:16px">
-  <div class="card-elevated fade-in">
-    <p id="dir-greeting" style="font-size:18px;font-weight:700;color:#1A5276">Bonjour, Dr</p>
-    <p id="dir-uni" style="font-size:13px;color:#5B6B7D;margin-top:2px">Universite</p>
-  </div>
-  <!-- KPI grid 2x2 -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" class="fade-in">
-    <div class="card" style="display:flex;align-items:center;gap:12px">
-      <div style="width:44px;height:44px;border-radius:12px;background:#EBF5FB;display:flex;align-items:center;justify-content:center;color:#2E86C1"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div>
-      <div><p id="dir-kpi-active" style="font-family:Roboto Mono;font-size:24px;font-weight:700;color:#1A5276">0</p><p style="font-size:11px;color:#5B6B7D">Etudiants actifs</p></div>
-    </div>
-    <div class="card" style="display:flex;align-items:center;gap:12px">
-      <div style="width:44px;height:44px;border-radius:12px;background:#FDEDEC;display:flex;align-items:center;justify-content:center;color:#E74C3C"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div>
-      <div><p id="dir-kpi-late" style="font-family:Roboto Mono;font-size:24px;font-weight:700;color:#E74C3C">0</p><p style="font-size:11px;color:#5B6B7D">En retard</p></div>
-    </div>
-    <div class="card" style="display:flex;align-items:center;gap:12px">
-      <div style="width:44px;height:44px;border-radius:12px;background:#EAFAF1;display:flex;align-items:center;justify-content:center;color:#27AE60"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
-      <div><p id="dir-kpi-done" style="font-family:Roboto Mono;font-size:24px;font-weight:700;color:#27AE60">0</p><p style="font-size:11px;color:#5B6B7D">Complets ce mois</p></div>
-    </div>
-    <div class="card" style="display:flex;align-items:center;gap:12px">
-      <div style="width:44px;height:44px;border-radius:12px;background:#FEF5E7;display:flex;align-items:center;justify-content:center;color:#F39C12"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg></div>
-      <div><p id="dir-kpi-pending" style="font-family:Roboto Mono;font-size:24px;font-weight:700;color:#F39C12">0</p><p style="font-size:11px;color:#5B6B7D">Demandes en attente</p></div>
-    </div>
-  </div>
-  <!-- Chart -->
-  <div class="card fade-in">
-    <h4 style="font-size:14px;font-weight:700;color:#1A5276;margin-bottom:12px">Repartition par jalon</h4>
-    <canvas id="dir-milestone-chart" height="200"></canvas>
-  </div>
-  <!-- Attention needed -->
-  <div class="card fade-in">
-    <h4 style="font-size:14px;font-weight:700;color:#E74C3C;margin-bottom:12px">Necessitent une attention</h4>
-    <div id="dir-attention" style="display:flex;flex-direction:column;gap:8px">
-      <p style="color:#95A5A6;font-size:13px;text-align:center;padding:12px">Aucun etudiant en retard</p>
-    </div>
-  </div>
-  <!-- Recent requests -->
-  <div class="card fade-in">
-    <h4 style="font-size:14px;font-weight:700;color:#1A5276;margin-bottom:12px">Demandes recentes</h4>
-    <div id="dir-requests" style="display:flex;flex-direction:column;gap:8px">
-      <p style="color:#95A5A6;font-size:13px;text-align:center;padding:12px">Aucune demande</p>
-    </div>
-  </div>
-</div>
-</div>
-<!-- ═══ PROFILE ═══ -->
-<div id="screen-profile" class="screen" style="background:#F4F6F9">
-<div class="pb-safe" style="padding:16px;display:flex;flex-direction:column;gap:16px">
-  <div class="card-elevated fade-in" style="text-align:center;padding:24px">
-    <div id="prof-avatar" style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#1A5276,#2E86C1);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:28px;margin:0 auto 12px">?</div>
-    <h3 id="prof-name" style="font-size:18px;font-weight:700;color:#1A5276">Nom</h3>
-    <p id="prof-meta" style="font-size:13px;color:#5B6B7D;margin-top:4px">Role - Specialite</p>
-  </div>
-  <div class="card fade-in">
-    <h4 style="font-size:14px;font-weight:700;color:#1A5276;margin-bottom:12px">Informations personnelles</h4>
-    <div style="display:flex;flex-direction:column;gap:12px">
-      <div><label style="font-size:12px;font-weight:600;color:#5B6B7D;display:block;margin-bottom:4px">Nom complet</label><input id="prof-displayname" class="input-field"></div>
-      <div><label style="font-size:12px;font-weight:600;color:#5B6B7D;display:block;margin-bottom:4px">Titre</label><input id="prof-title" class="input-field"></div>
-      <div><label style="font-size:12px;font-weight:600;color:#5B6B7D;display:block;margin-bottom:4px">Specialite</label><input id="prof-specialty" class="input-field"></div>
-      <div><label style="font-size:12px;font-weight:600;color:#5B6B7D;display:block;margin-bottom:4px">E-mail</label><input id="prof-email" class="input-field" disabled style="background:#F4F6F9"></div>
-      <button class="btn-primary btn-sm" onclick="saveProfile()">Enregistrer les modifications</button>
-    </div>
-  </div>
-  <div class="card fade-in">
-    <h4 style="font-size:14px;font-weight:700;color:#1A5276;margin-bottom:12px">Statistiques</h4>
-    <div id="prof-stats" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div style="text-align:center"><p style="font-family:Roboto Mono;font-size:20px;font-weight:700;color:#1A5276" id="prof-stat-1">0</p><p style="font-size:11px;color:#5B6B7D">References</p></div>
-      <div style="text-align:center"><p style="font-family:Roboto Mono;font-size:20px;font-weight:700;color:#1A5276" id="prof-stat-2">0</p><p style="font-size:11px;color:#5B6B7D">Donnees collectees</p></div>
-    </div>
-  </div>
-  <div class="card fade-in">
-    <h4 style="font-size:14px;font-weight:700;color:#1A5276;margin-bottom:12px">Changer le mot de passe</h4>
-    <div style="display:flex;flex-direction:column;gap:12px">
-      <input id="prof-oldpwd" type="password" class="input-field" placeholder="Mot de passe actuel">
-      <input id="prof-newpwd" type="password" class="input-field" placeholder="Nouveau mot de passe">
-      <button class="btn-outline btn-sm" onclick="changePwd()">Changer le mot de passe</button>
-    </div>
-  </div>
-</div>
-</div>
-<!-- ═══ THESIS (Student) ═══ -->
-<div id="screen-thesis" class="screen" style="background:#F4F6F9">
-<div class="pb-safe" style="padding:16px;display:flex;flex-direction:column;gap:12px">
-  <div class="card-elevated fade-in">
-    <h3 id="thesis-title" style="font-size:16px;font-weight:700;color:#1A5276">Pas encore de projet</h3>
-    <p id="thesis-domain" style="font-size:13px;color:#5B6B7D;margin-top:4px">Envoyez une demande de supervision pour commencer</p>
-  </div>
-  <div class="tab-bar" style="background:#fff;border-radius:12px;overflow:hidden">
-    <button class="tab-item" data-ms="topic_assigned" onclick="switchMilestoneTab('topic_assigned')">Sujet assigne</button><button class="tab-item" data-ms="literature_review" onclick="switchMilestoneTab('literature_review')">Revue de litterature</button><button class="tab-item" data-ms="protocol" onclick="switchMilestoneTab('protocol')">Protocole de recherche</button><button class="tab-item" data-ms="survey_form" onclick="switchMilestoneTab('survey_form')">Fiche d'enquete</button><button class="tab-item" data-ms="data_collection" onclick="switchMilestoneTab('data_collection')">Collecte de donnees</button><button class="tab-item" data-ms="analysis" onclick="switchMilestoneTab('analysis')">Analyse statistique</button><button class="tab-item" data-ms="discussion" onclick="switchMilestoneTab('discussion')">Discussion</button><button class="tab-item" data-ms="references" onclick="switchMilestoneTab('references')">References</button><button class="tab-item" data-ms="finalization" onclick="switchMilestoneTab('finalization')">Memoire finalise</button>
-  </div>
-  <div id="thesis-content" class="card fade-in" style="min-height:300px">
-    <p style="color:#95A5A6;text-align:center;padding:40px 0">Selectionnez un jalon ci-dessus</p>
-  </div>
-  <button id="btn-find-director" class="btn-primary" onclick="nav('find-director')" style="width:100%">Chercher un directeur de memoire</button>
-</div>
-</div>
-<!-- ═══ FIND DIRECTOR ═══ -->
-<div id="screen-find-director" class="screen" style="background:#F4F6F9">
-<div class="pb-safe" style="padding:16px;display:flex;flex-direction:column;gap:16px">
-  <div class="card fade-in">
-    <div style="display:flex;align-items:center;gap:10px">
-      <svg class="w-5 h-5" style="color:#2E86C1" fill="currentColor" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-      <input id="dir-search" class="input-field" placeholder="Rechercher un directeur (nom, specialite...)" style="border:none;box-shadow:none;padding:0" oninput="searchDirectors(this.value)">
-    </div>
-  </div>
-  <div id="directors-list" style="display:flex;flex-direction:column;gap:12px">
-    <p style="color:#95A5A6;text-align:center;padding:24px">Recherchez un directeur pour envoyer une demande de supervision</p>
-  </div>
-</div>
-</div>
-
-<!-- ═══ SUPERVISION REQUEST MODAL ═══ -->
-<div id="modal-supervision" style="display:none" class="modal-overlay" onclick="if(event.target===this)this.style.display='none'">
-<div style="background:#fff;border-radius:16px;padding:24px;max-width:480px;width:100%;max-height:80vh;overflow-y:auto">
-  <h3 style="font-size:18px;font-weight:700;color:#1A5276;margin-bottom:4px">Demande de supervision</h3>
-  <p id="modal-dir-name" style="font-size:14px;color:#5B6B7D;margin-bottom:16px"></p>
-  <div style="display:flex;flex-direction:column;gap:14px">
-    <div><label style="font-size:13px;font-weight:600;color:#5B6B7D;display:block;margin-bottom:6px">Sujet souhaite</label><input id="req-subject" class="input-field" placeholder="Titre ou theme de votre memoire"></div>
-    <div><label style="font-size:13px;font-weight:600;color:#5B6B7D;display:block;margin-bottom:6px">Message au directeur</label><textarea id="req-message" class="input-field" placeholder="Expliquez pourquoi vous souhaitez travailler avec ce directeur et votre interet pour le sujet..."></textarea></div>
-    <div><label style="font-size:13px;font-weight:600;color:#5B6B7D;display:block;margin-bottom:6px">Domaine medical</label><input id="req-domain" class="input-field" placeholder="ex: Medecine interne, Chirurgie..."></div>
-    <div style="display:flex;gap:12px">
-      <button class="btn-outline" style="flex:1" onclick="document.getElementById('modal-supervision').style.display='none'">Annuler</button>
-      <button class="btn-primary" style="flex:1" onclick="sendSupervisionRequest()">Envoyer la demande</button>
-    </div>
-  </div>
-</div>
-</div>
-<!-- ═══ STUDENTS LIST (Director) ═══ -->
-<div id="screen-students" class="screen" style="background:#F4F6F9">
-<div class="pb-safe" style="padding:16px;display:flex;flex-direction:column;gap:12px">
-  <div class="card fade-in" style="display:flex;gap:8px;flex-wrap:wrap">
-    <select id="filter-year" class="input-field" style="width:auto;flex:1;min-width:120px;padding:8px 12px;font-size:13px" onchange="loadStudents()"><option value="">Annee</option></select>
-    <select id="filter-promo" class="input-field" style="width:auto;min-width:90px;padding:8px 12px;font-size:13px" onchange="loadStudents()"><option value="">Promo</option><option value="D3">D3</option><option value="D4">D4</option></select>
-    <select id="filter-status" class="input-field" style="width:auto;min-width:110px;padding:8px 12px;font-size:13px" onchange="loadStudents()"><option value="">Statut</option><option value="active">En cours</option><option value="late">En retard</option><option value="completed">Complets</option></select>
-  </div>
-  <p id="students-count" style="font-size:12px;color:#95A5A6;padding:0 4px"></p>
-  <div id="students-list" style="display:flex;flex-direction:column;gap:12px">
-    <p style="color:#95A5A6;text-align:center;padding:40px 0">Aucun etudiant trouve</p>
-  </div>
-</div>
-</div>
-<!-- ═══ PROJECTS (Director) ═══ -->
-<div id="screen-projects" class="screen" style="background:#F4F6F9">
-<div class="pb-safe" style="padding:16px;display:flex;flex-direction:column;gap:12px">
-  <div id="projects-list" style="display:flex;flex-direction:column;gap:12px">
-    <p style="color:#95A5A6;text-align:center;padding:40px 0">Aucun projet</p>
-  </div>
-</div>
-</div>
-<!-- ═══ DATA COLLECTION ═══ -->
-<div id="screen-collection" class="screen" style="background:#F4F6F9">
-<div class="pb-safe" style="padding:16px;display:flex;flex-direction:column;gap:16px">
-  <div class="card-elevated fade-in" style="display:flex;justify-content:space-between;align-items:center">
-    <div><h3 style="font-size:16px;font-weight:700;color:#1A5276">Collecte de donnees</h3><p id="coll-progress" style="font-size:13px;color:#5B6B7D">0 reponses collectees</p></div>
-    <button class="btn-primary btn-sm" onclick="newRespondent()">+ Nouveau</button>
-  </div>
-  <div id="collection-form" class="card fade-in" style="display:none">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-      <h4 style="font-size:14px;font-weight:700;color:#1A5276">Repondant #<span id="resp-num">1</span></h4>
-      <span class="badge badge-green" id="resp-status">En cours</span>
-    </div>
-    <div id="form-questions" style="display:flex;flex-direction:column;gap:14px"></div>
-    <div style="display:flex;gap:12px;margin-top:16px">
-      <button class="btn-outline btn-sm" style="flex:1" onclick="cancelRespondent()">Annuler</button>
-      <button class="btn-primary btn-sm" style="flex:1" onclick="saveRespondent()">Enregistrer</button>
-    </div>
-  </div>
-  <div id="responses-list" style="display:flex;flex-direction:column;gap:8px">
-    <p style="color:#95A5A6;text-align:center;padding:24px">Aucune reponse collectee</p>
-  </div>
-</div>
-</div>
-<!-- ═══ STATISTICS ═══ -->
-<div id="screen-stats" class="screen" style="background:#F4F6F9">
-<div class="pb-safe" style="padding:16px;display:flex;flex-direction:column;gap:16px">
-  <div class="card fade-in">
-    <h3 style="font-size:16px;font-weight:700;color:#1A5276;margin-bottom:12px">Selection des variables</h3>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div><label style="font-size:12px;font-weight:600;color:#5B6B7D;display:block;margin-bottom:4px">Variable independante</label><select id="stat-var1" class="input-field"><option value="">Choisir...</option></select></div>
-      <div><label style="font-size:12px;font-weight:600;color:#5B6B7D;display:block;margin-bottom:4px">Variable dependante</label><select id="stat-var2" class="input-field"><option value="">Choisir...</option></select></div>
-    </div>
-    <button class="btn-primary btn-sm" style="margin-top:12px;width:100%" onclick="runAnalysis()">Lancer l'analyse</button>
-  </div>
-  <div id="stat-recommendation" class="card fade-in" style="display:none">
-    <h4 style="font-size:14px;font-weight:700;color:#1A5276;margin-bottom:8px">Test recommande</h4>
-    <p id="stat-rec-text" style="font-size:14px;color:#5B6B7D"></p>
-  </div>
-  <div id="stat-results" class="card fade-in" style="display:none">
-    <h4 style="font-size:14px;font-weight:700;color:#1A5276;margin-bottom:12px">Resultats</h4>
-    <div id="stat-table-container"></div>
-    <canvas id="stat-chart" style="margin-top:16px" height="200"></canvas>
-    <div id="stat-interpretation" style="margin-top:12px;padding:12px;background:#F8F9FA;border-radius:8px;font-size:14px;color:#5B6B7D;line-height:1.6"></div>
-  </div>
-  <!-- Reference table -->
-  <div class="card fade-in">
-    <h4 style="font-size:14px;font-weight:700;color:#1A5276;margin-bottom:8px">Tests statistiques disponibles</h4>
-    <div style="overflow-x:auto">
-      <table style="width:100%;border-collapse:collapse">
-        <thead><tr style="background:#F8F9FA"><th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Test</th><th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Categorie</th><th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Conditions</th></tr></thead>
-        <tbody><tr><td class="px-4 py-3 text-sm font-medium">Chi-carre d'independance</td><td class="px-4 py-3 text-sm">Quali x Quali</td><td class="px-4 py-3 text-sm text-gray-500">Effectifs theoriques >= 5</td></tr><tr><td class="px-4 py-3 text-sm font-medium">Test exact de Fisher</td><td class="px-4 py-3 text-sm">Quali x Quali</td><td class="px-4 py-3 text-sm text-gray-500">Effectifs theoriques < 5</td></tr><tr><td class="px-4 py-3 text-sm font-medium">Test de McNemar</td><td class="px-4 py-3 text-sm">Quali x Quali</td><td class="px-4 py-3 text-sm text-gray-500">Donnees appariees</td></tr><tr><td class="px-4 py-3 text-sm font-medium">t-test de Student</td><td class="px-4 py-3 text-sm">Quali x Quanti (2 grp)</td><td class="px-4 py-3 text-sm text-gray-500">Normalite + homogeneite</td></tr><tr><td class="px-4 py-3 text-sm font-medium">Test de Mann-Whitney</td><td class="px-4 py-3 text-sm">Quali x Quanti (2 grp)</td><td class="px-4 py-3 text-sm text-gray-500">Non-normalite</td></tr><tr><td class="px-4 py-3 text-sm font-medium">ANOVA a un facteur</td><td class="px-4 py-3 text-sm">Quali x Quanti (>2 grp)</td><td class="px-4 py-3 text-sm text-gray-500">Normalite + homogeneite</td></tr><tr><td class="px-4 py-3 text-sm font-medium">Test de Kruskal-Wallis</td><td class="px-4 py-3 text-sm">Quali x Quanti (>2 grp)</td><td class="px-4 py-3 text-sm text-gray-500">Non-normalite</td></tr><tr><td class="px-4 py-3 text-sm font-medium">Correlation de Pearson</td><td class="px-4 py-3 text-sm">Quanti x Quanti</td><td class="px-4 py-3 text-sm text-gray-500">Normalite</td></tr><tr><td class="px-4 py-3 text-sm font-medium">Correlation de Spearman</td><td class="px-4 py-3 text-sm">Quanti x Quanti</td><td class="px-4 py-3 text-sm text-gray-500">Non-normalite</td></tr><tr><td class="px-4 py-3 text-sm font-medium">Regression lineaire simple</td><td class="px-4 py-3 text-sm">Quanti x Quanti</td><td class="px-4 py-3 text-sm text-gray-500">Relation lineaire</td></tr><tr><td class="px-4 py-3 text-sm font-medium">Regression logistique binaire</td><td class="px-4 py-3 text-sm">Binaire (resultat)</td><td class="px-4 py-3 text-sm text-gray-500">Var dependante binaire</td></tr><tr><td class="px-4 py-3 text-sm font-medium">Courbe de Kaplan-Meier</td><td class="px-4 py-3 text-sm">Survie</td><td class="px-4 py-3 text-sm text-gray-500">Donnees de survie</td></tr><tr><td class="px-4 py-3 text-sm font-medium">Courbe ROC / AUC</td><td class="px-4 py-3 text-sm">Diagnostic</td><td class="px-4 py-3 text-sm text-gray-500">Test diagnostique</td></tr><tr><td class="px-4 py-3 text-sm font-medium">Sensibilite / Specificite</td><td class="px-4 py-3 text-sm">Diagnostic</td><td class="px-4 py-3 text-sm text-gray-500">Evaluation test</td></tr><tr><td class="px-4 py-3 text-sm font-medium">Statistiques descriptives</td><td class="px-4 py-3 text-sm">Descriptive</td><td class="px-4 py-3 text-sm text-gray-500">Moyenne, mediane, ecart-type</td></tr><tr><td class="px-4 py-3 text-sm font-medium">Test de Shapiro-Wilk</td><td class="px-4 py-3 text-sm">Normalite</td><td class="px-4 py-3 text-sm text-gray-500">Verification normalite</td></tr><tr><td class="px-4 py-3 text-sm font-medium">Test de Levene</td><td class="px-4 py-3 text-sm">Homogeneite</td><td class="px-4 py-3 text-sm text-gray-500">Verification variances</td></tr></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-</div>
-<!-- ═══ CHAT ═══ -->
-<div id="screen-chat" class="screen" style="background:#F4F6F9;justify-content:flex-end">
-<div style="flex:1;display:flex;flex-direction:column;min-height:0">
-  <!-- Chat list view -->
-  <div id="chat-list" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px">
-    <p style="color:#95A5A6;text-align:center;padding:40px 0">Aucune conversation</p>
-  </div>
-  <!-- Chat conversation view -->
-  <div id="chat-conv" style="display:none;flex:1;flex-direction:column;min-height:0">
-    <div style="padding:12px 16px;background:#fff;border-bottom:1px solid #F0F2F5;display:flex;align-items:center;gap:12px">
-      <button onclick="showChatList()" style="background:none;border:none;cursor:pointer;color:#1A5276"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
-      <div id="chat-partner-avatar" style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#1A5276,#2E86C1);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px">?</div>
-      <div><p id="chat-partner-name" style="font-weight:600;font-size:14px">Nom</p><p id="chat-partner-status" style="font-size:11px;color:#27AE60">En ligne</p></div>
-    </div>
-    <div id="chat-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px"></div>
-    <div style="padding:12px 16px;background:#fff;border-top:1px solid #F0F2F5;display:flex;gap:8px;align-items:flex-end">
-      <textarea id="chat-input" class="input-field" placeholder="Ecrire un message..." rows="1" style="flex:1;min-height:40px;max-height:120px;padding:10px 14px;border-radius:20px" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"></textarea>
-      <button onclick="sendMessage()" style="width:40px;height:40px;border-radius:50%;background:#2E86C1;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg class="w-5 h-5" fill="#fff" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
-    </div>
-  </div>
-</div>
-</div>
-<!-- ═══ NOTIFICATIONS ═══ -->
-<div id="screen-notifications" class="screen" style="background:#F4F6F9">
-<div class="pb-safe" style="padding:16px;display:flex;flex-direction:column;gap:12px">
-  <h3 style="font-size:18px;font-weight:700;color:#1A5276">Notifications</h3>
-  <div id="notif-list" style="display:flex;flex-direction:column;gap:8px">
-    <p style="color:#95A5A6;text-align:center;padding:40px 0">Aucune notification</p>
-  </div>
-</div>
-</div>
-<!-- ═══ REFERENCES ═══ -->
-<div id="screen-references" class="screen" style="background:#F4F6F9">
-<div class="pb-safe" style="padding:16px;display:flex;flex-direction:column;gap:12px">
-  <div class="card fade-in" style="display:flex;gap:8px">
-    <input id="ref-search" class="input-field" placeholder="Rechercher (PubMed, Google Scholar, local)..." style="flex:1">
-    <button class="btn-primary btn-sm" onclick="searchRefs()">Rechercher</button>
-  </div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap">
-    <button class="btn-outline btn-sm" onclick="addRefManual()">+ Ajouter manuellement</button>
-    <select id="ref-format" class="input-field" style="width:auto;padding:6px 12px;font-size:12px"><option value="vancouver">Vancouver</option><option value="apa">APA</option></select>
-  </div>
-  <div id="refs-list" style="display:flex;flex-direction:column;gap:8px">
-    <p style="color:#95A5A6;text-align:center;padding:24px">Aucune reference</p>
-  </div>
-</div>
-</div>
-<!-- ═══ ARCHIVES ═══ -->
-<div id="screen-archives" class="screen" style="background:#F4F6F9">
-<div class="pb-safe" style="padding:16px;display:flex;flex-direction:column;gap:12px">
-  <div class="card fade-in" style="display:flex;gap:8px;flex-wrap:wrap">
-    <select id="arch-year" class="input-field" style="width:auto;flex:1;min-width:120px;padding:8px 12px;font-size:13px" onchange="loadArchives()"><option value="">Annee</option></select>
-    <select id="arch-uni" class="input-field" style="width:auto;min-width:120px;padding:8px 12px;font-size:13px" onchange="loadArchives()"><option value="">Universite</option></select>
-    <select id="arch-domain" class="input-field" style="width:auto;min-width:120px;padding:8px 12px;font-size:13px" onchange="loadArchives()"><option value="">Domaine</option></select>
-  </div>
-  <div id="archives-list" style="display:flex;flex-direction:column;gap:12px">
-    <p style="color:#95A5A6;text-align:center;padding:40px 0">Aucune archive</p>
-  </div>
-</div>
-</div>
-<!-- ═══ CALENDAR ═══ -->
-<div id="screen-calendar" class="screen" style="background:#F4F6F9">
-<div class="pb-safe" style="padding:16px;display:flex;flex-direction:column;gap:16px">
-  <div class="card fade-in">
-    <h3 style="font-size:16px;font-weight:700;color:#1A5276;margin-bottom:16px">Calendrier academique</h3>
-    <div id="calendar-content" style="display:flex;flex-direction:column;gap:12px">
-      <p style="color:#95A5A6;text-align:center;padding:24px">Aucune date academique configuree</p>
-    </div>
-  </div>
-</div>
-</div>
-<!-- ═══ SETTINGS ═══ -->
-<div id="screen-settings" class="screen" style="background:#F4F6F9">
-<div class="pb-safe" style="padding:16px;display:flex;flex-direction:column;gap:16px">
-  <div class="card fade-in">
-    <h3 style="font-size:16px;font-weight:700;color:#1A5276;margin-bottom:16px">Parametres</h3>
-    <div style="display:flex;flex-direction:column;gap:16px">
-      <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:14px">Notifications push</span><label style="position:relative;width:48px;height:26px"><input type="checkbox" checked id="set-notif" style="opacity:0;width:0;height:0"><span style="position:absolute;cursor:pointer;inset:0;background:#2E86C1;border-radius:26px;transition:.3s"></span><span style="position:absolute;height:20px;width:20px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s"></span></label></div>
-      <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:14px">Mode sombre</span><label style="position:relative;width:48px;height:26px"><input type="checkbox" id="set-dark" style="opacity:0;width:0;height:0"><span style="position:absolute;cursor:pointer;inset:0;background:#E0E6ED;border-radius:26px;transition:.3s"></span><span style="position:absolute;height:20px;width:20px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s"></span></label></div>
-      <div><label style="font-size:13px;font-weight:600;color:#5B6B7D;display:block;margin-bottom:6px">Heure de rappel</label><input type="time" class="input-field" value="08:00" id="set-reminder"></div>
-    </div>
-  </div>
-</div>
-</div>
-<!-- ═══ ADMIN: USERS ═══ -->
-<div id="screen-admin-users" class="screen" style="background:#F4F6F9">
-<div class="pb-safe" style="padding:16px;display:flex;flex-direction:column;gap:12px">
-  <div class="card fade-in" style="display:flex;gap:8px">
-    <input id="admin-user-search" class="input-field" placeholder="Rechercher un utilisateur..." style="flex:1" oninput="loadAdminUsers()">
-    <button class="btn-primary btn-sm" onclick="showAddUserModal()">+ Ajouter</button>
-  </div>
-  <div id="admin-users-list" style="display:flex;flex-direction:column;gap:8px">
-    <p style="color:#95A5A6;text-align:center;padding:24px">Aucun utilisateur</p>
-  </div>
-</div>
-</div>
-
-<!-- ═══ ADMIN: UNIVERSITIES ═══ -->
-<div id="screen-admin-unis" class="screen" style="background:#F4F6F9">
-<div class="pb-safe" style="padding:16px;display:flex;flex-direction:column;gap:12px">
-  <button class="btn-primary btn-sm" onclick="showAddUniModal()" style="align-self:flex-start">+ Ajouter une universite</button>
-  <div id="admin-unis-list" style="display:flex;flex-direction:column;gap:12px">
-    <p style="color:#95A5A6;text-align:center;padding:24px">Aucune universite</p>
-  </div>
-</div>
-</div>
-
-<!-- ═══ ADMIN: ACADEMIC YEARS ═══ -->
-<div id="screen-admin-years" class="screen" style="background:#F4F6F9">
-<div class="pb-safe" style="padding:16px;display:flex;flex-direction:column;gap:12px">
-  <button class="btn-primary btn-sm" onclick="showAddYearModal()" style="align-self:flex-start">+ Ajouter une annee</button>
-  <div id="admin-years-list" style="display:flex;flex-direction:column;gap:12px">
-    <p style="color:#95A5A6;text-align:center;padding:24px">Aucune annee academique</p>
-  </div>
-</div>
-</div>
-<!-- ═══════════════════════════════════════════════════════════════
-     JAVASCRIPT - Moteur de l'application MedStat
-     ═══════════════════════════════════════════════════════════════ -->
+<!-- DEPARTMENTS + ICONS + APP -->
 <script>
-// ═══════════════════════════════════════════════════
-// FIREBASE CONFIG - Remplacez par vos propres valeurs
-// ═══════════════════════════════════════════════════
-const firebaseConfig = {
-  apiKey: "VOTRE_API_KEY",
-  authDomain: "votre-projet.firebaseapp.com",
-  projectId: "votre-projet-id",
-  storageBucket: "votre-projet.appspot.com",
-  messagingSenderId: "000000000000",
-  appId: "1:000000000000:web:0000000000000000"
+// ===== SVG ICONS =====
+const ICONS = {
+  heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
+  stethoscope: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/></svg>',
+  brain: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>',
+  baby: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M12 13v8M8 21h8M9 17h6"/></svg>',
+  scissors: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>',
+  brainCircuit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 0 0-4 4v2H6a4 4 0 0 0-4 4v0a4 4 0 0 0 4 4h2v2a4 4 0 0 0 8 0v-2h2a4 4 0 0 0 0-8h-2V6a4 4 0 0 0-4-4z"/></svg>',
+  search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+  arrowLeft: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>',
+  chevronRight: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>',
+  siren: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M4.93 4.93l14.14 14.14M12 2l0 3M12 19l0 3M2 12l3 0M19 12l3 0"/></svg>',
+  alertTriangle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+  bookOpen: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>',
+  pill: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-6 3.75h12v15h-12v-15z"/></svg>',
+  calculator: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="10" y2="18"/><line x1="14" y1="18" x2="16" y2="18"/></svg>',
+  activity: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+  shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+  wind: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>',
+  bug: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4M16 2v4M12 10v6M4.93 7.07l1.41 1.41M18.36 7.07l-1.41 1.41M2 12h4M18 12h4M4.93 16.93l1.41-1.41M18.36 16.93l-1.41-1.41"/><circle cx="12" cy="12" r="4"/></svg>',
+  droplets: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>',
+  bone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="6" r="3"/><circle cx="15" cy="6" r="3"/><path d="M12 9v12M6 18h12"/></svg>',
+  bean: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 6c-2 3-2 9 0 12"/></svg>',
+  flask: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6M10 9V3h4v6l5 8.5a2 2 0 0 1-1.7 3H6.7a2 2 0 0 1-1.7-3L10 9z"/></svg>',
+  zap: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+  thermometer: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>',
+  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+  warning: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+  menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+  fileText: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>',
+  eye: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
 };
 
-// ═══════════════════════════════════════════════════
-// GLOBALS
-// ═══════════════════════════════════════════════════
-let db, auth;
-let currentUser = null;
-let currentUserData = null;
-let currentScreen = 'splash';
-let currentRole = null;
-let activeSupervisionId = null;
-let activeProjectId = null;
-let activeChatSupervisionId = null;
-let selectedDirectorId = null;
-
-// ═══════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', () => {
-  try {
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-    }
-    auth = firebase.auth();
-    db = firebase.firestore();
-    auth.onAuthStateChanged(onAuthStateChanged);
-  } catch(e) {
-    console.warn('Firebase non configure. Mode demonstration active.');
-    console.warn('Remplacez firebaseConfig dans le code par vos valeurs Firebase.');
-    // Allow navigation in demo mode
-    window._demoMode = true;
-  }
-});
-
-function onAuthStateChanged(user) {
-  currentUser = user;
-  if (user) {
-    db.collection('Users').doc(user.uid).get().then(doc => {
-      if (doc.exists) {
-        currentUserData = { id: doc.id, ...doc.data() };
-        currentRole = currentUserData.role;
-        updateUIForRole();
-        nav('dashboard');
-      } else {
-        // User exists in Auth but not in Users collection (admin must create)
-        showDemoDashboard(user);
-      }
-    }).catch(() => {
-      showDemoDashboard(user);
-    });
-  } else {
-    currentUserData = null;
-    currentRole = null;
-    hideAppShell();
-    nav('splash');
-  }
-}
-
-function showDemoDashboard(user) {
-  currentRole = 'student';
-  currentUserData = {
-    id: user.uid,
-    displayName: user.displayName || user.email.split('@')[0],
-    email: user.email,
-    role: 'student',
-    universityName: 'UNIKIN',
-    promotion: 'D4',
-    specialty: 'Medecine interne',
-    title: 'Etudiant'
-  };
-  updateUIForRole();
-  nav('dashboard');
-}
-
-// ═══════════════════════════════════════════════════
-// NAVIGATION / ROUTING
-// ═══════════════════════════════════════════════════
-function nav(screen) {
-  // Hide all screens
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  // Map screen names
-  let screenId = screen;
-  if (screen === 'dashboard' && currentRole === 'director') screenId = 'dir-dashboard';
-  if (screen === 'dashboard' && currentRole === 'admin') screenId = 'admin-users';
-  const el = document.getElementById('screen-' + screenId);
-  if (el) {
-    el.classList.add('active');
-    currentScreen = screen;
-    // Load data for this screen
-    loadScreenData(screen);
-  }
-  // Close drawer
-  document.getElementById('drawer').classList.remove('open');
-  document.getElementById('drawer-overlay').classList.remove('open');
-}
-
-function navTab(tab, role) {
-  // Update bottom nav active state
-  const bnav = document.getElementById('bnav-' + role);
-  if (bnav) {
-    bnav.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-    const btn = bnav.querySelector('[data-tab="' + tab + '"]');
-    if (btn) btn.classList.add('active');
-  }
-  nav(tab);
-}
-
-function loadScreenData(screen) {
-  switch(screen) {
-    case 'dashboard': loadDashboard(); break;
-    case 'dir-dashboard': loadDirectorDashboard(); break;
-    case 'profile': loadProfile(); break;
-    case 'thesis': loadThesis(); break;
-    case 'students': loadStudents(); break;
-    case 'projects': loadProjects(); break;
-    case 'chat': loadChatList(); break;
-    case 'notifications': loadNotifications(); break;
-    case 'references': loadReferences(); break;
-    case 'archives': loadArchives(); break;
-    case 'admin-users': loadAdminUsers(); break;
-    case 'admin-unis': loadAdminUniversities(); break;
-    case 'admin-years': loadAdminYears(); break;
-    case 'collection': loadCollection(); break;
-    case 'stats': loadStats(); break;
-    case 'calendar': loadCalendar(); break;
-  }
-}
-
-// ═══════════════════════════════════════════════════
-// UI ROLE MANAGEMENT
-// ═══════════════════════════════════════════════════
-function updateUIForRole() {
-  if (!currentUserData) return;
-  const r = currentRole;
-  const initials = (currentUserData.displayName || '?').split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
-
-  // Update avatars
-  ['appbar-avatar', 'drawer-avatar', 'prof-avatar'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = initials;
-  });
-
-  // Update names
-  document.getElementById('drawer-name').textContent = currentUserData.displayName || 'Utilisateur';
-  document.getElementById('drawer-role').textContent = {student:'Etudiant',director:'Directeur',co_director:'Co-directeur',admin:'Administrateur'}[r] || r;
-
-  // Show/hide bottom navs
-  document.getElementById('bnav-student').style.display = r === 'student' ? 'flex' : 'none';
-  document.getElementById('bnav-director').style.display = r === 'director' || r === 'co_director' ? 'flex' : 'none';
-  document.getElementById('bnav-admin').style.display = r === 'admin' ? 'flex' : 'none';
-
-  // Show/hide admin drawer items
-  document.getElementById('drawer-admin-btn').style.display = r === 'admin' ? 'block' : 'none';
-
-  // Show appbar
-  showAppShell();
-}
-
-function showAppShell() {
-  document.getElementById('appbar').style.display = 'flex';
-}
-
-function hideAppShell() {
-  document.getElementById('appbar').style.display = 'none';
-  document.getElementById('bnav-student').style.display = 'none';
-  document.getElementById('bnav-director').style.display = 'none';
-  document.getElementById('bnav-admin').style.display = 'none';
-}
-
-function toggleDrawer() {
-  document.getElementById('drawer').classList.toggle('open');
-  document.getElementById('drawer-overlay').classList.toggle('open');
-}
-
-function togglePwd(id, btn) {
-  const inp = document.getElementById(id);
-  inp.type = inp.type === 'password' ? 'text' : 'password';
-}
-
-function showToast(msg, type) {
-  const t = document.createElement('div');
-  t.className = 'toast';
-  t.style.background = type === 'error' ? '#E74C3C' : type === 'success' ? '#27AE60' : '#2E86C1';
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 4000);
-}
-
-// ═══════════════════════════════════════════════════
-// AUTHENTICATION
-// ═══════════════════════════════════════════════════
-async function doLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const pwd = document.getElementById('login-password').value;
-  const errEl = document.getElementById('login-error');
-  errEl.style.display = 'none';
-  if (!email || !pwd) { errEl.textContent = 'Veuillez remplir tous les champs'; errEl.style.display = 'block'; return; }
-  try {
-    await auth.signInWithEmailAndPassword(email, pwd);
-  } catch(e) {
-    errEl.textContent = translateError(e.code);
-    errEl.style.display = 'block';
-  }
-}
-
-async function doGoogleLogin() {
-  try {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    await auth.signInWithPopup(provider);
-  } catch(e) {
-    showToast(translateError(e.code), 'error');
-  }
-}
-
-function translateError(code) {
-  const m = {
-    'auth/user-not-found': 'Aucun compte avec cet e-mail',
-    'auth/wrong-password': 'Mot de passe incorrect',
-    'auth/email-already-in-use': 'Cet e-mail est deja utilise',
-    'auth/weak-password': 'Le mot de passe doit contenir au moins 6 caracteres',
-    'auth/invalid-email': 'Adresse e-mail invalide',
-    'auth/invalid-credential': 'Identifiants incorrects',
-    'auth/too-many-requests': 'Trop de tentatives. Reessayez plus tard.',
-  };
-  return m[code] || 'Erreur de connexion. Verifiez vos identifiants.';
-}
-
-// Signup state
-let signupRole = null;
-let signupStep = 1;
-
-function suStep(n) {
-  document.getElementById('signup-s' + signupStep).style.display = 'none';
-  document.getElementById('signup-s' + n).style.display = 'flex';
-  for (let i = 1; i <= 3; i++) {
-    document.getElementById('step-bar-' + i).style.background = i <= n ? '#2E86C1' : '#E0E6ED';
-  }
-  signupStep = n;
-  if (n === 3) buildSignupSummary();
-}
-
-function pickRole(role) {
-  signupRole = role;
-  document.getElementById('rc-student').style.borderColor = role === 'student' ? '#2E86C1' : '#E0E6ED';
-  document.getElementById('rc-director').style.borderColor = role === 'director' ? '#2E86C1' : '#E0E6ED';
-  document.getElementById('rc-student').style.background = role === 'student' ? '#EBF5FB' : '#fff';
-  document.getElementById('rc-director').style.background = role === 'director' ? '#EAFAF1' : '#fff';
-  document.getElementById('sf-student').style.display = role === 'student' ? 'flex' : 'none';
-  document.getElementById('sf-director').style.display = role === 'director' ? 'flex' : 'none';
-}
-
-function buildSignupSummary() {
-  const name = document.getElementById('su-name').value;
-  const email = document.getElementById('su-email').value;
-  const rLabel = signupRole === 'student' ? 'Etudiant' : 'Directeur';
-  let extra = '';
-  if (signupRole === 'student') {
-    extra = '<p>Universite: ' + (document.getElementById('su-uni').value || '-') + '</p>' +
-            '<p>Promotion: ' + (document.getElementById('su-promo').value || '-') + '</p>' +
-            '<p>Specialite: ' + (document.getElementById('su-spec').value || '-') + '</p>';
-  } else {
-    extra = '<p>Universite: ' + (document.getElementById('su-unid').value || '-') + '</p>' +
-            '<p>Titre: ' + (document.getElementById('su-title').value || '-') + '</p>' +
-            '<p>Specialite: ' + (document.getElementById('su-specd').value || '-') + '</p>';
-  }
-  document.getElementById('su-summary').innerHTML =
-    '<p style="font-size:14px"><strong>' + name + '</strong></p>' +
-    '<p style="font-size:13px;color:#5B6B7D">' + email + '</p>' +
-    '<p style="font-size:13px;color:#2E86C1;font-weight:600;margin-top:4px">Role: ' + rLabel + '</p>' +
-    extra;
-}
-
-async function doSignup() {
-  const errEl = document.getElementById('su-error');
-  errEl.style.display = 'none';
-  if (!document.getElementById('su-terms').checked) {
-    errEl.textContent = 'Vous devez accepter les conditions';
-    errEl.style.display = 'block';
-    return;
-  }
-  const email = document.getElementById('su-email').value.trim();
-  const pwd = document.getElementById('su-pwd').value;
-  const name = document.getElementById('su-name').value.trim();
-  if (!name || !email || !pwd || !signupRole) {
-    errEl.textContent = 'Veuillez remplir tous les champs';
-    errEl.style.display = 'block';
-    return;
-  }
-  try {
-    const cred = await auth.createUserWithEmailAndPassword(email, pwd);
-    await cred.user.updateProfile({ displayName: name });
-    // User document will be created by admin or self-registration cloud function
-    // For now, create it directly
-    let userData = {
-      id: cred.user.uid,
-      email: email,
-      displayName: name,
-      role: signupRole,
-      title: signupRole === 'director' ? (document.getElementById('su-title').value || 'Dr') : 'Etudiant',
-      specialty: signupRole === 'student' ? (document.getElementById('su-spec').value || '') : (document.getElementById('su-specd').value || ''),
-      universityId: signupRole === 'student' ? document.getElementById('su-uni').value : document.getElementById('su-unid').value,
-      universityName: '',
-      promotion: signupRole === 'student' ? document.getElementById('su-promo').value : '',
-      photoURL: '',
-      fcmToken: '',
-      isOnline: true,
-      lastActive: firebase.firestore.FieldValue.serverTimestamp(),
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    };
-    await db.collection('Users').doc(cred.user.uid).set(userData);
-  } catch(e) {
-    errEl.textContent = translateError(e.code);
-    errEl.style.display = 'block';
-  }
-}
-
-async function doLogout() {
-  if (confirm('Voulez-vous vraiment vous deconnecter ?')) {
-    await auth.signOut();
-  }
-}
-
-// ═══════════════════════════════════════════════════
-// STUDENT DASHBOARD
-// ═══════════════════════════════════════════════════
-function loadDashboard() {
-  if (!currentUserData) return;
-  const d = currentUserData;
-  document.getElementById('dash-greeting').textContent = 'Bonjour, ' + (d.displayName || 'Etudiant');
-  document.getElementById('dash-uni').textContent = (d.universityName || '') + ' - ' + (d.promotion || '');
-
-  if (!activeProjectId) {
-    document.getElementById('dash-milestone').textContent = 'Envoyez une demande de supervision pour commencer';
-    return;
-  }
-
-  // Load project data
-  db.collection('ThesisProjects').doc(activeProjectId).get().then(doc => {
-    if (doc.exists) {
-      const p = doc.data();
-      document.getElementById('dash-milestone').textContent = 'Jalon actuel : ' + milestoneLabel(p.currentMilestone);
-      // Progress
-      const pct = milestonePercent(p.currentMilestone);
-      document.getElementById('prog-pct').textContent = pct + '%';
-      const circle = document.getElementById('prog-circle');
-      const offset = 188.5 - (188.5 * pct / 100);
-      circle.style.strokeDashoffset = offset;
-      circle.style.stroke = pct < 25 ? '#E74C3C' : pct < 50 ? '#F39C12' : pct < 75 ? '#F39C12' : '#27AE60';
-    }
-  }).catch(() => {});
-
-  // Count references
-  if (activeProjectId) {
-    db.collection('References').where('projectId', '==', activeProjectId).get().then(snap => {
-      document.getElementById('kpi-refs').textContent = snap.size;
-    }).catch(() => {});
-    db.collection('SurveyResponses').where('projectId', '==', activeProjectId).get().then(snap => {
-      document.getElementById('kpi-data').textContent = snap.size;
-    }).catch(() => {});
-  }
-
-  // Load notifications
-  loadDashboardNotifications();
-  loadDashboardMessages();
-  // Find active supervision
-  findActiveSupervision();
-}
-
-function findActiveSupervision() {
-  if (!currentUser) return;
-  db.collection('Supervisions').where('studentId', '==', currentUser.uid).where('status', '==', 'accepted').limit(1).get()
-  .then(snap => {
-    if (!snap.empty) {
-      const sup = snap.docs[0];
-      activeSupervisionId = sup.id;
-      if (sup.data().thesisProjectId) {
-        activeProjectId = sup.data().thesisProjectId;
-      }
-    }
-  }).catch(() => {});
-}
-
-function loadDashboardNotifications() {
-  if (!currentUser) return;
-  db.collection('Notifications').where('userId', '==', currentUser.uid).orderBy('createdAt', 'desc').limit(5).get()
-  .then(snap => {
-    const el = document.getElementById('dash-notifs');
-    if (snap.empty) { el.innerHTML = '<p style="color:#95A5A6;font-size:13px;text-align:center;padding:12px">Aucune notification</p>'; return; }
-    let html = '';
-    snap.forEach(doc => {
-      const n = doc.data();
-      html += '<div style="display:flex;gap:10px;align-items:flex-start;padding:8px;border-radius:8px;background:' + (n.isRead ? 'transparent' : '#EBF5FB') + '">' +
-        '<div style="width:8px;height:8px;border-radius:50%;background:' + (n.isRead ? '#E0E6ED' : '#2E86C1') + ';margin-top:6px;flex-shrink:0"></div>' +
-        '<div style="flex:1;min-width:0"><p style="font-size:13px;font-weight:600;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (n.title || '') + '</p>' +
-        '<p style="font-size:12px;color:#5B6B7D;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (n.body || '') + '</p></div></div>';
-    });
-    el.innerHTML = html;
-    // Update badge
-    const unread = snap.docs.filter(d => !d.data().isRead).length;
-    const badge = document.getElementById('notif-badge');
-    if (unread > 0) { badge.textContent = unread; badge.style.display = 'flex'; }
-    else { badge.style.display = 'none'; }
-  }).catch(() => {});
-}
-
-function loadDashboardMessages() {
-  if (!activeSupervisionId || !currentUser) return;
-  db.collection('Messages').where('supervisionId', '==', activeSupervisionId).orderBy('createdAt', 'desc').limit(3).get()
-  .then(snap => {
-    const el = document.getElementById('dash-msgs');
-    if (snap.empty) { el.innerHTML = '<p style="color:#95A5A6;font-size:13px;text-align:center;padding:12px">Aucun message</p>'; return; }
-    let html = '';
-    snap.forEach(doc => {
-      const m = doc.data();
-      const isMine = m.senderId === currentUser.uid;
-      html += '<div style="display:flex;gap:10px;align-items:center;padding:8px;border-radius:8px;cursor:pointer" onclick="openChat(\'' + m.supervisionId + '\')">' +
-        '<div style="width:36px;height:36px;border-radius:50%;background:#2E86C1;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:600">' + (isMine ? 'Moi' : 'Dr') + '</div>' +
-        '<div style="flex:1;min-width:0"><p style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (m.content || '').substring(0, 50) + '</p></div>' +
-        (m.isRead ? '' : '<div style="width:8px;height:8px;border-radius:50%;background:#2E86C1"></div>') +
-        '</div>';
-    });
-    el.innerHTML = html;
-  }).catch(() => {});
-}
-
-// ═══════════════════════════════════════════════════
-// DIRECTOR DASHBOARD
-// ═══════════════════════════════════════════════════
-function loadDirectorDashboard() {
-  if (!currentUserData) return;
-  document.getElementById('dir-greeting').textContent = 'Bonjour, ' + (currentUserData.displayName || 'Dr');
-  document.getElementById('dir-uni').textContent = (currentUserData.universityName || currentUserData.specialty || '');
-
-  // Load KPIs
-  db.collection('Supervisions').where('directorId', '==', currentUser.uid).where('status', '==', 'accepted').get()
-  .then(snap => {
-    document.getElementById('dir-kpi-active').textContent = snap.size;
-  }).catch(() => {});
-
-  db.collection('Supervisions').where('directorId', '==', currentUser.uid).where('status', '==', 'pending').get()
-  .then(snap => {
-    document.getElementById('dir-kpi-pending').textContent = snap.size;
-    const el = document.getElementById('dir-requests');
-    if (snap.empty) { el.innerHTML = '<p style="color:#95A5A6;font-size:13px;text-align:center;padding:12px">Aucune demande</p>'; return; }
-    let html = '';
-    snap.forEach(doc => {
-      const s = doc.data();
-      html += '<div class="card" style="padding:12px"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><p style="font-weight:600;font-size:14px">' + (s.studentMessage || 'Demande de supervision') + '</p><p style="font-size:12px;color:#5B6B7D;margin-top:2px">Promotion: ' + (s.promotion || '-') + ' | ' + (s.universityId || '') + '</p></div>' +
-        '<div style="display:flex;gap:6px"><button class="btn-success btn-sm" style="padding:6px 12px;font-size:12px" onclick="handleSupervision(\'' + doc.id + '\',\'accepted\')">Accepter</button>' +
-        '<button class="btn-danger btn-sm" style="padding:6px 12px;font-size:12px" onclick="handleSupervision(\'' + doc.id + '\',\'rejected\')">Refuser</button></div></div></div>';
-    });
-    el.innerHTML = html;
-  }).catch(() => {});
-
-  // Load milestone chart
-  loadDirectorChart();
-}
-
-let milestoneChartInstance = null;
-function loadDirectorChart() {
-  if (!currentUser) return;
-  db.collection('Supervisions').where('directorId', '==', currentUser.uid).where('status', '==', 'accepted').get()
-  .then(snap => {
-    const counts = {};
-    MILESTONES.forEach(m => counts[m[0]] = 0);
-    let promises = [];
-    snap.forEach(doc => {
-      const s = doc.data();
-      if (s.thesisProjectId) {
-        promises.push(db.collection('ThesisProjects').doc(s.thesisProjectId).get().then(pdoc => {
-          if (pdoc.exists) counts[pdoc.data().currentMilestone] = (counts[pdoc.data().currentMilestone] || 0) + 1;
-        }).catch(() => {}));
-      }
-    });
-    Promise.all(promises).then(() => {
-      const ctx = document.getElementById('dir-milestone-chart');
-      if (!ctx) return;
-      if (milestoneChartInstance) milestoneChartInstance.destroy();
-      milestoneChartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: MILESTONES.map(m => m[1].substring(0, 15)),
-          datasets: [{ data: MILESTONES.map(m => counts[m[0]] || 0), backgroundColor: '#2E86C1', borderRadius: 6, barThickness: 20 }]
-        },
-        options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } } }
-      });
-    });
-  }).catch(() => {});
-}
-
-async function handleSupervision(supId, status) {
-  try {
-    await db.collection('Supervisions').doc(supId).update({
-      status: status,
-      responseDate: firebase.firestore.FieldValue.serverTimestamp(),
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    if (status === 'accepted') {
-      // Create ThesisProject
-      const supDoc = await db.collection('Supervisions').doc(supId).get();
-      const sup = supDoc.data();
-      const projRef = await db.collection('ThesisProjects').add({
-        supervisionId: supId,
-        studentId: sup.studentId,
-        directorId: sup.directorId,
-        title: sup.studentMessage || '',
-        subject: '',
-        domain: '',
-        subDomain: '',
-        researchQuestion: '',
-        objectives: [],
-        hypotheses: [],
-        currentMilestone: 'topic_assigned',
-        milestoneDates: {},
-        plagiarismScore: 0,
-        isArchived: false,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      await db.collection('Supervisions').doc(supId).update({ thesisProjectId: projRef.id });
-      // Create notification
-      await db.collection('Notifications').add({
-        userId: sup.studentId,
-        type: 'supervision_request',
-        title: 'Demande acceptee',
-        body: 'Le directeur a accepte votre demande de supervision',
-        isRead: false,
-        deepLink: 'thesis',
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      showToast('Supervision acceptee et projet cree', 'success');
-    } else {
-      showToast('Demande refusee', 'info');
-    }
-    loadDirectorDashboard();
-  } catch(e) {
-    showToast('Erreur: ' + e.message, 'error');
-  }
-}
-
-// ═══════════════════════════════════════════════════
-// PROFILE
-// ═══════════════════════════════════════════════════
-function loadProfile() {
-  if (!currentUserData) return;
-  const d = currentUserData;
-  const initials = (d.displayName || '?').split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
-  document.getElementById('prof-avatar').textContent = initials;
-  document.getElementById('prof-name').textContent = d.displayName;
-  document.getElementById('prof-meta').textContent = (d.title || '') + ' - ' + (d.specialty || '') + ' (' + (d.role || '') + ')';
-  document.getElementById('prof-displayname').value = d.displayName || '';
-  document.getElementById('prof-title').value = d.title || '';
-  document.getElementById('prof-specialty').value = d.specialty || '';
-  document.getElementById('prof-email').value = d.email || '';
-}
-
-async function saveProfile() {
-  if (!currentUser) return;
-  try {
-    await db.collection('Users').doc(currentUser.uid).update({
-      displayName: document.getElementById('prof-displayname').value,
-      title: document.getElementById('prof-title').value,
-      specialty: document.getElementById('prof-specialty').value,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    showToast('Profil mis a jour', 'success');
-  } catch(e) {
-    showToast('Erreur: ' + e.message, 'error');
-  }
-}
-
-async function changePwd() {
-  const old = document.getElementById('prof-oldpwd').value;
-  const newp = document.getElementById('prof-newpwd').value;
-  if (!old || !newp) { showToast('Remplissez les deux champs', 'error'); return; }
-  try {
-    await auth.currentUser.updatePassword(newp);
-    showToast('Mot de passe change', 'success');
-    document.getElementById('prof-oldpwd').value = '';
-    document.getElementById('prof-newpwd').value = '';
-  } catch(e) {
-    showToast(translateError(e.code), 'error');
-  }
-}
-
-// ═══════════════════════════════════════════════════
-// THESIS / MILESTONE CONTENT
-// ═══════════════════════════════════════════════════
-function loadThesis() {
-  if (!activeProjectId) return;
-  db.collection('ThesisProjects').doc(activeProjectId).get().then(doc => {
-    if (doc.exists) {
-      const p = doc.data();
-      document.getElementById('thesis-title').textContent = p.title || 'Projet sans titre';
-      document.getElementById('thesis-domain').textContent = (p.domain || '') + ' | ' + milestoneLabel(p.currentMilestone);
-      document.getElementById('btn-find-director').style.display = 'none';
-    }
-  }).catch(() => {});
-  // Default: show first milestone tab
-  const firstTab = document.querySelector('.tab-item');
-  if (firstTab) { firstTab.classList.add('active'); switchMilestoneTab('topic_assigned'); }
-}
-
-function switchMilestoneTab(ms) {
-  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-  const tab = document.querySelector('[data-ms="' + ms + '"]');
-  if (tab) tab.classList.add('active');
-  const el = document.getElementById('thesis-content');
-  if (!activeProjectId) {
-    el.innerHTML = '<p style="color:#95A5A6;text-align:center;padding:40px">Aucun projet actif</p>';
-    return;
-  }
-  // Load content based on milestone type
-  switch(ms) {
-    case 'literature_review': loadLiteratureReview(el); break;
-    case 'protocol': loadProtocol(el); break;
-    case 'survey_form': loadSurveyForm(el); break;
-    case 'data_collection': el.innerHTML = '<p style="color:#5B6B7D;text-align:center;padding:20px">Utilisez l\'onglet <strong>Collecte</strong> pour saisir les donnees</p>'; break;
-    case 'analysis': el.innerHTML = '<p style="color:#5B6B7D;text-align:center;padding:20px">Utilisez l\'onglet <strong>Statistiques</strong> pour les analyses</p>'; break;
-    case 'discussion': loadDiscussion(el); break;
-    case 'references': el.innerHTML = '<p style="color:#5B6B7D;text-align:center;padding:20px">Utilisez le menu <strong>References bibliographiques</strong></p>'; break;
-    default: el.innerHTML = milestoneContentHTML(ms); break;
-  }
-}
-
-function milestoneContentHTML(ms) {
-  const configs = {
-    topic_assigned: { title: 'Sujet assigne', desc: 'Le directeur a valide le sujet de votre memoire.', fields: ['title','subject','domain','researchQuestion','objectives'] },
-    finalization: { title: 'Finalisation du memoire', desc: 'Assemblez et exportez votre memoire complet.', fields: [] }
-  };
-  const c = configs[ms] || { title: milestoneLabel(ms), desc: '', fields: [] };
-  let html = '<h4 style="font-size:16px;font-weight:700;color:#1A5276;margin-bottom:8px">' + c.title + '</h4>';
-  html += '<p style="color:#5B6B7D;font-size:14px;line-height:1.6;margin-bottom:16px">' + c.desc + '</p>';
-  if (ms === 'finalization') {
-    html += '<div style="display:flex;gap:12px;flex-wrap:wrap">' +
-      '<button class="btn-primary btn-sm" onclick="exportThesis(\'docx\')">Export Word (DOCX)</button>' +
-      '<button class="btn-primary btn-sm" onclick="exportThesis(\'pdf\')">Export PDF</button>' +
-      '<button class="btn-outline btn-sm" onclick="checkPlagiarism()">Verification anti-plagiat</button></div>';
-    html += '<div id="plagiarism-result" style="margin-top:12px"></div>';
-  }
-  return html;
-}
-
-function loadLiteratureReview(el) {
-  el.innerHTML = '<div style="display:flex;flex-direction:column;gap:12px">' +
-    '<h4 style="font-size:16px;font-weight:700;color:#1A5276">Revue de litterature</h4>' +
-    '<div style="display:flex;gap:8px;align-items:center"><span style="font-size:13px;color:#5B6B7D">Mots:</span><span id="lr-wordcount" style="font-family:Roboto Mono;font-size:13px;font-weight:600;color:#1A5276">0</span></div>' +
-    '<textarea id="lr-content" class="input-field" style="min-height:300px" placeholder="Redigez votre revue de litterature ici..." oninput="updateWordCount()"></textarea>' +
-    '<div style="display:flex;gap:8px"><button class="btn-primary btn-sm" onclick="saveLiteratureReview(\'draft\')">Sauvegarder brouillon</button>' +
-    '<button class="btn-success btn-sm" onclick="saveLiteratureReview(\'submitted\')">Soumettre au directeur</button></div></div>';
-  // Load existing
-  if (activeProjectId) {
-    db.collection('LiteratureReviews').where('projectId', '==', activeProjectId).orderBy('version', 'desc').limit(1).get()
-    .then(snap => {
-      if (!snap.empty) {
-        const d = snap.docs[0].data();
-        document.getElementById('lr-content').value = d.content || '';
-        updateWordCount();
-      }
-    }).catch(() => {});
-  }
-}
-
-function updateWordCount() {
-  const text = document.getElementById('lr-content').value;
-  document.getElementById('lr-wordcount').textContent = text.split(/\s+/).filter(w => w).length;
-}
-
-async function saveLiteratureReview(status) {
-  if (!activeProjectId) return;
-  const content = document.getElementById('lr-content').value;
-  try {
-    // Check if exists
-    const existing = await db.collection('LiteratureReviews').where('projectId', '==', activeProjectId).orderBy('version', 'desc').limit(1).get();
-    const version = existing.empty ? 1 : (existing.docs[0].data().version || 0) + 1;
-    if (existing.empty) {
-      await db.collection('LiteratureReviews').add({
-        projectId: activeProjectId,
-        content: content,
-        structure: {},
-        keyFindings: [],
-        wordCount: content.split(/\s+/).filter(w => w).length,
-        status: status,
-        version: version,
-        directorComments: [],
-        lastEditedBy: 'student',
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    } else {
-      await db.collection('LiteratureReviews').doc(existing.docs[0].id).update({
-        content: content,
-        wordCount: content.split(/\s+/).filter(w => w).length,
-        status: status,
-        version: version,
-        lastEditedBy: 'student',
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    }
-    showToast(status === 'submitted' ? 'Revue soumise' : 'Brouillon sauvegarde', 'success');
-  } catch(e) {
-    showToast('Erreur: ' + e.message, 'error');
-  }
-}
-
-function loadProtocol(el) {
-  const sections = [
-    { id: 'proto-general', title: 'Informations generales', fields: [
-      { id: 'proto-type', label: 'Type d\'etude', type: 'select', options: ['Observationnel','Experimental','Transversal','Longitudinal','Cas-temoin'] },
-      { id: 'proto-design', label: 'Plan d\'etude', type: 'textarea' }
-    ]},
-    { id: 'proto-problem', title: 'Problematique et objectifs', fields: [
-      { id: 'proto-question', label: 'Question de recherche', type: 'textarea' },
-      { id: 'proto-objectives', label: 'Objectifs specifiques (un par ligne)', type: 'textarea' },
-      { id: 'proto-hypotheses', label: 'Hypotheses (une par ligne)', type: 'textarea' }
-    ]},
-    { id: 'proto-pop', title: 'Population et echantillon', fields: [
-      { id: 'proto-population', label: 'Population d\'etude', type: 'textarea' },
-      { id: 'proto-sample', label: 'Taille d\'echantillon', type: 'number' },
-      { id: 'proto-formula', label: 'Formule utilisee', type: 'text' }
-    ]},
-    { id: 'proto-vars', title: 'Variables', fields: [
-      { id: 'proto-indep', label: 'Variables independantes', type: 'textarea' },
-      { id: 'proto-dep', label: 'Variables dependantes', type: 'textarea' },
-      { id: 'proto-conf', label: 'Variables confusionnelles', type: 'textarea' }
-    ]},
-    { id: 'proto-collect', title: 'Collecte de donnees', fields: [
-      { id: 'proto-method', label: 'Methode de collecte', type: 'select', options: ['Questionnaire','Entretien','Dossiers medicaux','Examen clinique'] }
-    ]},
-    { id: 'proto-ethics', title: 'Considerations ethiques', fields: [
-      { id: 'proto-ethics', label: 'Considérations ethiques', type: 'textarea' }
-    ]},
-    { id: 'proto-statplan', title: 'Plan d\'analyse statistique', fields: [
-      { id: 'proto-plan', label: 'Analyses prevues', type: 'textarea' }
-    ]}
-  ];
-
-  let html = '<h4 style="font-size:16px;font-weight:700;color:#1A5276;margin-bottom:12px">Protocole de recherche</h4>';
-  sections.forEach((s, i) => {
-    html += '<div class="card" style="padding:0;margin-bottom:8px;overflow:hidden">' +
-      '<div class="accordion-header" onclick="toggleAccordion(this)">' +
-      '<span style="font-weight:600;font-size:14px;color:#1A5276">' + (i+1) + '. ' + s.title + '</span>' +
-      '<svg class="w-5 h-5" style="color:#5B6B7D;transition:transform .3s" fill="currentColor" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg></div>' +
-      '<div class="accordion-content"><div style="padding:16px;display:flex;flex-direction:column;gap:12px">';
-    s.fields.forEach(f => {
-      html += '<div><label style="font-size:12px;font-weight:600;color:#5B6B7D;display:block;margin-bottom:4px">' + f.label + '</label>';
-      if (f.type === 'textarea') html += '<textarea id="' + f.id + '" class="input-field" rows="3"></textarea>';
-      else if (f.type === 'select') {
-        html += '<select id="' + f.id + '" class="input-field"><option value="">Choisir...</option>';
-        f.options.forEach(o => html += '<option value="' + o + '">' + o + '</option>');
-        html += '</select>';
-      } else html += '<input id="' + f.id + '" type="' + f.type + '" class="input-field">';
-      html += '</div>';
-    });
-    html += '</div></div></div>';
-  });
-  html += '<div style="display:flex;gap:8px;margin-top:8px"><button class="btn-primary btn-sm" onclick="saveProtocol(\'draft\')">Sauvegarder</button>' +
-    '<button class="btn-success btn-sm" onclick="saveProtocol(\'submitted\')">Soumettre</button></div>';
-  el.innerHTML = html;
-
-  // Load existing
-  if (activeProjectId) {
-    db.collection('ResearchProtocols').where('projectId', '==', activeProjectId).orderBy('version', 'desc').limit(1).get()
-    .then(snap => {
-      if (!snap.empty) {
-        const d = snap.docs[0].data();
-        const map = { studyType: 'proto-type', studyDesign: 'proto-design', researchQuestion: 'proto-question', population: 'proto-population', sampleSize: 'proto-sample', sampleSizeFormula: 'proto-formula' };
-        Object.entries(map).forEach(([k, id]) => { const el = document.getElementById(id); if (el && d[k]) el.value = d[k]; });
-      }
-    }).catch(() => {});
-  }
-}
-
-function toggleAccordion(header) {
-  const content = header.nextElementSibling;
-  const arrow = header.querySelector('svg');
-  content.classList.toggle('open');
-  arrow.style.transform = content.classList.contains('open') ? 'rotate(180deg)' : '';
-}
-
-async function saveProtocol(status) {
-  if (!activeProjectId) return;
-  try {
-    const data = {
-      projectId: activeProjectId,
-      studyType: document.getElementById('proto-type').value,
-      studyDesign: document.getElementById('proto-design').value,
-      population: document.getElementById('proto-population').value,
-      sampleSize: parseInt(document.getElementById('proto-sample').value) || 0,
-      sampleSizeFormula: document.getElementById('proto-formula').value,
-      variables: [],
-      independentVars: (document.getElementById('proto-indep').value || '').split('\n').filter(v => v),
-      dependentVars: (document.getElementById('proto-dep').value || '').split('\n').filter(v => v),
-      confoundingVars: (document.getElementById('proto-conf').value || '').split('\n').filter(v => v),
-      dataCollectionMethod: document.getElementById('proto-method').value,
-      ethicalConsiderations: document.getElementById('proto-ethics').value,
-      statisticalPlan: document.getElementById('proto-plan').value,
-      status: status,
-      version: 1,
-      directorComments: [],
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    };
-    const existing = await db.collection('ResearchProtocols').where('projectId', '==', activeProjectId).limit(1).get();
-    if (existing.empty) {
-      await db.collection('ResearchProtocols').add(data);
-    } else {
-      data.version = (existing.docs[0].data().version || 0) + 1;
-      await db.collection('ResearchProtocols').doc(existing.docs[0].id).update(data);
-    }
-    showToast(status === 'submitted' ? 'Protocole soumis' : 'Sauvegarde', 'success');
-  } catch(e) {
-    showToast('Erreur: ' + e.message, 'error');
-  }
-}
-
-function loadSurveyForm(el) {
-  el.innerHTML = '<h4 style="font-size:16px;font-weight:700;color:#1A5276;margin-bottom:12px">Fiche d\'enquete</h4>' +
-    '<div class="card" style="background:#EBF5FB;border:1px solid #AED6F1">' +
-    '<p style="font-size:14px;color:#1A5276;font-weight:600;margin-bottom:4px">Generation IA de la fiche</p>' +
-    '<p style="font-size:13px;color:#5B6B7D;line-height:1.5">L\'IA analyse votre revue de litterature et protocole pour generer automatiquement une fiche d\'enquete optimisee avec les variables, types de reponses et logique de saut conditionnel.</p></div>' +
-    '<button class="btn-primary" style="width:100%;margin-top:12px" onclick="generateSurveyAI()">Generer la fiche avec l\'IA</button>' +
-    '<div id="survey-form-content" style="margin-top:16px"></div>';
-  // Load existing form
-  if (activeProjectId) {
-    db.collection('SurveyForms').where('projectId', '==', activeProjectId).orderBy('version', 'desc').limit(1).get()
-    .then(snap => {
-      if (!snap.empty) renderSurveyForm(snap.docs[0].data());
-    }).catch(() => {});
-  }
-}
-
-function generateSurveyAI() {
-  showToast('Generation en cours... L\'IA analyse vos documents', 'info');
-  // Simulate AI generation (in production, call OpenAI/Claude API)
-  setTimeout(() => {
-    const demoQuestions = [
-      { id: 'q1', text: 'Age du patient', type: 'number', category: 'Sociodemographique', required: true, variableName: 'age' },
-      { id: 'q2', text: 'Sexe', type: 'single_choice', options: ['Masculin','Feminin'], category: 'Sociodemographique', required: true, variableName: 'sexe' },
-      { id: 'q3', text: 'Niveau d\'education', type: 'single_choice', options: ['Primaire','Secondaire','Universitaire'], category: 'Sociodemographique', required: true, variableName: 'education' },
-      { id: 'q4', text: 'Diagnostic principal', type: 'text', category: 'Clinique', required: true, variableName: 'diagnostic' },
-      { id: 'q5', text: 'Duree d\'evolution (en mois)', type: 'number', category: 'Clinique', required: true, variableName: 'duree' },
-      { id: 'q6', text: 'Antecedents pathologiques', type: 'multiple_choice', options: ['Hypertension','Diabete','VIH','Tuberculose','Autre'], category: 'Antecedents', required: false, variableName: 'antecedents' },
-      { id: 'q7', text: 'Pression arterielle systolique (mmHg)', type: 'number', category: 'Paraclinique', required: true, variableName: 'pas' },
-      { id: 'q8', text: 'Resultat de l\'examen', type: 'single_choice', options: ['Normal','Anormal'], category: 'Paraclinique', required: true, variableName: 'resultat_examen', skipLogic: { questionId: 'q7', operator: '>', value: 140 } }
-    ];
-    renderSurveyForm({ questions: demoQuestions, aiGenerated: true, isLocked: false, title: 'Fiche d\'enquete - Memoire', status: 'generated', totalQuestions: demoQuestions.length, estimatedDuration: 12 });
-    showToast('Fiche generee avec succes !', 'success');
-  }, 2000);
-}
-
-function renderSurveyForm(form) {
-  const container = document.getElementById('survey-form-content');
-  if (!container) return;
-  let html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
-    '<span class="badge ' + (form.isLocked ? 'badge-green' : 'badge-blue') + '">' + (form.isLocked ? 'Verrouillee' : 'Brouillon') + '</span>' +
-    '<span style="font-size:12px;color:#5B6B7D">' + (form.totalQuestions || 0) + ' questions | ~' + (form.estimatedDuration || 0) + ' min</span></div>';
-  (form.questions || []).forEach((q, i) => {
-    html += '<div class="card" style="padding:12px;margin-bottom:8px"><div style="display:flex;gap:8px;align-items:flex-start">' +
-      '<span style="font-family:Roboto Mono;font-size:12px;color:#2E86C1;font-weight:600;min-width:24px">Q' + (i+1) + '</span>' +
-      '<div style="flex:1"><p style="font-size:14px;font-weight:500;margin-bottom:4px">' + q.text + (q.required ? ' *' : '') + '</p>' +
-      '<span class="badge badge-gray" style="font-size:10px">' + (q.category || '') + ' | ' + (q.variableName || '') + ' | ' + (q.type || '') + '</span></div>';
-    if (!form.isLocked) html += '<button style="background:none;border:none;cursor:pointer;color:#E74C3C" onclick="this.closest(\'.card\').remove()"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>';
-    html += '</div></div>';
-  });
-  if (!form.isLocked) {
-    html += '<div style="display:flex;gap:8px;margin-top:8px"><button class="btn-primary btn-sm" onclick="saveSurveyForm()">Sauvegarder</button>' +
-      '<button class="btn-success btn-sm" onclick="submitSurveyForValidation()">Soumettre pour validation</button></div>';
-  }
-  container.innerHTML = html;
-}
-
-function loadDiscussion(el) {
-  el.innerHTML = '<h4 style="font-size:16px;font-weight:700;color:#1A5276;margin-bottom:12px">Generation IA de la discussion</h4>' +
-    '<div class="card" style="background:#EBF5FB;border:1px solid #AED6F1"><p style="font-size:14px;color:#1A5276;font-weight:600;margin-bottom:4px">Discussion assistee par IA</p>' +
-    '<p style="font-size:13px;color:#5B6B7D;line-height:1.5">L\'IA compare vos resultats avec les etudes citees dans la revue de litterature et genere une discussion structuree avec references auto-identifiees.</p></div>' +
-    '<button class="btn-primary" style="width:100%;margin-top:12px" onclick="generateDiscussionAI()">Generer la discussion avec l\'IA</button>' +
-    '<div id="discussion-content" style="margin-top:16px"></div>';
-}
-
-function generateDiscussionAI() {
-  showToast('Generation en cours...', 'info');
-  setTimeout(() => {
-    const el = document.getElementById('discussion-content');
-    if (!el) return;
-    el.innerHTML = '<div class="card" style="padding:16px"><h5 style="color:#1A5276;font-weight:700;margin-bottom:8px">5.1. Concordances avec la litterature</h5>' +
-      '<p style="font-size:14px;color:#5B6B7D;line-height:1.6">Nos resultats sont concordants avec ceux rapportes par [Reference 1] qui avait trouve des resultats similaires dans une population comparable. Ces resultats confirment l\'hypothese selon laquelle...</p></div>' +
-      '<div class="card" style="padding:16px;margin-top:8px"><h5 style="color:#1A5276;font-weight:700;margin-bottom:8px">5.2. Discordances</h5>' +
-      '<p style="font-size:14px;color:#5B6B7D;line-height:1.6">Contrairement a [Reference 3], nos resultats montrent une difference significative. Cette discordance pourrait s\'expliquer par les differences methodologiques, notamment la taille de l\'echantillon et les criteres d\'inclusion...</p></div>' +
-      '<div class="card" style="padding:16px;margin-top:8px"><h5 style="color:#1A5276;font-weight:700;margin-bottom:8px">5.3. Implications cliniques</h5>' +
-      '<p style="font-size:14px;color:#5B6B7D;line-height:1.6">Ces resultats ont des implications importantes pour la pratique clinique en RDC. Ils suggerent que...</p></div>' +
-      '<div class="card" style="padding:16px;margin-top:8px"><h5 style="color:#1A5276;font-weight:700;margin-bottom:8px">5.4. Limites</h5>' +
-      '<p style="font-size:14px;color:#5B6B7D;line-height:1.6">Notre etude presente certaines limites. La taille de l\'echantillon reste modeste et le caractere unicentrique limite la generalisabilite des resultats...</p></div>' +
-      '<div class="card" style="padding:16px;margin-top:8px"><h5 style="color:#1A5276;font-weight:700;margin-bottom:8px">5.5. Perspectives</h5>' +
-      '<p style="font-size:14px;color:#5B6B7D;line-height:1.6">Des etudes complementaires multicentriques seraient necessaires pour confirmer ces resultats. Par ailleurs, l\'utilisation de methodes analytiques plus avancees permettrait de...</p></div>';
-    showToast('Discussion generee !', 'success');
-  }, 2500);
-}
-
-function exportThesis(format) {
-  showToast('Export ' + format.toUpperCase() + ' en cours de preparation...', 'info');
-  setTimeout(() => showToast('Document exporte avec succes (mode demo)', 'success'), 2000);
-}
-
-function checkPlagiarism() {
-  showToast('Verification anti-plagiat en cours...', 'info');
-  setTimeout(() => {
-    const el = document.getElementById('plagiarism-result');
-    if (el) el.innerHTML = '<div class="card" style="margin-top:12px;background:#EAFAF1;border:1px solid #A9DFBF">' +
-      '<p style="font-size:14px;font-weight:600;color:#27AE60">Score de similarite: 12%</p>' +
-      '<p style="font-size:13px;color:#5B6B7D;margin-top:4px">Votre document est original. Aucun passage plagiarise significatif detecte.</p></div>';
-    showToast('Verification terminee', 'success');
-  }, 3000);
-}
-
-// ═══════════════════════════════════════════════════
-// FIND DIRECTOR / SUPERVISION REQUEST
-// ═══════════════════════════════════════════════════
-function searchDirectors(query) {
-  if (!query || query.length < 2) {
-    document.getElementById('directors-list').innerHTML = '<p style="color:#95A5A6;text-align:center;padding:24px">Saisissez au moins 2 caracteres</p>';
-    return;
-  }
-  db.collection('Users').where('role', 'in', ['director', 'co_director']).get()
-  .then(snap => {
-    let html = '';
-    snap.forEach(doc => {
-      const d = doc.data();
-      const name = (d.displayName || '').toLowerCase();
-      const spec = (d.specialty || '').toLowerCase();
-      if (name.includes(query.toLowerCase()) || spec.includes(query.toLowerCase())) {
-        const initials = (d.displayName || '?').split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
-        html += '<div class="card fade-in" style="display:flex;align-items:center;gap:12px;cursor:pointer" onclick="openSupervisionModal(\'' + doc.id + '\',\'' + (d.displayName || '').replace(/'/g, "\\'") + '\')">' +
-          '<div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#27AE60,#1A5276);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px">' + initials + '</div>' +
-          '<div style="flex:1"><p style="font-weight:600;font-size:14px">' + (d.displayName || '') + '</p><p style="font-size:12px;color:#5B6B7D">' + (d.title || '') + ' ' + (d.specialty || '') + ' | ' + (d.universityName || '') + '</p></div>' +
-          '<svg class="w-5 h-5" style="color:#95A5A6" fill="currentColor" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></div>';
-      }
-    });
-    document.getElementById('directors-list').innerHTML = html || '<p style="color:#95A5A6;text-align:center;padding:24px">Aucun directeur trouve</p>';
-  }).catch(() => {
-    document.getElementById('directors-list').innerHTML = '<p style="color:#95A5A6;text-align:center;padding:24px">Erreur de chargement</p>';
-  });
-}
-
-function openSupervisionModal(dirId, dirName) {
-  selectedDirectorId = dirId;
-  document.getElementById('modal-dir-name').textContent = dirName;
-  document.getElementById('modal-supervision').style.display = 'flex';
-}
-
-async function sendSupervisionRequest() {
-  if (!currentUser || !selectedDirectorId) return;
-  const subject = document.getElementById('req-subject').value.trim();
-  const message = document.getElementById('req-message').value.trim();
-  const domain = document.getElementById('req-domain').value.trim();
-  if (!subject) { showToast('Veuillez saisir le sujet souhaite', 'error'); return; }
-  try {
-    await db.collection('Supervisions').add({
-      studentId: currentUser.uid,
-      directorId: selectedDirectorId,
-      coDirectorIds: [],
-      thesisProjectId: null,
-      status: 'pending',
-      studentMessage: subject + (message ? '\n\n' + message : ''),
-      directorResponse: '',
-      universityId: currentUserData.universityId || '',
-      academicYearId: currentUserData.academicYearId || '',
-      promotion: currentUserData.promotion || '',
-      requestDate: firebase.firestore.FieldValue.serverTimestamp(),
-      responseDate: null,
-      completionDate: null,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    // Notify director
-    await db.collection('Notifications').add({
-      userId: selectedDirectorId,
-      type: 'supervision_request',
-      title: 'Nouvelle demande de supervision',
-      body: (currentUserData.displayName || 'Un etudiant') + ' souhaite votre encadrement pour: ' + subject,
-      isRead: false,
-      deepLink: 'dir-dashboard',
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    document.getElementById('modal-supervision').style.display = 'none';
-    showToast('Demande envoyee avec succes', 'success');
-    nav('dashboard');
-  } catch(e) {
-    showToast('Erreur: ' + e.message, 'error');
-  }
-}
-
-// ═══════════════════════════════════════════════════
-// STUDENTS MANAGEMENT (Director)
-// ═══════════════════════════════════════════════════
-function loadStudents() {
-  if (!currentUser) return;
-  db.collection('Supervisions').where('directorId', '==', currentUser.uid).where('status', '==', 'accepted').get()
-  .then(snap => {
-    const el = document.getElementById('students-list');
-    document.getElementById('students-count').textContent = snap.size + ' etudiant(s) trouve(s)';
-    if (snap.empty) { el.innerHTML = '<p style="color:#95A5A6;text-align:center;padding:40px">Aucun etudiant</p>'; return; }
-    let html = '';
-    snap.forEach(doc => {
-      const s = doc.data();
-      const initials = 'E';
-      html += '<div class="card fade-in"><div style="display:flex;align-items:center;gap:12px">' +
-        '<div style="width:40px;height:40px;border-radius:50%;background:#2E86C1;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px">' + initials + '</div>' +
-        '<div style="flex:1"><p style="font-weight:600;font-size:14px">Etudiant ' + s.studentId.substring(0, 8) + '</p>' +
-        '<p style="font-size:12px;color:#5B6B7D">' + (s.promotion || '') + ' | ' + (s.universityId || '') + '</p></div>' +
-        '<span class="badge badge-green">Actif</span></div></div>';
-    });
-    el.innerHTML = html;
-  }).catch(() => {});
-}
-
-function loadProjects() {
-  if (!currentUser) return;
-  db.collection('Supervisions').where('directorId', '==', currentUser.uid).where('status', '==', 'accepted').get()
-  .then(snap => {
-    const el = document.getElementById('projects-list');
-    if (snap.empty) { el.innerHTML = '<p style="color:#95A5A6;text-align:center;padding:40px">Aucun projet</p>'; return; }
-    let promises = [];
-    snap.forEach(doc => {
-      const s = doc.data();
-      if (s.thesisProjectId) {
-        promises.push(db.collection('ThesisProjects').doc(s.thesisProjectId).get().then(pdoc => {
-          if (pdoc.exists) return pdoc.data();
-          return null;
-        }));
-      }
-    });
-    Promise.all(promises).then(projects => {
-      projects = projects.filter(p => p);
-      if (projects.length === 0) { el.innerHTML = '<p style="color:#95A5A6;text-align:center;padding:40px">Aucun projet</p>'; return; }
-      let html = '';
-      projects.forEach(p => {
-        html += '<div class="card fade-in"><h4 style="font-size:14px;font-weight:700;color:#1A5276;margin-bottom:4px">' + (p.title || 'Sans titre') + '</h4>' +
-          '<p style="font-size:13px;color:#5B6B7D">' + (p.domain || '') + '</p>' +
-          '<div style="margin-top:8px;display:flex;gap:8px;align-items:center"><span class="badge badge-blue">' + milestoneLabel(p.currentMilestone) + '</span></div></div>';
-      });
-      el.innerHTML = html;
-    });
-  }).catch(() => {});
-}
-
-// ═══════════════════════════════════════════════════
-// DATA COLLECTION
-// ═══════════════════════════════════════════════════
-let currentRespondent = null;
-function loadCollection() {
-  if (!activeProjectId) return;
-  db.collection('SurveyResponses').where('projectId', '==', activeProjectId).orderBy('createdAt', 'desc').get()
-  .then(snap => {
-    document.getElementById('coll-progress').textContent = snap.size + ' reponses collectees';
-    const el = document.getElementById('responses-list');
-    if (snap.empty) { el.innerHTML = '<p style="color:#95A5A6;text-align:center;padding:24px">Aucune reponse</p>'; return; }
-    let html = '';
-    snap.forEach((doc, i) => {
-      const r = doc.data();
-      html += '<div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:12px">' +
-        '<div><p style="font-weight:600;font-size:14px">Repondant #' + (snap.size - i) + '</p>' +
-        '<p style="font-size:12px;color:#5B6B7D">' + (r.collectionDate ? new Date(r.collectionDate.seconds * 1000).toLocaleDateString('fr-FR') : '') + ' | ' + (r.isValid ? '<span class="badge badge-green">Valide</span>' : '<span class="badge badge-red">Invalide</span>') + '</p></div>' +
-        '<span class="badge ' + (r.isSynced !== false ? 'badge-green' : 'badge-orange') + '">' + (r.isSynced !== false ? 'Sync' : 'Hors ligne') + '</span></div>';
-    });
-    el.innerHTML = html;
-  }).catch(() => {});
-}
-
-function newRespondent() {
-  if (!activeProjectId) { showToast('Aucun projet actif', 'error'); return; }
-  currentRespondent = { responses: {} };
-  document.getElementById('collection-form').style.display = 'block';
-  document.getElementById('resp-status').textContent = 'En cours';
-  document.getElementById('resp-status').className = 'badge badge-blue';
-  // Load form questions
-  db.collection('SurveyForms').where('projectId', '==', activeProjectId).where('isLocked', '==', true).limit(1).get()
-  .then(snap => {
-    if (snap.empty) { showToast('Aucune fiche validee trouvee', 'error'); return; }
-    const form = snap.docs[0].data();
-    const qEl = document.getElementById('form-questions');
-    let html = '';
-    (form.questions || []).forEach((q, i) => {
-      html += '<div><label style="font-size:13px;font-weight:600;color:#1A5276;display:block;margin-bottom:4px">' + (i+1) + '. ' + q.text + (q.required ? ' *' : '') + '</label>';
-      if (q.type === 'text') html += '<input class="input-field" data-qid="' + q.id + '" onchange="updateResponse(\'' + q.id + '\',this.value)">';
-      else if (q.type === 'number') html += '<input type="number" class="input-field" data-qid="' + q.id + '" onchange="updateResponse(\'' + q.id + '\',this.value)">';
-      else if (q.type === 'single_choice') {
-        html += '<div style="display:flex;flex-direction:column;gap:4px">';
-        (q.options || []).forEach(o => html += '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px"><input type="radio" name="' + q.id + '" value="' + o + '" onchange="updateResponse(\'' + q.id + '\',this.value)" style="accent-color:#2E86C1">' + o + '</label>');
-        html += '</div>';
-      } else if (q.type === 'multiple_choice') {
-        html += '<div style="display:flex;flex-wrap:wrap;gap:8px">';
-        (q.options || []).forEach(o => html += '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:6px 12px;border:1px solid #E0E6ED;border-radius:8px"><input type="checkbox" value="' + o + '" onchange="updateMultiResponse(\'' + q.id + '\',this)" style="accent-color:#2E86C1">' + o + '</label>');
-        html += '</div>';
-      } else if (q.type === 'boolean') {
-        html += '<div style="display:flex;gap:8px"><label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:14px"><input type="radio" name="' + q.id + '" value="Oui" onchange="updateResponse(\'' + q.id + '\',\'Oui\')" style="accent-color:#2E86C1">Oui</label><label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:14px"><input type="radio" name="' + q.id + '" value="Non" onchange="updateResponse(\'' + q.id + '\',\'Non\')" style="accent-color:#2E86C1">Non</label></div>';
-      } else if (q.type === 'date') {
-        html += '<input type="date" class="input-field" onchange="updateResponse(\'' + q.id + '\',this.value)">';
-      } else if (q.type === 'likert_scale') {
-        html += '<div style="display:flex;gap:4px">';
-        for (let s = 1; s <= 5; s++) html += '<label style="display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-size:12px;color:#5B6B7D"><input type="radio" name="' + q.id + '" value="' + s + '" onchange="updateResponse(\'' + q.id + '\',' + s + ')" style="accent-color:#2E86C1">' + s + '</label>';
-        html += '</div>';
-      } else {
-        html += '<input class="input-field" data-qid="' + q.id + '" onchange="updateResponse(\'' + q.id + '\',this.value)">';
-      }
-      html += '</div>';
-    });
-    qEl.innerHTML = html;
-  }).catch(() => {});
-}
-
-function updateResponse(qid, val) { if (currentRespondent) currentRespondent.responses[qid] = val; }
-function updateMultiResponse(qid, checkbox) {
-  if (!currentRespondent) return;
-  if (!currentRespondent.responses[qid]) currentRespondent.responses[qid] = [];
-  const arr = currentRespondent.responses[qid];
-  if (checkbox.checked) arr.push(checkbox.value); else arr.splice(arr.indexOf(checkbox.value), 1);
-}
-
-function cancelRespondent() {
-  currentRespondent = null;
-  document.getElementById('collection-form').style.display = 'none';
-}
-
-async function saveRespondent() {
-  if (!activeProjectId || !currentRespondent) return;
-  try {
-    await db.collection('SurveyResponses').add({
-      projectId: activeProjectId,
-      surveyFormId: '',
-      respondentId: 'resp_' + Date.now(),
-      responses: currentRespondent.responses,
-      collectedBy: currentUser.uid,
-      collectionDate: firebase.firestore.FieldValue.serverTimestamp(),
-      location: null,
-      isSynced: true,
-      isValid: true,
-      validationErrors: [],
-      duration: 0,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    currentRespondent = null;
-    document.getElementById('collection-form').style.display = 'none';
-    showToast('Reponse enregistree', 'success');
-    loadCollection();
-  } catch(e) {
-    showToast('Erreur: ' + e.message, 'error');
-  }
-}
-
-// ═══════════════════════════════════════════════════
-// STATISTICAL ANALYSIS
-// ═══════════════════════════════════════════════════
-function loadStats() {
-  // Load variable options from project
-  if (activeProjectId) {
-    db.collection('ResearchProtocols').where('projectId', '==', activeProjectId).limit(1).get()
-    .then(snap => {
-      if (!snap.empty) {
-        const d = snap.docs[0].data();
-        const vars = [...(d.independentVars || []), ...(d.dependentVars || [])];
-        const opts = vars.map(v => '<option value="' + v + '">' + v + '</option>').join('');
-        document.getElementById('stat-var1').innerHTML = '<option value="">Choisir...</option>' + opts;
-        document.getElementById('stat-var2').innerHTML = '<option value="">Choisir...</option>' + opts;
-      }
-    }).catch(() => {});
-  }
-}
-
-function runAnalysis() {
-  const v1 = document.getElementById('stat-var1').value;
-  const v2 = document.getElementById('stat-var2').value;
-  if (!v1 || !v2) { showToast('Selectionnez les deux variables', 'error'); return; }
-  // Auto-recommend test
-  const rec = document.getElementById('stat-recommendation');
-  rec.style.display = 'block';
-  document.getElementById('stat-rec-text').textContent = 'Test recommande: Chi-carre d\'independance (Quali x Quali)';
-  // Show results (demo)
-  setTimeout(() => {
-    const results = document.getElementById('stat-results');
-    results.style.display = 'block';
-    document.getElementById('stat-table-container').innerHTML =
-      '<table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr style="background:#F8F9FA"><th class="px-4 py-2 text-left">Statistique</th><th class="px-4 py-2 text-left">Valeur</th></tr></thead><tbody>' +
-      '<tr><td class="px-4 py-2">Chi-carre</td><td class="px-4 py-2 font-mono">12.456</td></tr>' +
-      '<tr><td class="px-4 py-2">Degre de liberte (ddl)</td><td class="px-4 py-2 font-mono">3</td></tr>' +
-      '<tr><td class="px-4 py-2">p-value</td><td class="px-4 py-2 font-mono" style="color:#E74C3C;font-weight:600">0.006</td></tr>' +
-      '<tr><td class="px-4 py-2">Significativite</td><td class="px-4 py-2"><span class="badge badge-green">Significatif (p &lt; 0.05)</span></td></tr></tbody></table>';
-    document.getElementById('stat-interpretation').innerHTML = '<strong style="color:#1A5276">Interpretation:</strong> Il existe une association statistiquement significative entre ' + v1 + ' et ' + v2 + ' (Chi-carre = 12.456, ddl = 3, p = 0.006). Le test est significatif au seuil de 5%, ce qui signifie que nous rejetons l\'hypothese nulle d\'independance entre ces deux variables.';
-    // Chart
-    const ctx = document.getElementById('stat-chart');
-    if (ctx && window.Chart) {
-      new Chart(ctx, {
-        type: 'bar',
-        data: { labels: ['Cat 1', 'Cat 2', 'Cat 3', 'Cat 4'], datasets: [{ label: v1 + ' - Cat A', data: [45, 30, 15, 10], backgroundColor: '#2E86C1', borderRadius: 6 }, { label: v1 + ' - Cat B', data: [20, 40, 25, 15], backgroundColor: '#1A5276', borderRadius: 6 }] },
-        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
-      });
-    }
-    // Save analysis
-    if (activeProjectId && db) {
-      db.collection('StatisticalAnalyses').add({
-        projectId: activeProjectId,
-        title: v1 + ' vs ' + v2,
-        researchQuestion: '',
-        variables: [v1, v2],
-        testType: 'Chi-carre',
-        testResult: { chiSquare: 12.456, ddl: 3, pValue: 0.006 },
-        interpretation: 'Association significative (p=0.006)',
-        aiGenerated: true,
-        chartType: 'bar',
-        status: 'interpreted',
-        requestedBy: currentUser ? currentUser.uid : '',
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      }).catch(() => {});
-    }
-    showToast('Analyse terminee', 'success');
-  }, 1500);
-}
-
-// ═══════════════════════════════════════════════════
-// CHAT / MESSAGING
-// ═══════════════════════════════════════════════════
-function loadChatList() {
-  if (!currentUser) return;
-  const field = currentUserData.role === 'director' ? 'directorId' : 'studentId';
-  db.collection('Supervisions').where(field, '==', currentUser.uid).where('status', '==', 'accepted').get()
-  .then(snap => {
-    const el = document.getElementById('chat-list');
-    if (snap.empty) { el.innerHTML = '<p style="color:#95A5A6;text-align:center;padding:40px">Aucune conversation</p>'; return; }
-    let html = '';
-    snap.forEach(doc => {
-      const s = doc.data();
-      const partnerId = field === 'directorId' ? s.studentId : s.directorId;
-      const initials = (field === 'directorId' ? 'E' : 'Dr');
-      html += '<div class="card fade-in" style="display:flex;align-items:center;gap:12px;cursor:pointer" onclick="openChat(\'' + doc.id + '\')">' +
-        '<div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#1A5276,#2E86C1);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px">' + initials + '</div>' +
-        '<div style="flex:1"><p style="font-weight:600;font-size:14px">' + (s.studentMessage || 'Conversation').substring(0, 40) + '</p><p style="font-size:12px;color:#5B6B7D">Supervision ' + doc.id.substring(0, 8) + '</p></div></div>';
-    });
-    el.innerHTML = html;
-  }).catch(() => {});
-}
-
-function openChat(supervisionId) {
-  activeChatSupervisionId = supervisionId;
-  document.getElementById('chat-list').style.display = 'none';
-  document.getElementById('chat-conv').style.display = 'flex';
-  // Get supervision to find partner
-  db.collection('Supervisions').doc(supervisionId).get().then(doc => {
-    if (doc.exists) {
-      const s = doc.data();
-      const partnerId = currentRole === 'director' ? s.studentId : s.directorId;
-      document.getElementById('chat-partner-name').textContent = currentRole === 'director' ? 'Etudiant' : 'Directeur';
-      // Load messages
-      db.collection('Messages').where('supervisionId', '==', supervisionId).orderBy('createdAt', 'asc').get()
-      .then(msgSnap => {
-        const el = document.getElementById('chat-messages');
-        if (msgSnap.empty) { el.innerHTML = '<p style="color:#95A5A6;text-align:center;padding:20px">Aucun message. Commencez la conversation !</p>'; return; }
-        let html = '';
-        msgSnap.forEach(md => {
-          const m = md.data();
-          const isMine = m.senderId === currentUser.uid;
-          const time = m.createdAt ? new Date(m.createdAt.seconds * 1000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '';
-          html += '<div style="display:flex;flex-direction:column;' + (isMine ? 'align-items:flex-end' : 'align-items:flex-start') + '">' +
-            '<div class="msg-bubble ' + (isMine ? 'msg-sent' : 'msg-received') + '">' + (m.content || '') + '</div>' +
-            '<span style="font-size:10px;color:#95A5A6;margin-top:2px">' + time + '</span></div>';
-        });
-        el.innerHTML = html;
-        el.scrollTop = el.scrollHeight;
-        // Mark as read
-        msgSnap.forEach(md => {
-          if (!md.data().isRead && md.data().receiverId === currentUser.uid) {
-            db.collection('Messages').doc(md.id).update({ isRead: true, readAt: firebase.firestore.FieldValue.serverTimestamp() }).catch(() => {});
-          }
-        });
-      }).catch(() => {});
-    }
-  }).catch(() => {});
-}
-
-function showChatList() {
-  document.getElementById('chat-list').style.display = 'flex';
-  document.getElementById('chat-conv').style.display = 'none';
-}
-
-async function sendMessage() {
-  const input = document.getElementById('chat-input');
-  const content = input.value.trim();
-  if (!content || !activeChatSupervisionId || !currentUser) return;
-  input.value = '';
-  try {
-    const supDoc = await db.collection('Supervisions').doc(activeChatSupervisionId).get();
-    const sup = supDoc.data();
-    const receiverId = currentRole === 'director' ? sup.studentId : sup.directorId;
-    await db.collection('Messages').add({
-      supervisionId: activeChatSupervisionId,
-      senderId: currentUser.uid,
-      receiverId: receiverId,
-      content: content,
-      type: 'text',
-      fileURL: '',
-      fileName: '',
-      isRead: false,
-      readAt: null,
-      reactions: [],
-      aiSummary: '',
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    // Notify receiver
-    await db.collection('Notifications').add({
-      userId: receiverId,
-      type: 'message',
-      title: 'Nouveau message',
-      body: content.substring(0, 80),
-      isRead: false,
-      deepLink: 'chat',
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    // Refresh chat
-    openChat(activeChatSupervisionId);
-  } catch(e) {
-    showToast('Erreur: ' + e.message, 'error');
-  }
-}
-
-// ═══════════════════════════════════════════════════
-// NOTIFICATIONS
-// ═══════════════════════════════════════════════════
-function loadNotifications() {
-  if (!currentUser) return;
-  db.collection('Notifications').where('userId', '==', currentUser.uid).orderBy('createdAt', 'desc').get()
-  .then(snap => {
-    const el = document.getElementById('notif-list');
-    if (snap.empty) { el.innerHTML = '<p style="color:#95A5A6;text-align:center;padding:40px">Aucune notification</p>'; return; }
-    let html = '';
-    snap.forEach(doc => {
-      const n = doc.data();
-      const time = n.createdAt ? new Date(n.createdAt.seconds * 1000).toLocaleDateString('fr-FR') : '';
-      html += '<div class="card" style="padding:12px;background:' + (n.isRead ? '#fff' : '#EBF5FB') + ';cursor:pointer;border-left:4px solid ' + (n.isRead ? 'transparent' : '#2E86C1') + '" onclick="markNotifRead(\'' + doc.id + '\')">' +
-        '<div style="display:flex;justify-content:space-between"><p style="font-weight:600;font-size:14px;color:#1A5276">' + (n.title || '') + '</p><span style="font-size:11px;color:#95A5A6">' + time + '</span></div>' +
-        '<p style="font-size:13px;color:#5B6B7D;margin-top:4px">' + (n.body || '') + '</p>' +
-        '<span class="badge badge-blue" style="margin-top:6px">' + (n.type || '') + '</span></div>';
-    });
-    el.innerHTML = html;
-  }).catch(() => {});
-}
-
-async function markNotifRead(id) {
-  try {
-    await db.collection('Notifications').doc(id).update({ isRead: true, readAt: firebase.firestore.FieldValue.serverTimestamp() });
-    loadNotifications();
-  } catch(e) {}
-}
-
-// ═══════════════════════════════════════════════════
-// REFERENCES
-// ═══════════════════════════════════════════════════
-function loadReferences() {
-  if (!activeProjectId) { document.getElementById('refs-list').innerHTML = '<p style="color:#95A5A6;text-align:center;padding:24px">Aucun projet actif</p>'; return; }
-  db.collection('References').where('projectId', '==', activeProjectId).orderBy('orderIndex').get()
-  .then(snap => {
-    const el = document.getElementById('refs-list');
-    if (snap.empty) { el.innerHTML = '<p style="color:#95A5A6;text-align:center;padding:24px">Aucune reference</p>'; return; }
-    const fmt = document.getElementById('ref-format').value;
-    let html = '';
-    snap.forEach(doc => {
-      const r = doc.data();
-      const citation = fmt === 'apa' ? (r.citationAPA || '') : (r.citationVancouver || '');
-      html += '<div class="card" style="padding:12px"><p style="font-size:13px;line-height:1.6;color:#333">' + citation + '</p>' +
-        '<div style="display:flex;gap:8px;margin-top:6px"><span class="badge badge-gray">' + (r.source || '') + '</span>' +
-        '<span class="badge badge-gray">' + (r.year || '') + '</span></div></div>';
-    });
-    el.innerHTML = html;
-  }).catch(() => {});
-}
-
-function searchRefs() { showToast('Recherche PubMed/Scholar en cours...', 'info'); }
-function addRefManual() { showToast('Formulaire d\'ajout manuel (a implementer)', 'info'); }
-
-// ═══════════════════════════════════════════════════
-// ARCHIVES
-// ═══════════════════════════════════════════════════
-function loadArchives() {
-  db.collection('Archives').orderBy('defenseDate', 'desc').limit(50).get()
-  .then(snap => {
-    const el = document.getElementById('archives-list');
-    if (snap.empty) { el.innerHTML = '<p style="color:#95A5A6;text-align:center;padding:40px">Aucune archive</p>'; return; }
-    let html = '';
-    snap.forEach(doc => {
-      const a = doc.data();
-      html += '<div class="card fade-in"><h4 style="font-size:14px;font-weight:700;color:#1A5276">' + (a.title || 'Sans titre') + '</h4>' +
-        '<p style="font-size:13px;color:#5B6B7D;margin-top:4px">' + (a.domain || '') + ' | ' + (a.promotion || '') + ' | Note: ' + (a.grade || '-') + '</p>' +
-        '<p style="font-size:12px;color:#95A5A6;margin-top:4px">Soutenance: ' + (a.defenseDate ? new Date(a.defenseDate.seconds * 1000).toLocaleDateString('fr-FR') : '-') + '</p></div>';
-    });
-    el.innerHTML = html;
-  }).catch(() => {});
-}
-
-// ═══════════════════════════════════════════════════
-// CALENDAR
-// ═══════════════════════════════════════════════════
-function loadCalendar() {
-  db.collection('AcademicYears').where('isActive', '==', true).limit(1).get()
-  .then(snap => {
-    const el = document.getElementById('calendar-content');
-    if (snap.empty) { el.innerHTML = '<p style="color:#95A5A6;text-align:center;padding:24px">Aucune annee academique active</p>'; return; }
-    const y = snap.docs[0].data();
-    el.innerHTML =
-      '<div class="card" style="border-left:4px solid #2E86C1"><p style="font-weight:600;color:#1A5276">Annee academique: ' + (y.label || '') + '</p>' +
-      '<p style="font-size:13px;color:#5B6B7D;margin-top:4px">Debut: ' + (y.startDate ? new Date(y.startDate.seconds * 1000).toLocaleDateString('fr-FR') : '-') + '</p>' +
-      '<p style="font-size:13px;color:#5B6B7D">Fin: ' + (y.endDate ? new Date(y.endDate.seconds * 1000).toLocaleDateString('fr-FR') : '-') + '</p></div>' +
-      '<div class="card" style="border-left:4px solid #E74C3C"><p style="font-weight:600;color:#E74C3C">Date limite de soumission</p>' +
-      '<p style="font-size:13px;color:#5B6B7D;margin-top:4px">' + (y.submissionDeadline ? new Date(y.submissionDeadline.seconds * 1000).toLocaleDateString('fr-FR') : '-') + '</p></div>' +
-      '<div class="card" style="border-left:4px solid #27AE60"><p style="font-weight:600;color:#27AE60">Periode de soutenance</p>' +
-      '<p style="font-size:13px;color:#5B6B7D;margin-top:4px">' + (y.defenseStartDate ? new Date(y.defenseStartDate.seconds * 1000).toLocaleDateString('fr-FR') : '-') + ' au ' + (y.defenseEndDate ? new Date(y.defenseEndDate.seconds * 1000).toLocaleDateString('fr-FR') : '-') + '</p></div>';
-  }).catch(() => {});
-}
-
-// ═══════════════════════════════════════════════════
-// ADMIN: USERS
-// ═══════════════════════════════════════════════════
-function loadAdminUsers() {
-  db.collection('Users').orderBy('createdAt', 'desc').limit(100).get()
-  .then(snap => {
-    const el = document.getElementById('admin-users-list');
-    if (snap.empty) { el.innerHTML = '<p style="color:#95A5A6;text-align:center;padding:24px">Aucun utilisateur</p>'; return; }
-    let html = '';
-    snap.forEach(doc => {
-      const u = doc.data();
-      const roleColors = { admin: 'badge-red', director: 'badge-green', co_director: 'badge-blue', student: 'badge-gray' };
-      html += '<div class="card" style="display:flex;align-items:center;gap:12px;padding:12px">' +
-        '<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#1A5276,#2E86C1);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px">' +
-        (u.displayName || '?').substring(0, 2).toUpperCase() + '</div>' +
-        '<div style="flex:1;min-width:0"><p style="font-weight:600;font-size:14px">' + (u.displayName || '') + '</p>' +
-        '<p style="font-size:12px;color:#5B6B7D">' + (u.email || '') + ' | ' + (u.universityName || '') + '</p></div>' +
-        '<span class="badge ' + (roleColors[u.role] || 'badge-gray') + '">' + (u.role || '') + '</span>' +
-        '<button class="btn-danger btn-sm" style="padding:6px 10px;font-size:11px" onclick="deleteUser(\'' + doc.id + '\')"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button></div>';
-    });
-    el.innerHTML = html;
-  }).catch(() => {});
-}
-
-function showAddUserModal() { showToast('Formulaire d\'ajout utilisateur (a implementer dans le panneau admin)', 'info'); }
-async function deleteUser(uid) {
-  if (!confirm('Supprimer cet utilisateur ?')) return;
-  try { await db.collection('Users').doc(uid).delete(); showToast('Utilisateur supprime', 'success'); loadAdminUsers(); } catch(e) { showToast('Erreur: ' + e.message, 'error'); }
-}
-
-// ═══════════════════════════════════════════════════
-// ADMIN: UNIVERSITIES
-// ═══════════════════════════════════════════════════
-function loadAdminUniversities() {
-  db.collection('Universities').orderBy('orderIndex').get()
-  .then(snap => {
-    const el = document.getElementById('admin-unis-list');
-    if (snap.empty) { el.innerHTML = '<p style="color:#95A5A6;text-align:center;padding:24px">Aucune universite</p>'; return; }
-    let html = '';
-    snap.forEach(doc => {
-      const u = doc.data();
-      html += '<div class="card fade-in" style="display:flex;align-items:center;gap:12px">' +
-        '<div style="width:44px;height:44px;border-radius:12px;background:#EBF5FB;display:flex;align-items:center;justify-content:center;color:#2E86C1;font-weight:700;font-size:14px">' + (u.shortName || '??').substring(0, 2) + '</div>' +
-        '<div style="flex:1"><p style="font-weight:600;font-size:14px">' + (u.name || '') + '</p>' +
-        '<p style="font-size:12px;color:#5B6B7D">' + (u.city || '') + ' | ' + (u.citationStyle || 'Vancouver') + ' | ' + (u.isActive ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-red">Inactive</span>') + '</p></div></div>';
-    });
-    el.innerHTML = html;
-  }).catch(() => {});
-}
-function showAddUniModal() { showToast('Formulaire d\'ajout universite (a implementer)', 'info'); }
-
-// ═══════════════════════════════════════════════════
-// ADMIN: ACADEMIC YEARS
-// ═══════════════════════════════════════════════════
-function loadAdminYears() {
-  db.collection('AcademicYears').orderBy('startDate', 'desc').get()
-  .then(snap => {
-    const el = document.getElementById('admin-years-list');
-    if (snap.empty) { el.innerHTML = '<p style="color:#95A5A6;text-align:center;padding:24px">Aucune annee</p>'; return; }
-    let html = '';
-    snap.forEach(doc => {
-      const y = doc.data();
-      html += '<div class="card fade-in"><h4 style="font-size:15px;font-weight:700;color:#1A5276">' + (y.label || '') + (y.isActive ? ' <span class="badge badge-green">En cours</span>' : '') + '</h4>' +
-        '<p style="font-size:13px;color:#5B6B7D;margin-top:4px">Soumission: ' + (y.submissionDeadline ? new Date(y.submissionDeadline.seconds * 1000).toLocaleDateString('fr-FR') : '-') +
-        ' | Soutenance: ' + (y.defenseStartDate ? new Date(y.defenseStartDate.seconds * 1000).toLocaleDateString('fr-FR') : '-') + ' au ' +
-        (y.defenseEndDate ? new Date(y.defenseEndDate.seconds * 1000).toLocaleDateString('fr-FR') : '-') + '</p></div>';
-    });
-    el.innerHTML = html;
-  }).catch(() => {});
-}
-function showAddYearModal() { showToast('Formulaire d\'ajout annee academique (a implementer)', 'info'); }
-
-// ═══════════════════════════════════════════════════
-// SAVE SURVEY FORM & MISC
-// ═══════════════════════════════════════════════════
-async function saveSurveyForm() {
-  showToast('Fiche sauvegardee', 'success');
-}
-async function submitSurveyForValidation() {
-  showToast('Fiche soumise pour validation au directeur', 'success');
-}
-
-// ═══════════════════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════════════════
-const MILESTONES = [
-  ['topic_assigned','Sujet assigne'],['literature_review','Revue de litterature'],
-  ['protocol','Protocole'],['survey_form','Fiche d\'enquete'],
-  ['data_collection','Collecte'],['analysis','Analyse'],
-  ['discussion','Discussion'],['references','References'],
-  ['finalization','Finalisation']
+function icon(name, size) {
+  const s = size || 20;
+  return ICONS[name] ? ICONS[name].replace('<svg ', `<svg width="${s}" height="${s}" `) : '';
+}
+
+// ===== DEPARTMENTS =====
+const DEPARTMENTS = [
+  { id:'medecine-interne', name:'Médecine Interne', iconName:'stethoscope', color:'emerald', courses:[
+    {id:'cardiologie',name:'Cardiologie',iconName:'heart'},
+    {id:'pneumologie',name:'Pneumologie',iconName:'wind'},
+    {id:'gastro-enterologie',name:'Gastro-entérologie',iconName:'flask'},
+    {id:'neurologie-mi',name:'Neurologie',iconName:'brain'},
+    {id:'endocrinologie',name:'Endocrinologie',iconName:'flask'},
+    {id:'infectiologie-mi',name:'Infectiologie',iconName:'bug'},
+    {id:'hematologie',name:'Hématologie',iconName:'droplets'},
+    {id:'rhumatologie',name:'Rhumatologie',iconName:'bone'},
+    {id:'dermatologie',name:'Dermatologie',iconName:'eye'},
+    {id:'nephrologie',name:'Néphrologie',iconName:'bean'},
+  ]},
+  { id:'pediatrie', name:'Pédiatrie', iconName:'baby', color:'sky', courses:[
+    {id:'neonatologie',name:'Néonatologie',iconName:'baby'},
+    {id:'pediatrie-generale',name:'Pédiatrie Générale',iconName:'heart'},
+    {id:'malnutrition',name:'Malnutrition',iconName:'heart'},
+    {id:'infectiologie-pediatrique',name:'Infectiologie Pédiatrique',iconName:'bug'},
+    {id:'urgences-pediatriques',name:'Urgences Pédiatriques',iconName:'siren'},
+  ]},
+  { id:'gyneco-obstetrique', name:'Gynécologie-Obstétrique', iconName:'baby', color:'rose', courses:[
+    {id:'gynecologie',name:'Gynécologie',iconName:'baby'},
+    {id:'grossesse',name:'Grossesse',iconName:'heart'},
+    {id:'travail-accouchement',name:'Travail et Accouchement',iconName:'clock'},
+    {id:'pathologies-obstetricales',name:'Pathologies Obstétricales',iconName:'alertTriangle'},
+    {id:'urgences-obstetricales',name:'Urgences Obstétricales',iconName:'siren'},
+    {id:'neonatologie-immediate',name:'Néonatologie Immédiate',iconName:'baby'},
+  ]},
+  { id:'chirurgie', name:'Chirurgie', iconName:'scissors', color:'amber', courses:[
+    {id:'chirurgie-digestive',name:'Chirurgie Digestive',iconName:'scissors'},
+    {id:'traumatologie',name:'Traumatologie',iconName:'shield'},
+    {id:'orthopedie',name:'Orthopédie',iconName:'bone'},
+    {id:'neurochirurgie',name:'Neurochirurgie',iconName:'brain'},
+    {id:'chirurgie-viscerale',name:'Chirurgie Viscérale',iconName:'scissors'},
+    {id:'urgences-chirurgicales',name:'Urgences Chirurgicales',iconName:'siren'},
+  ]},
+  { id:'neuro-psychiatrie', name:'Neuro-Psychiatrie', iconName:'brainCircuit', color:'violet', courses:[
+    {id:'neurologie-np',name:'Neurologie',iconName:'brain'},
+    {id:'psychiatrie',name:'Psychiatrie',iconName:'brainCircuit'},
+    {id:'neurotraumatologie',name:'Neurotraumatologie',iconName:'brain'},
+    {id:'avc',name:'AVC',iconName:'brainCircuit'},
+    {id:'epilepsie',name:'Épilepsie',iconName:'zap'},
+    {id:'troubles-psychiatriques',name:'Troubles Psychiatriques',iconName:'brainCircuit'},
+    {id:'urgences-neurologiques',name:'Urgences Neurologiques',iconName:'siren'},
+    {id:'urgences-psychiatriques',name:'Urgences Psychiatriques',iconName:'siren'},
+  ]},
 ];
 
-function milestoneLabel(key) {
-  const m = MILESTONES.find(m => m[0] === key);
-  return m ? m[1] : key;
+const DEPT_COLORS = {
+  'emerald': { bg:'#ecfdf5', border:'#a7f3d0', text:'#065f46', accent:'#059669' },
+  'sky':    { bg:'#f0f9ff', border:'#bae6fd', text:'#075985', accent:'#0284c7' },
+  'rose':   { bg:'#fff1f2', border:'#fecdd3', text:'#9f1239', accent:'#e11d48' },
+  'amber':  { bg:'#fffbeb', border:'#fde68a', text:'#92400e', accent:'#d97706' },
+  'violet': { bg:'#f5f3ff', border:'#ddd6fe', text:'#5b21b6', accent:'#7c3aed' },
+};
+
+// ===== LOAD DATA =====
+const pathologies = JSON.parse(document.getElementById('pathology-data').textContent);
+
+// ===== NAV STATE =====
+let currentView = 'home';
+let viewParams = {};
+let history = [];
+
+function navigate(view, params) {
+  history.push({ view: currentView, params: viewParams });
+  currentView = view;
+  viewParams = params || {};
+  render();
+  window.scrollTo(0, 0);
+  document.getElementById('mobileMenu').classList.remove('open');
+}
+function goBack() {
+  if (history.length === 0) return;
+  const prev = history.pop();
+  currentView = prev.view;
+  viewParams = prev.params;
+  render();
+  window.scrollTo(0, 0);
 }
 
-function milestonePercent(key) {
-  const idx = MILESTONES.findIndex(m => m[0] === key);
-  if (idx < 0) return 0;
-  const weights = [10, 15, 15, 5, 15, 15, 15, 5, 5];
-  let pct = 0;
-  for (let i = 0; i < idx; i++) pct += weights[i];
-  pct += weights[idx] / 2;
-  return Math.round(pct);
+// ===== HELPERS =====
+function getPathosByCourse(cid) { return pathologies.filter(p => p.courseId === cid); }
+function getPathoById(id) { return pathologies.find(p => p.id === id); }
+function getDept(id) { return DEPARTMENTS.find(d => d.id === id); }
+function getCourse(deptId, courseId) {
+  const d = getDept(deptId);
+  return d ? d.courses.find(c => c.id === courseId) : null;
+}
+function deptBadge(color) { return `badge badge-${color}`; }
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function dc(id) { return DEPT_COLORS[id] || DEPT_COLORS.emerald; }
+
+// ===== RENDER ROUTER =====
+function render() {
+  const main = document.getElementById('mainContent');
+  const backBtn = document.getElementById('backBtn');
+  backBtn.style.display = currentView === 'home' ? 'none' : 'inline-flex';
+
+  switch(currentView) {
+    case 'home': main.innerHTML = renderHome(); break;
+    case 'department': main.innerHTML = renderDepartment(); break;
+    case 'course': main.innerHTML = renderCourse(); break;
+    case 'pathologie': main.innerHTML = renderPathologie(); break;
+    case 'search': main.innerHTML = renderSearch(); break;
+    case 'urgences': main.innerHTML = renderUrgences(); break;
+    default: main.innerHTML = '<div class="empty">Page non trouvée</div>';
+  }
+  attachEvents();
+}
+// ===== HOME VIEW =====
+function renderHome() {
+  const deptCounts = {};
+  pathologies.forEach(p => { deptCounts[p.departmentId] = (deptCounts[p.departmentId]||0)+1; });
+
+  let html = `
+  <div class="hero">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+      ${icon('stethoscope',28).replace('currentColor','white')}
+      <h1>MedRef RDC</h1>
+    </div>
+    <p>Bibliothèque médicale de référence adaptée au contexte de la République Démocratique du Congo.</p>
+    <div class="search-box">
+      ${icon('search',16).replace('currentColor','#6ee7b7')}
+      <input type="text" id="homeSearch" placeholder="Rechercher une pathologie, un médicament..." autocomplete="off">
+    </div>
+  </div>
+
+  <div class="grid-6" style="margin-top:16px">
+    <button class="quick-card red" onclick="navigate('urgences')">${icon('siren',18)} Urgences</button>
+    <button class="quick-card amber" onclick="">${icon('thermometer',18)} Symptômes</button>
+    <button class="quick-card blue" onclick="">${icon('calculator',18)} Calculatrices</button>
+    <button class="quick-card purple" onclick="">${icon('pill',18)} Médicaments</button>
+    <button class="quick-card teal" onclick="">${icon('bookOpen',18)} Manuel IKB</button>
+    <button class="quick-card gray" onclick="">${icon('fileText',18)} Sources</button>
+  </div>
+
+  <div style="margin-top:24px">
+    <h2 style="font-size:1.1rem;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px">${icon('bookOpen',20)} Départements</h2>
+    <div class="grid-2">
+      ${DEPARTMENTS.map(dept => {
+        const c = dc(dept.color);
+        const count = deptCounts[dept.id] || 0;
+        return `
+        <div class="dept-card" style="border-left-color:${c.accent}" onclick="navigate('department',{departmentId:'${dept.id}'})">
+          <div class="icon-box" style="background:${c.bg};color:${c.text}">${icon(dept.iconName,20).replace('currentColor',c.text)}</div>
+          <div class="info">
+            <h3>${dept.name}</h3>
+            <div class="badges">
+              ${dept.courses.slice(0,4).map(co => `<span class="badge-sm">${co.name}</span>`).join('')}
+              ${dept.courses.length > 4 ? `<span class="badge-sm">+${dept.courses.length-4}</span>` : ''}
+            </div>
+          </div>
+          <span class="count">${count}</span>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+  return html;
+}
+// ===== DEPARTMENT VIEW =====
+function renderDepartment() {
+  const dept = getDept(viewParams.departmentId);
+  if (!dept) return '<div class="empty">Département non trouvé</div>';
+  const c = dc(dept.color);
+  const allPathos = pathologies.filter(p => p.departmentId === dept.id);
+  
+  return `
+  <button class="back-btn" onclick="navigate('home')">${icon('arrowLeft',14)} Accueil</button>
+  <div style="display:flex;align-items:center;gap:12px;margin:12px 0">
+    <div class="icon-box" style="background:${c.bg};color:${c.text};width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center">${icon(dept.iconName,24).replace('currentColor',c.text)}</div>
+    <div>
+      <h1 style="font-size:1.4rem;font-weight:700">${dept.name}</h1>
+      <p style="font-size:0.85rem;color:var(--gray-500)">${dept.courses.length} cours · ${allPathos.length} pathologies</p>
+    </div>
+  </div>
+  <div class="grid-2">
+    ${dept.courses.map(course => {
+      const cp = allPathos.filter(p => p.courseId === course.id);
+      return `
+      <div class="card clickable" style="border-left:4px solid ${c.accent}" onclick="navigate('course',{departmentId:'${dept.id}',courseId:'${course.id}'})">
+        <div style="padding:14px 16px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="color:var(--gray-400)">${icon(course.iconName,18)}</span>
+              <h3 style="font-size:0.92rem;font-weight:600">${course.name}</h3>
+            </div>
+            <span style="color:var(--gray-400)">${icon('chevronRight',16)}</span>
+          </div>
+          ${cp.length > 0 ? `
+            <div style="display:flex;flex-wrap:wrap;gap:4px">
+              ${cp.slice(0,6).map(p => `<span class="badge badge-outline" style="font-size:0.72rem">${p.name}</span>`).join('')}
+              ${cp.length > 6 ? `<span class="badge badge-outline" style="font-size:0.72rem">+${cp.length-6}</span>` : ''}
+            </div>
+          ` : '<p style="font-size:0.8rem;color:var(--gray-400)">Aucune pathologie enregistrée</p>'}
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
 }
 
-// ═══ ThesisMilestones - tracking per project ═══
-function loadMilestones(projectId) {
-  if (!projectId) return;
-  db.collection('ThesisMilestones').where('projectId', '==', projectId).orderBy('orderIndex').get()
-  .then(snap => {
-    snap.forEach(doc => {
-      const m = doc.data();
-      // Milestone data used in timeline and progress calculation
-      // Fields: milestoneType, status, dueDate, directorFeedback, studentNotes, version
-    });
-  }).catch(() => {});
+// ===== COURSE VIEW =====
+function renderCourse() {
+  const dept = getDept(viewParams.departmentId);
+  const course = getCourse(viewParams.departmentId, viewParams.courseId);
+  if (!dept || !course) return '<div class="empty">Cours non trouvé</div>';
+  const c = dc(dept.color);
+  const cp = getPathosByCourse(course.id);
+
+  return `
+  <div class="breadcrumb">
+    <button onclick="navigate('home')">Accueil</button><span class="sep">›</span>
+    <button onclick="navigate('department',{departmentId:'${dept.id}'})">${dept.name}</button>
+  </div>
+  <h1 style="font-size:1.4rem;font-weight:700;margin-bottom:16px">${course.name}</h1>
+  ${cp.length === 0 
+    ? '<div class="card"><div class="empty">Aucune pathologie enregistrée pour ce cours.</div></div>'
+    : `<div class="grid-2">
+      ${cp.map(p => `
+      <div class="card clickable" style="border-left:4px solid ${c.accent}" onclick="navigate('pathologie',{departmentId:'${dept.id}',courseId:'${course.id}',pathologieId:'${p.id}'})">
+        <div style="padding:14px 16px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+              <h3 style="font-size:0.9rem;font-weight:600">${p.name}</h3>
+              <p style="font-size:0.8rem;color:var(--gray-500);margin-top:4px">${esc(p.definition.definition).slice(0,120)}...</p>
+            </div>
+            <span style="color:var(--gray-400);flex-shrink:0;margin-left:8px">${icon('chevronRight',16)}</span>
+          </div>
+        </div>
+      </div>`).join('')}
+    </div>`
+  }`;
+}
+// ===== PATHOLOGIE VIEW =====
+function renderPathologie() {
+  const p = getPathoById(viewParams.pathologieId);
+  if (!p) return '<div class="empty">Pathologie non trouvée</div>';
+  const dept = getDept(p.departmentId);
+  const course = getCourse(p.departmentId, p.courseId);
+  if (!dept || !course) return '<div class="empty">Contexte non trouvé</div>';
+  const c = dc(dept.color);
+
+  return `
+  <div class="breadcrumb">
+    <button onclick="navigate('home')">Accueil</button><span class="sep">›</span>
+    <button onclick="navigate('department',{departmentId:'${dept.id}'})">${dept.name}</button><span class="sep">›</span>
+    <button onclick="navigate('course',{departmentId:'${dept.id}',courseId:'${course.id}'})">${course.name}</button>
+  </div>
+  <div style="margin-bottom:4px"><span class="${deptBadge(dept.color)}">${dept.name}</span></div>
+  <h1 style="font-size:1.4rem;font-weight:700;margin-bottom:14px">${p.name}</h1>
+
+  <!-- Urgence Banner -->
+  <div class="urgency-banner">
+    <h3>${icon('siren',18)} Urgences associées</h3>
+    <div class="urgency-grid">
+      ${p.urgences.motifsConsultation.slice(0,6).map(m => `<div class="urgency-item">${icon('warning',14)} ${esc(m)}</div>`).join('')}
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs" id="tabBar">
+    <button class="tab-btn active" data-tab="definition">Définition</button>
+    <button class="tab-btn" data-tab="diagnostic">Diagnostic</button>
+    <button class="tab-btn" data-tab="etiologies">Étiologies</button>
+    <button class="tab-btn" data-tab="therapeutique">Thérapeutique</button>
+    <button class="tab-btn" data-tab="urgences-tab">Urgences</button>
+    <button class="tab-btn" data-tab="evolution">Évolution</button>
+  </div>
+
+  <!-- Tab: Definition -->
+  <div class="tab-content active" id="tab-definition">
+    ${section('Définition','bookOpen',p.definition.definition)}
+    ${section('Anatomie concernée','eye',p.definition.anatomieConcernee)}
+    ${section('Physiologie générale','activity',p.definition.physiologieGenerale)}
+    ${section('Physiopathologie','zap',p.definition.physiopathologie)}
+    ${section('Mécanisme de la maladie','brain',p.definition.mecanismeMaladie)}
+    ${p.definition.schemasExplicatifs.length > 0 ? `
+    <div class="section">
+      <div class="section-title">${icon('flask',16)} Schémas explicatifs</div>
+      ${p.definition.schemasExplicatifs.map(s => `<div class="schema-box">${esc(s)}</div>`).join('')}
+    </div>` : ''}
+  </div>
+
+  <!-- Tab: Diagnostic -->
+  <div class="tab-content" id="tab-diagnostic">
+    <div class="card"><div style="padding:14px 16px">
+      <div class="section-title">Diagnostic Clinique</div>
+      ${listSection('Motif de consultation', p.diagnostic.clinique.motifConsultation, 'danger')}
+      ${listSection('Signes fonctionnels', p.diagnostic.clinique.signesFonctionnels)}
+      ${listSection('Signes généraux', p.diagnostic.clinique.signesGeneraux)}
+      ${listSection('Signes physiques', p.diagnostic.clinique.signesPhysiques, 'warn')}
+      ${listSection('Signes de gravité', p.diagnostic.clinique.signesGravite, 'danger')}
+    </div></div>
+    <div class="card" style="margin-top:12px"><div style="padding:14px 16px">
+      <div class="section-title">Examens Paracliniques</div>
+      ${p.diagnostic.paraclinique.map(ex => `
+      <div class="exam-card">
+        <div class="exam-header">
+          <h4>
+            ${ex.intention===1?'<span class="badge badge-default" style="font-size:0.65rem;padding:1px 5px">1re intention</span>':''}
+            ${ex.intention===2?'<span class="badge badge-secondary" style="font-size:0.65rem;padding:1px 5px">2e intention</span>':''}
+            ${ex.intention===3?'<span class="badge badge-outline" style="font-size:0.65rem;padding:1px 5px">3e intention</span>':''}
+            ${esc(ex.nom)}
+          </h4>
+          <div class="exam-badges">
+            <span class="badge badge-outline" style="font-size:0.65rem">${ex.type}</span>
+            ${ex.urgence?'<span class="badge badge-red" style="font-size:0.65rem">Urgent</span>':''}
+          </div>
+        </div>
+        <div class="exam-info"><b>Résultats attendus :</b> ${esc(ex.resultatsAttendus)}</div>
+        <div class="exam-info"><b>Interprétation :</b> ${esc(ex.interpretation)}</div>
+      </div>`).join('')}
+    </div></div>
+  </div>
+
+  <!-- Tab: Etiologies -->
+  <div class="tab-content" id="tab-etiologies">
+    <div class="card"><div style="padding:14px 16px">
+      <div class="section-title">Étiologies</div>
+      <div class="etio-grid">
+        ${Object.entries(p.etiologie.etiologies).filter(([,v])=>v&&v.length>0).map(([k,v])=>`
+        <div class="etio-card">
+          <h4>${labelize(k)}</h4>
+          <ul class="item-list">${v.map(e=>`<li>${esc(e)}</li>`).join('')}</ul>
+        </div>`).join('')}
+      </div>
+    </div></div>
+    <div class="card" style="margin-top:12px"><div style="padding:14px 16px">
+      <div class="section-title">Terrain</div>
+      ${Object.entries(p.etiologie.terrain).filter(([,v])=>v&&(Array.isArray(v)?v.length>0:String(v).trim())).map(([k,v])=>`
+        <div style="margin-bottom:8px">
+          <b style="font-size:0.84rem">${labelize(k)}</b>
+          <p style="font-size:0.84rem;color:var(--gray-600)">${Array.isArray(v)?v.map(x=>esc(x)).join(' · '):esc(String(v))}</p>
+        </div>`).join('')}
+    </div></div>
+    <div class="card" style="margin-top:12px"><div style="padding:14px 16px">
+      <div class="section-title">Facteurs déclencheurs</div>
+      ${Object.entries(p.etiologie.facteursDeclencheurs).filter(([,v])=>v&&(Array.isArray(v)?v.length>0:v===true)).map(([k,v])=>`
+        <div style="margin-bottom:8px">
+          <b style="font-size:0.84rem">${labelize(k)}</b>
+          ${Array.isArray(v)?`<ul class="item-list warn">${v.map(e=>`<li>${esc(e)}</li>`).join('')}</ul>`
+            :v===true?'<p style="font-size:0.84rem;color:var(--red-600);font-weight:500">Oui — facteur de déclenchement</p>':''}
+        </div>`).join('')}
+    </div></div>
+  </div>
+
+  <!-- Tab: Therapeutique -->
+  <div class="tab-content" id="tab-therapeutique">
+    <div class="card"><div style="padding:14px 16px">
+      <div class="section-title">Mesures générales</div>
+      <div class="grid-2">
+        ${Object.entries(p.therapeutique.mesuresGenerales).filter(([,v])=>v&&(Array.isArray(v)?v.length>0:String(v).trim())).map(([k,v])=>`
+        <div>
+          <b style="font-size:0.84rem">${labelize(k)}</b>
+          ${Array.isArray(v)?`<ul class="item-list">${v.map(e=>`<li>${esc(e)}</li>`).join('')}</ul>`
+            :`<p style="font-size:0.84rem;color:var(--gray-600)">${esc(String(v))}</p>`}
+        </div>`).join('')}
+      </div>
+    </div></div>
+    <div class="card" style="margin-top:12px"><div style="padding:14px 16px">
+      <div class="section-title">Traitement médicamenteux</div>
+      ${p.therapeutique.traitementMedicamenteux.map(m=>`
+      <div class="med-card">
+        <div class="med-header">
+          <h4>${esc(m.medicament)}</h4>
+          <div style="display:flex;gap:4px">
+            <span class="badge badge-outline" style="font-size:0.65rem">${esc(m.voie)}</span>
+            <span class="badge badge-secondary" style="font-size:0.65rem">${esc(m.duree)}</span>
+          </div>
+        </div>
+        ${m.dci?`<div class="med-info"><b>DCI :</b> ${esc(m.dci)}</div>`:''}
+        <div class="med-info"><b>Posologie :</b> ${esc(m.posologie)}</div>
+        ${m.particularites?`<div class="med-note">${esc(m.particularites)}</div>`:''}
+      </div>`).join('')}
+    </div></div>
+    ${p.therapeutique.traitementChirurgical && p.therapeutique.traitementChirurgical.length>0?`
+    <div class="card" style="margin-top:12px"><div style="padding:14px 16px">
+      <div class="section-title">${icon('scissors',16)} Traitement chirurgical</div>
+      ${p.therapeutique.traitementChirurgical.map(t=>`
+      <div class="surg-card">
+        <h4>${esc(t.indication)} ${t.urgence?'<span class="badge" style="background:var(--red-600);color:white;font-size:0.65rem">Urgence</span>':''}</h4>
+        ${t.type?`<p style="font-size:0.84rem;margin-top:4px"><b>Type :</b> ${esc(t.type)}</p>`:''}
+        ${t.details?`<p style="font-size:0.84rem;color:var(--gray-600)">${esc(t.details)}</p>`:''}
+      </div>`).join('')}
+    </div></div>`:''}
+    ${p.therapeutique.mesuresNonMedicamenteuses && p.therapeutique.mesuresNonMedicamenteuses.length>0?`
+    <div class="card" style="margin-top:12px"><div style="padding:14px 16px">
+      <div class="section-title">Mesures non médicamenteuses</div>
+      <ul class="item-list">${p.therapeutique.mesuresNonMedicamenteuses.map(m=>`<li>${esc(m)}</li>`).join('')}</ul>
+    </div></div>`:''}
+  </div>
+
+  <!-- Tab: Urgences -->
+  <div class="tab-content" id="tab-urgences-tab">
+    <div style="background:var(--red-50);border:1px solid var(--red-200);border-radius:12px;padding:16px;margin-bottom:16px">
+      <h3 style="font-size:0.92rem;font-weight:700;color:var(--red-800);display:flex;align-items:center;gap:6px;margin-bottom:12px">${icon('siren',18)} Conduite à tenir en urgence — ABCDE</h3>
+      <div class="abcde-grid">
+        ${['airway','breathing','circulation','disability','exposure'].map(k=>{
+          const lbl={airway:'A — Airway',breathing:'B — Breathing',circulation:'C — Circulation',disability:'D — Disability',exposure:'E — Exposure'}[k];
+          return `<div class="abcde-card"><h4>${lbl}</h4><p>${esc(p.urgences.conduiteImmediate[k])}</p></div>`;
+        }).join('')}
+      </div>
+    </div>
+    <div class="card"><div style="padding:14px 16px">
+      <div class="section-title">5 premières minutes</div>
+      <ol class="num-list red">${p.urgences.cinqPremieresMinutes.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>
+    </div></div>
+    <div class="card" style="margin-top:12px"><div style="padding:14px 16px">
+      <div class="section-title">30 premières minutes</div>
+      <ol class="num-list amber">${p.urgences.trentePremieresMinutes.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>
+    </div></div>
+    <div class="card" style="margin-top:12px"><div style="padding:14px 16px">
+      <div class="section-title">Quand appeler le spécialiste</div>
+      <p style="font-size:0.85rem">${esc(p.urgences.quandAppelerSpecialiste)}</p>
+    </div></div>
+    <div class="card" style="margin-top:12px"><div style="padding:14px 16px">
+      <div class="section-title">Quand et où transférer</div>
+      <p style="font-size:0.85rem;margin-bottom:6px"><b>Quand :</b> ${esc(p.urgences.quandTransferer)}</p>
+      <p style="font-size:0.85rem"><b>Où :</b> ${esc(p.urgences.ouTransferer)}</p>
+    </div></div>
+  </div>
+
+  <!-- Tab: Evolution -->
+  <div class="tab-content" id="tab-evolution">
+    <div class="card"><div style="padding:14px 16px">
+      <div class="section-title">Évolution naturelle</div>
+      ${Object.entries(p.evolution.evolutionNaturelle).filter(([,v])=>v&&v.trim()).map(([k,v])=>`
+        <div style="margin-bottom:8px">
+          <b style="font-size:0.84rem">${labelize(k)}</b>
+          <p style="font-size:0.84rem;color:var(--gray-600)">${esc(v)}</p>
+        </div>`).join('')}
+    </div></div>
+    <div class="card" style="margin-top:12px"><div style="padding:14px 16px">
+      <div class="section-title">Complications</div>
+      ${Object.entries(p.evolution.complications).filter(([,v])=>v&&v.length>0).map(([k,v])=>`
+        <div style="margin-bottom:10px">
+          <b style="font-size:0.84rem">${labelize(k)}</b>
+          <ul class="item-list danger">${v.map(c=>`<li>${esc(c)}</li>`).join('')}</ul>
+        </div>`).join('')}
+    </div></div>
+    <div class="card" style="margin-top:12px"><div style="padding:14px 16px">
+      <div class="section-title">Pronostic</div>
+      <p style="font-size:0.85rem">${esc(p.evolution.pronostic)}</p>
+    </div></div>
+    <div class="card" style="margin-top:12px"><div style="padding:14px 16px">
+      <div class="section-title">Sources</div>
+      ${p.sources.map(s=>`<div class="source-item"><span class="level" style="color:${s.level<=2?'var(--red-600)':s.level===3?'var(--amber-600)':'var(--gray-400)'}">Niv.${s.level}</span> ${esc(s.name)} — ${esc(s.category)}</div>`).join('')}
+    </div></div>
+  </div>
+  `;
 }
 
-// ═══ Documents - version management per project ═══
-function loadDocumentVersions(projectId) {
-  if (!projectId) return;
-  db.collection('Documents').where('projectId', '==', projectId).where('isCurrent', '==', true).get()
-  .then(snap => {
-    snap.forEach(doc => {
-      const d = doc.data();
-      // Document versioning: documentType, title, fileURL, fileName, version, content, changelog, isCurrent
-    });
-  }).catch(() => {});
+// ===== VIEW HELPERS =====
+function section(title, iconName, text) {
+  return `<div class="section"><div class="section-title">${icon(iconName,16)} ${title}</div><div class="section-text">${esc(text)}</div></div>`;
 }
-<\/script>
+function listSection(title, items, cls) {
+  if (!items || items.length === 0) return '';
+  return `<div style="margin-bottom:12px"><b style="font-size:0.85rem;display:block;margin-bottom:4px">${title}</b><ul class="item-list ${cls||''}">${items.map(i=>`<li>${esc(i)}</li>`).join('')}</ul></div>`;
+}
+function labelize(k) {
+  return k.replace(/([A-Z])/g,' $1').replace(/^./,s=>s.toUpperCase()).trim();
+}
+// ===== SEARCH VIEW =====
+function renderSearch() {
+  const q = (viewParams.query || '').toLowerCase();
+  if (!q) return '<div class="empty">Entrez un terme de recherche</div>';
+
+  const results = pathologies.filter(p => {
+    if (p.name.toLowerCase().includes(q)) return true;
+    if (p.definition.definition.toLowerCase().includes(q)) return true;
+    if (p.diagnostic.clinique.signesFonctionnels.some(s => s.toLowerCase().includes(q))) return true;
+    if (p.diagnostic.clinique.signesPhysiques.some(s => s.toLowerCase().includes(q))) return true;
+    if (p.therapeutique.traitementMedicamenteux.some(m => 
+      m.medicament.toLowerCase().includes(q) || (m.dci && m.dci.toLowerCase().includes(q))
+    )) return true;
+    return false;
+  });
+
+  return `
+  <button class="back-btn" onclick="navigate('home')">${icon('arrowLeft',14)} Accueil</button>
+  <h1 style="font-size:1.2rem;font-weight:700;margin:8px 0 14px">Résultats pour « ${esc(viewParams.query)} » — ${results.length} trouvé(s)</h1>
+  ${results.length === 0 
+    ? '<div class="empty">Aucun résultat trouvé</div>'
+    : `<div class="grid-2">${results.map(p => {
+        const dept = getDept(p.departmentId);
+        const c = dc(dept?.color || 'emerald');
+        return `
+        <div class="card clickable" style="border-left:4px solid ${c.accent}" onclick="navigate('pathologie',{departmentId:'${p.departmentId}',courseId:'${p.courseId}',pathologieId:'${p.id}'})">
+          <div style="padding:14px 16px">
+            <span class="${deptBadge(dept?.color||'emerald')}" style="font-size:0.65rem;margin-bottom:4px">${dept?.name||''}</span>
+            <h3 style="font-size:0.9rem;font-weight:600">${p.name}</h3>
+            <p style="font-size:0.8rem;color:var(--gray-500);margin-top:4px">${esc(p.definition.definition).slice(0,100)}...</p>
+          </div>
+        </div>`;
+      }).join('')}</div>`
+  }`;
+}
+
+// ===== URGENCES VIEW =====
+function renderUrgences() {
+  return `
+  <button class="back-btn" onclick="navigate('home')">${icon('arrowLeft',14)} Accueil</button>
+  <h1 style="font-size:1.3rem;font-weight:700;margin:8px 0 16px">Urgences Médicales</h1>
+  <div class="grid-2">
+    ${pathologies.filter(p => p.urgences.motifsConsultation.length > 0).slice(0,20).map(p => `
+    <div class="card clickable" style="border-left:4px solid var(--red-500)" onclick="navigate('pathologie',{departmentId:'${p.departmentId}',courseId:'${p.courseId}',pathologieId:'${p.id}'})">
+      <div style="padding:14px 16px">
+        <h3 style="font-size:0.88rem;font-weight:600">${p.name}</h3>
+        <ul class="item-list danger" style="margin-top:6px">
+          ${p.urgences.motifsConsultation.slice(0,3).map(m=>`<li style="font-size:0.8rem">${esc(m)}</li>`).join('')}
+        </ul>
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+// (placeholder for future views - symptomes, calculatrices, medicaments, sources)
+// Currently redirects to home
+function renderSymptomes() { return '<div class="empty">Section Symptômes — en cours de développement</div>'; }
+function renderCalculatrices() { return '<div class="empty">Section Calculatrices — en cours de développement</div>'; }
+function renderMedicaments() { return '<div class="empty">Section Médicaments — en cours de développement</div>'; }
+function renderSources() { return '<div class="empty">Section Sources — en cours de développement</div>'; }
+// ===== NO EXTRA ICONS NEEDED — all in js_data =====
+// ===== EVENT HANDLERS =====
+function attachEvents() {
+  // Tabs
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.onclick = function() {
+      const tab = this.dataset.tab;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      this.classList.add('active');
+      const target = document.getElementById('tab-' + tab);
+      if (target) target.classList.add('active');
+    };
+  });
+
+  // Home search
+  const hs = document.getElementById('homeSearch');
+  if (hs) {
+    hs.focus();
+    let timeout;
+    hs.oninput = function() {
+      clearTimeout(timeout);
+      const val = this.value;
+      timeout = setTimeout(() => {
+        if (val.length >= 2) {
+          navigate('search', { query: val });
+        }
+      }, 300);
+    };
+  }
+}
+
+// ===== BACK BUTTON =====
+document.getElementById('backBtn').onclick = goBack;
+
+// ===== MOBILE MENU =====
+const mobileMenu = document.getElementById('mobileMenu');
+const menuPanel = document.getElementById('mobileMenuPanel');
+document.getElementById('menuBtn').onclick = function() {
+  menuPanel.innerHTML = `
+    <h3 style="display:flex;align-items:center;gap:8px">${icon('stethoscope',20)} MedRef RDC</h3>
+    <a href="#" onclick="navigate('home');return false">Accueil</a>
+    ${DEPARTMENTS.map(d => `<a href="#" onclick="navigate('department',{departmentId:'${d.id}'});return false">${d.name}</a>`).join('')}
+    <a href="#" onclick="navigate('urgences');return false">Urgences</a>
+  `;
+  mobileMenu.classList.add('open');
+};
+mobileMenu.onclick = function(e) {
+  if (e.target === mobileMenu) mobileMenu.classList.remove('open');
+};
+
+// ===== INIT =====
+render();
+</script>
 </body>
 </html>
