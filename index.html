@@ -282,7 +282,236 @@ button { cursor: pointer; font-family: inherit; }
 .mobile-menu-panel h3 { font-size: 1rem; font-weight: 700; margin-bottom: 16px; }
 .mobile-menu-panel a { display: block; padding: 10px 0; border-bottom: 1px solid var(--gray-100); font-size: 0.88rem; color: var(--gray-700); }
 .mobile-menu-panel a:hover { color: var(--emerald-600); }
+
+/* ===== ADMIN BUTTON ===== */
+.admin-btn {
+  display: inline-flex; align-items: center; gap: 6px; background: none; border: 1px solid var(--gray-200);
+  border-radius: 9999px; padding: 6px 12px; font-size: 0.82rem; color: var(--gray-600); transition: all 0.15s;
+}
+.admin-btn:hover { background: var(--gray-50); border-color: var(--gray-300); }
+.admin-btn svg { width: 16px; height: 16px; }
+.admin-btn.logged-in { color: var(--emerald-700); border-color: var(--emerald-200); background: var(--emerald-50); }
+
+/* ===== ICON ACTIONS (favoris, edit) ===== */
+.icon-action {
+  width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--gray-200);
+  background: white; font-size: 1.1rem; color: var(--gray-500); display: inline-flex;
+  align-items: center; justify-content: center; transition: all 0.15s;
+}
+.icon-action:hover { background: var(--gray-50); color: var(--gray-800); border-color: var(--gray-300); }
+.icon-action.active { color: var(--rose-600); border-color: var(--rose-200); background: var(--rose-50); }
+
+/* ===== ADMIN-ONLY elements ===== */
+.admin-only { display: none !important; }
+body.is-admin .admin-only { display: inline-flex !important; }
+
+/* ===== MODAL ===== */
+.modal {
+  display: none; position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.55);
+  align-items: center; justify-content: center; padding: 16px;
+}
+.modal.open { display: flex; }
+.modal-card {
+  background: white; border-radius: var(--radius); box-shadow: var(--shadow-md);
+  width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto;
+}
+.modal-card.wide { max-width: 800px; }
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid var(--gray-200);
+}
+.modal-header h3 { font-size: 1rem; font-weight: 700; }
+.modal-close {
+  background: none; border: none; font-size: 1.4rem; color: var(--gray-400); cursor: pointer; line-height: 1;
+}
+.modal-close:hover { color: var(--gray-700); }
+.modal-body { padding: 20px; }
+.modal-footer {
+  display: flex; justify-content: flex-end; gap: 8px; padding: 12px 20px;
+  border-top: 1px solid var(--gray-200); background: var(--gray-50);
+}
+
+/* ===== FORM ===== */
+.form-group { margin-bottom: 14px; }
+.form-group label {
+  display: block; font-size: 0.82rem; font-weight: 600; color: var(--gray-700); margin-bottom: 4px;
+}
+.form-group input, .form-group textarea {
+  width: 100%; padding: 10px 12px; border: 1px solid var(--gray-300); border-radius: 8px;
+  font-size: 0.88rem; font-family: inherit; outline: none; transition: border-color 0.15s;
+}
+.form-group input:focus, .form-group textarea:focus { border-color: var(--emerald-500); }
+.form-group textarea { min-height: 200px; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.82rem; resize: vertical; }
+.form-hint { font-size: 0.75rem; color: var(--gray-500); margin-top: 4px; }
+.form-error {
+  background: var(--red-50); border: 1px solid var(--red-200); color: var(--red-700);
+  padding: 8px 12px; border-radius: 6px; font-size: 0.82rem; margin-bottom: 12px;
+}
+.form-success {
+  background: var(--emerald-50); border: 1px solid var(--emerald-200); color: var(--emerald-800);
+  padding: 8px 12px; border-radius: 6px; font-size: 0.82rem; margin-bottom: 12px;
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 8px;
+  font-size: 0.85rem; font-weight: 500; border: 1px solid transparent; cursor: pointer; transition: all 0.15s;
+}
+.btn-primary { background: var(--emerald-600); color: white; }
+.btn-primary:hover { background: var(--emerald-700); }
+.btn-secondary { background: white; color: var(--gray-700); border-color: var(--gray-300); }
+.btn-secondary:hover { background: var(--gray-50); }
+.btn-danger { background: var(--red-600); color: white; }
+.btn-danger:hover { background: var(--red-700); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ===== FAVORIS / HISTORY in menu ===== */
+.menu-section-title {
+  font-size: 0.72rem; font-weight: 700; color: var(--gray-500); text-transform: uppercase;
+  letter-spacing: 0.05em; margin-top: 16px; margin-bottom: 4px; padding-bottom: 4px;
+  border-bottom: 1px solid var(--gray-200);
+}
+.menu-fav-item, .menu-history-item {
+  display: flex; align-items: center; gap: 8px; padding: 8px 0; font-size: 0.85rem;
+  color: var(--gray-700); border-bottom: 1px solid var(--gray-100); cursor: pointer;
+}
+.menu-fav-item:hover, .menu-history-item:hover { color: var(--emerald-600); }
+.menu-empty { font-size: 0.78rem; color: var(--gray-400); padding: 8px 0; font-style: italic; }
+
+/* ===== STATUS INDICATOR ===== */
+.status-dot {
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px;
+}
+.status-dot.online { background: var(--emerald-500); }
+.status-dot.offline { background: var(--gray-400); }
+.status-dot.loading { background: var(--amber-500); animation: pulse 1.2s ease infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
 }</style>
+
+<!-- ===== FIREBASE INIT (modular SDK v10) ===== -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, collection, enableIndexedDbPersistence, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  // ===== Firebase config =====
+  const firebaseConfig = {
+    apiKey: "AIzaSyAp-LHy_8FHaOLr-7pNyERco_ioCnP1ncw",
+    authDomain: "medref-rdc.firebaseapp.com",
+    projectId: "medref-rdc",
+    storageBucket: "medref-rdc.firebasestorage.app",
+    messagingSenderId: "112788481626",
+    appId: "1:112788481626:web:f42965ceb89173655e9a63",
+    measurementId: "G-RK414HTRZB"
+  };
+
+  // ===== Initialize Firebase =====
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+
+  // ===== Enable offline persistence (CRITICAL for RDC context) =====
+  // Allows the app to read from cache when offline, and writes are queued.
+  try {
+    await enableIndexedDbPersistence(db, { synchronizeTabs: false });
+    console.log('[MedRef] Offline persistence enabled.');
+  } catch (err) {
+    if (err.code === 'failed-precondition') {
+      console.warn('[MedRef] Offline persistence not enabled: multiple tabs open.');
+    } else if (err.code === 'unimplemented') {
+      console.warn('[MedRef] Offline persistence not supported by this browser.');
+    } else {
+      console.warn('[MedRef] Offline persistence error:', err);
+    }
+  }
+
+  // ===== Expose to non-module script =====
+  window.MedRef = {
+    db, auth,
+    // Firestore helpers
+    async getPathologies() {
+      try {
+        const snap = await getDocs(collection(db, 'pathologies'));
+        if (snap.empty) return null;
+        return snap.docs.map(d => d.data());
+      } catch (e) {
+        console.warn('[MedRef] getPathologies failed, falling back to inline data:', e);
+        return null;
+      }
+    },
+    async getPathology(id) {
+      try {
+        const snap = await getDoc(doc(db, 'pathologies', id));
+        return snap.exists() ? snap.data() : null;
+      } catch (e) {
+        console.warn('[MedRef] getPathology failed:', e);
+        return null;
+      }
+    },
+    async savePathology(id, data) {
+      await setDoc(doc(db, 'pathologies', id), data, { merge: true });
+    },
+    async isAdminUser(user) {
+      if (!user) return false;
+      // 1) Try custom claim (recommended)
+      try {
+        const token = await user.getIdTokenResult(true);
+        if (token.claims && token.claims.admin === true) return true;
+      } catch (e) { /* ignore */ }
+      // 2) Fallback: check Firestore 'admins' collection
+      try {
+        const snap = await getDoc(doc(db, 'admins', user.uid));
+        if (snap.exists()) return snap.data().admin === true || snap.data().role === 'admin';
+      } catch (e) { /* ignore */ }
+      // 3) Fallback: check email whitelist (configure in console)
+      const ADMIN_EMAILS = [
+        // Add admin emails here as a fallback, e.g.:
+        // 'docteur@example.com',
+      ];
+      return ADMIN_EMAILS.includes(user.email);
+    },
+    async login(email, password) {
+      return await signInWithEmailAndPassword(auth, email, password);
+    },
+    async logout() {
+      return await signOut(auth);
+    },
+    onAuthChange(callback) {
+      onAuthStateChanged(auth, callback);
+    }
+  };
+
+  // ===== Auth state listener =====
+  let _initialized = false;
+  onAuthStateChanged(auth, async (user) => {
+    const btn = document.getElementById('adminBtn');
+    const label = document.getElementById('adminBtnLabel');
+    if (user) {
+      const isAdmin = await window.MedRef.isAdminUser(user);
+      if (isAdmin) {
+        document.body.classList.add('is-admin');
+        if (btn) btn.classList.add('logged-in');
+        if (label) label.textContent = user.email.split('@')[0];
+        console.log('[MedRef] Admin connecté:', user.email);
+      } else {
+        document.body.classList.remove('is-admin');
+        if (btn) btn.classList.remove('logged-in');
+        if (label) label.textContent = 'Connecté (non-admin)';
+        console.log('[MedRef] Utilisateur connecté mais PAS admin:', user.email);
+      }
+    } else {
+      document.body.classList.remove('is-admin');
+      if (btn) btn.classList.remove('logged-in');
+      if (label) label.textContent = 'Connexion';
+      console.log('[MedRef] Déconnecté.');
+    }
+    if (!_initialized) {
+      _initialized = true;
+      window.dispatchEvent(new CustomEvent('medref-auth-ready'));
+    }
+  });
+</script>
 </head>
 <body>
 <div class="app" id="app">
@@ -300,6 +529,10 @@ button { cursor: pointer; font-family: inherit; }
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
       Retour
     </button>
+    <button class="admin-btn" id="adminBtn" onclick="handleAdminButtonClick()" aria-label="Connexion admin">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span id="adminBtnLabel">Connexion</span>
+    </button>
   </div>
 
   <!-- Mobile Menu -->
@@ -310,6 +543,55 @@ button { cursor: pointer; font-family: inherit; }
   <!-- Main Content -->
   <div id="mainContent"></div>
 
+</div>
+
+<!-- ===== LOGIN MODAL ===== -->
+<div class="modal" id="loginModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Connexion Administrateur</h3>
+      <button class="modal-close" onclick="closeModal('loginModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="loginError"></div>
+      <div class="form-group">
+        <label for="loginEmail">Email</label>
+        <input type="email" id="loginEmail" placeholder="admin@medref-rdc.org" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label for="loginPassword">Mot de passe</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <p class="form-hint">Réservé aux administrateurs autorisés. Les modifications sont enregistrées dans Firestore.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('loginModal')">Annuler</button>
+      <button class="btn btn-primary" id="loginSubmitBtn" onclick="doLogin()">Se connecter</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== EDIT PATHOLOGY MODAL ===== -->
+<div class="modal" id="editModal">
+  <div class="modal-card wide">
+    <div class="modal-header">
+      <h3>Modifier la pathologie — <span id="editPathologyTitle"></span></h3>
+      <button class="modal-close" onclick="closeModal('editModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="editError"></div>
+      <div id="editSuccess"></div>
+      <div class="form-group">
+        <label for="editJson">Contenu JSON de la pathologie</label>
+        <textarea id="editJson" spellcheck="false"></textarea>
+        <p class="form-hint">Modifiez le JSON ci-dessus. La validation s'effectue à l'enregistrement. Les champs <code>id</code>, <code>departmentId</code> et <code>courseId</code> ne doivent pas être changés.</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('editModal')">Annuler</button>
+      <button class="btn btn-primary" id="editSubmitBtn" onclick="savePathologyEdit()">Enregistrer</button>
+    </div>
+  </div>
 </div>
 
 <!-- PATHOLOGY DATA -->
@@ -418,7 +700,9 @@ const DEPT_COLORS = {
 };
 
 // ===== LOAD DATA =====
-const pathologies = JSON.parse(document.getElementById('pathology-data').textContent);
+// Initial inline data — used as a fallback / instant render before Firestore loads.
+// Will be replaced (merged) by Firestore data when available.
+let pathologies = JSON.parse(document.getElementById('pathology-data').textContent);
 
 // ===== NAV STATE =====
 let currentView = 'home';
@@ -429,6 +713,10 @@ function navigate(view, params) {
   history.push({ view: currentView, params: viewParams });
   currentView = view;
   viewParams = params || {};
+  // Track pathology views for the history section
+  if (view === 'pathologie' && params && params.pathologieId) {
+    addToHistory(params.pathologieId);
+  }
   render();
   window.scrollTo(0, 0);
   document.getElementById('mobileMenu').classList.remove('open');
@@ -610,7 +898,17 @@ function renderPathologie() {
     <button onclick="navigate('course',{departmentId:'${dept.id}',courseId:'${course.id}'})">${course.name}</button>
   </div>
   <div style="margin-bottom:4px"><span class="${deptBadge(dept.color)}">${dept.name}</span></div>
-  <h1 style="font-size:1.4rem;font-weight:700;margin-bottom:14px">${p.name}</h1>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px">
+    <h1 style="font-size:1.4rem;font-weight:700">${p.name}</h1>
+    <div style="display:flex;gap:6px;flex-shrink:0">
+      <button class="icon-action ${isFavori(p.id)?'active':''}" onclick="toggleFavori('${p.id}');render();" title="Ajouter aux favoris" aria-label="Favori">
+        ${isFavori(p.id) ? '♥' : '♡'}
+      </button>
+      <button class="icon-action admin-only" onclick="openEditModal('${p.id}')" title="Modifier cette pathologie" aria-label="Modifier">
+        ✎
+      </button>
+    </div>
+  </div>
 
   <!-- Urgence Banner -->
   <div class="urgency-banner">
@@ -918,15 +1216,250 @@ function attachEvents() {
 // ===== BACK BUTTON =====
 document.getElementById('backBtn').onclick = goBack;
 
+// ===== FAVORIS (localStorage) =====
+function getFavoris() {
+  try { return JSON.parse(localStorage.getItem('medref_favoris') || '[]'); }
+  catch (e) { return []; }
+}
+function isFavori(id) {
+  return getFavoris().includes(id);
+}
+function toggleFavori(id) {
+  let favs = getFavoris();
+  if (favs.includes(id)) {
+    favs = favs.filter(f => f !== id);
+  } else {
+    favs.push(id);
+  }
+  localStorage.setItem('medref_favoris', JSON.stringify(favs));
+}
+
+// ===== HISTORIQUE (localStorage) =====
+function getHistory() {
+  try { return JSON.parse(localStorage.getItem('medref_history') || '[]'); }
+  catch (e) { return []; }
+}
+function addToHistory(pathologieId) {
+  let hist = getHistory().filter(h => h.id !== pathologieId);
+  hist.unshift({ id: pathologieId, ts: Date.now() });
+  hist = hist.slice(0, 30); // keep last 30 entries
+  localStorage.setItem('medref_history', JSON.stringify(hist));
+}
+
+// ===== DB STATUS =====
+// 'loading' | 'online' | 'offline'
+let dbStatus = 'loading';
+let dbStatusText = 'Chargement de la base...';
+function updateDbStatus(status, text) {
+  dbStatus = status;
+  dbStatusText = text;
+  const dot = document.getElementById('menuDbStatus');
+  const txt = document.getElementById('menuDbStatusText');
+  if (dot) dot.className = 'status-dot ' + status;
+  if (txt) txt.textContent = text;
+}
+
+// ===== MODAL HELPERS =====
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ===== ADMIN BUTTON CLICK =====
+function handleAdminButtonClick() {
+  if (document.body.classList.contains('is-admin')) {
+    // Logged in as admin → offer logout
+    if (confirm('Vous êtes connecté en tant qu\'administrateur. Voulez-vous vous déconnecter ?')) {
+      window.MedRef.logout().catch(e => alert('Erreur de déconnexion : ' + e.message));
+    }
+  } else {
+    // Not logged in → show login modal
+    openModal('loginModal');
+    setTimeout(() => document.getElementById('loginEmail').focus(), 50);
+  }
+}
+
+// ===== LOGIN =====
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  const btn = document.getElementById('loginSubmitBtn');
+  errEl.innerHTML = '';
+  if (!email || !password) {
+    errEl.innerHTML = '<div class="form-error">Veuillez saisir votre email et mot de passe.</div>';
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = 'Connexion...';
+  try {
+    const cred = await window.MedRef.login(email, password);
+    const isAdmin = await window.MedRef.isAdminUser(cred.user);
+    if (!isAdmin) {
+      errEl.innerHTML = '<div class="form-error">Connexion réussie, mais ce compte n\'a pas les droits administrateur. Contactez l\'administrateur de la base Firebase.</div>';
+      await window.MedRef.logout();
+    } else {
+      closeModal('loginModal');
+      document.getElementById('loginPassword').value = '';
+    }
+  } catch (e) {
+    let msg = e.message || 'Erreur inconnue';
+    if (e.code === 'auth/invalid-credential' || e.code === 'auth/wrong-password' || e.code === 'auth/user-not-found') {
+      msg = 'Email ou mot de passe incorrect.';
+    } else if (e.code === 'auth/too-many-requests') {
+      msg = 'Trop de tentatives. Réessayez plus tard.';
+    } else if (e.code === 'auth/network-request-failed') {
+      msg = 'Problème de réseau. Vérifiez votre connexion internet.';
+    }
+    errEl.innerHTML = '<div class="form-error">' + msg + '</div>';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Se connecter';
+  }
+}
+
+// ===== EDIT MODAL =====
+function openEditModal(pathologieId) {
+  if (!document.body.classList.contains('is-admin')) {
+    alert('Réservé aux administrateurs. Veuillez vous connecter.');
+    return;
+  }
+  const p = getPathoById(pathologieId);
+  if (!p) { alert('Pathologie introuvable.'); return; }
+  document.getElementById('editPathologyTitle').textContent = p.name;
+  document.getElementById('editJson').value = JSON.stringify(p, null, 2);
+  document.getElementById('editError').innerHTML = '';
+  document.getElementById('editSuccess').innerHTML = '';
+  openModal('editModal');
+}
+
+async function savePathologyEdit() {
+  const errEl = document.getElementById('editError');
+  const successEl = document.getElementById('editSuccess');
+  const btn = document.getElementById('editSubmitBtn');
+  const textarea = document.getElementById('editJson');
+  errEl.innerHTML = '';
+  successEl.innerHTML = '';
+
+  let data;
+  try {
+    data = JSON.parse(textarea.value);
+  } catch (e) {
+    errEl.innerHTML = '<div class="form-error">JSON invalide : ' + e.message + '</div>';
+    return;
+  }
+
+  // Validation: required fields
+  if (!data.id || !data.name || !data.departmentId || !data.courseId) {
+    errEl.innerHTML = '<div class="form-error">Champs obligatoires manquants : id, name, departmentId, courseId.</div>';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Enregistrement...';
+  try {
+    await window.MedRef.savePathology(data.id, data);
+    // Update local cache
+    const idx = pathologies.findIndex(p => p.id === data.id);
+    if (idx >= 0) pathologies[idx] = data;
+    else pathologies.push(data);
+    successEl.innerHTML = '<div class="form-success">Pathologie enregistrée dans Firestore avec succès.</div>';
+    setTimeout(() => {
+      closeModal('editModal');
+      render();
+    }, 900);
+  } catch (e) {
+    errEl.innerHTML = '<div class="form-error">Erreur lors de l\'enregistrement : ' + (e.message || e) + '</div>';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Enregistrer';
+  }
+}
+
+// ===== LOAD FROM FIRESTORE =====
+async function loadFromFirestore() {
+  if (!window.MedRef) {
+    // Firebase module not ready yet — retry shortly
+    setTimeout(loadFromFirestore, 200);
+    return;
+  }
+  updateDbStatus('loading', 'Synchronisation avec Firestore...');
+  try {
+    const remote = await window.MedRef.getPathologies();
+    if (remote && remote.length > 0) {
+      // Merge: remote overrides inline data with the same id; new remote entries are added.
+      const map = new Map();
+      pathologies.forEach(p => map.set(p.id, p));
+      remote.forEach(p => { if (p && p.id) map.set(p.id, p); });
+      pathologies = Array.from(map.values());
+      updateDbStatus('online', 'Connecté à Firestore (' + pathologies.length + ' pathologies)');
+      console.log('[MedRef] Chargé depuis Firestore :', remote.length, 'pathologies.');
+      render();
+    } else {
+      // No remote data yet — keep using inline JSON. The migration script can populate Firestore later.
+      updateDbStatus('online', 'Firestore vide — utilisation des données locales (' + pathologies.length + ')');
+      console.log('[MedRef] Firestore vide. Utilisation du JSON inline. Lancez le script de migration pour peupler Firestore.');
+    }
+  } catch (e) {
+    updateDbStatus('offline', 'Hors-ligne — données en cache (' + pathologies.length + ')');
+    console.warn('[MedRef] Firestore inaccessible, utilisation des données inline:', e);
+  }
+}
+
+// ===== KEYBOARD: Escape to close modals =====
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal.open').forEach(m => m.classList.remove('open'));
+  }
+});
+
+// ===== ENTER key on login form submits =====
+document.addEventListener('DOMContentLoaded', () => {
+  const lp = document.getElementById('loginPassword');
+  if (lp) lp.addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
+  const le = document.getElementById('loginEmail');
+  if (le) le.addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
+});
+
 // ===== MOBILE MENU =====
 const mobileMenu = document.getElementById('mobileMenu');
 const menuPanel = document.getElementById('mobileMenuPanel');
 document.getElementById('menuBtn').onclick = function() {
+  const favs = getFavoris();
+  const hist = getHistory();
   menuPanel.innerHTML = `
     <h3 style="display:flex;align-items:center;gap:8px">${icon('stethoscope',20)} MedRef RDC</h3>
-    <a href="#" onclick="navigate('home');return false">Accueil</a>
+    <a href="#" onclick="navigate('home');return false">${icon('home',16)} Accueil</a>
     ${DEPARTMENTS.map(d => `<a href="#" onclick="navigate('department',{departmentId:'${d.id}'});return false">${d.name}</a>`).join('')}
-    <a href="#" onclick="navigate('urgences');return false">Urgences</a>
+    <a href="#" onclick="navigate('urgences');return false">${icon('siren',16)} Urgences</a>
+
+    <div class="menu-section-title">♥ Favoris</div>
+    ${favs.length === 0
+      ? '<div class="menu-empty">Aucun favori. Cliquez sur ♡ sur une pathologie pour l\'ajouter.</div>'
+      : favs.map(id => {
+          const p = getPathoById(id);
+          if (!p) return '';
+          const dept = getDept(p.departmentId);
+          return `<a href="#" onclick="navigate('pathologie',{departmentId:'${p.departmentId}',courseId:'${p.courseId}',pathologieId:'${p.id}'});return false" style="display:flex;align-items:center;gap:6px"><span style="color:var(--rose-500)">♥</span> ${esc(p.name)} <span style="font-size:0.7rem;color:var(--gray-400);margin-left:auto">${dept?dept.name:''}</span></a>`;
+        }).join('')
+    }
+
+    <div class="menu-section-title">🕐 Historique</div>
+    ${hist.length === 0
+      ? '<div class="menu-empty">Aucune consultation récente.</div>'
+      : hist.slice(0,10).map(item => {
+          const p = getPathoById(item.id);
+          if (!p) return '';
+          const dept = getDept(p.departmentId);
+          const date = new Date(item.ts);
+          const dateStr = date.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}) + ' ' + date.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+          return `<a href="#" onclick="navigate('pathologie',{departmentId:'${p.departmentId}',courseId:'${p.courseId}',pathologieId:'${p.id}'});return false" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${esc(p.name)} <span style="font-size:0.7rem;color:var(--gray-400);margin-left:auto">${dateStr}</span></a>`;
+        }).join('')
+    }
+
+    <div class="menu-section-title">État de la base</div>
+    <div style="padding:8px 0;font-size:0.78rem;color:var(--gray-500);display:flex;align-items:center">
+      <span class="status-dot ${dbStatus}" id="menuDbStatus"></span>
+      <span id="menuDbStatusText">${dbStatusText}</span>
+    </div>
   `;
   mobileMenu.classList.add('open');
 };
@@ -936,6 +1469,8 @@ mobileMenu.onclick = function(e) {
 
 // ===== INIT =====
 render();
+// Async load from Firestore (non-blocking). Uses inline data as fallback.
+loadFromFirestore();
 </script>
 </body>
 </html>
